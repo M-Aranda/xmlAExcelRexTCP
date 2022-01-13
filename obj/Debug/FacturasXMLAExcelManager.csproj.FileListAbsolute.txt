@@ -1,0 +1,17 @@
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\bin\Debug\FacturasXMLAExcelManager.exe.config
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\bin\Debug\FacturasXMLAExcelManager.exe
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\bin\Debug\FacturasXMLAExcelManager.pdb
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\bin\Debug\EPPlus.dll
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\bin\Debug\Microsoft.IO.RecyclableMemoryStream.dll
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\bin\Debug\System.ComponentModel.Annotations.dll
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\bin\Debug\EPPlus.xml
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\bin\Debug\Microsoft.IO.RecyclableMemoryStream.xml
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\obj\Debug\FacturasXMLAExcelManager.csproj.AssemblyReference.cache
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\obj\Debug\FacturasXMLAExcelManager.csproj.SuggestedBindingRedirects.cache
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\obj\Debug\FacturasXMLAExcelManager.Form1.resources
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\obj\Debug\FacturasXMLAExcelManager.Properties.Resources.resources
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\obj\Debug\FacturasXMLAExcelManager.csproj.GenerateResource.cache
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\obj\Debug\FacturasXMLAExcelManager.csproj.CoreCompileInputs.cache
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\obj\Debug\FacturasXMLAExcelManager.csproj.CopyComplete
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\obj\Debug\FacturasXMLAExcelManager.exe
+C:\Users\Chelo\source\repos\FacturasXMLAExcelManager\obj\Debug\FacturasXMLAExcelManager.pdb
