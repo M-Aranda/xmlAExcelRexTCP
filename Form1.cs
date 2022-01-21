@@ -865,7 +865,28 @@ namespace FacturasXMLAExcelManager
        JOIN [C0012022].[dbo].[EncCpaVta] AS C
        ON A.ECVNumDoc=C.ECVNumDoc AND A.CpRut=C.CpRut";
 
+            string sql2 = @"SELECT 
+       A.DocCod
+      ,A.ECVNumDoc
+      ,A.CpRut
+      ,A.CtaCod
+      ,A.DCVMonto
+      ,A.CtroCod
+      ,A.DCVTri
+      ,A.DCVActF
+      ,A.DCVGlosa
+      ,B.ECVFecha
+      ,B.ECVExento
+      ,B.ECVNeto
+
+  FROM [C0012022].[dbo].[DetCpaVta] AS A
+   JOIN [C0012022].[dbo].[EncCpaVta] AS B
+   ON  A.ECVNumDoc=B.ECVNumDoc AND A.CpRut=B.CpRut
+
+   WHERE A.DocCod=12";
+
             Console.WriteLine("[" + sql + "]");
+            Console.WriteLine("[" + sql2 + "]");
 
             cmd.CommandText = sql;
             cmd.CommandType = CommandType.Text;
@@ -1107,6 +1128,264 @@ namespace FacturasXMLAExcelManager
 
             }
             con.Close();
+
+            //esto es para facturas exentas
+
+            cmd.CommandText = sql2;
+            cmd.CommandType = CommandType.Text;
+            cmd.Connection = con;
+            try
+            {
+                con.Open();
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Problema de comunicacion con el Servidor.  Por favor revise su conexion a Internet o VPN.");
+            }
+
+            r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                f = new Factura();
+
+                f.MontoAfecto = "0";
+                f.MontoExento = "0";
+                f.MontoIva = "0";
+                f.TotalDelDocumento = "0";
+
+
+
+                f.TipoDeDocumento = Convert.ToString(r.GetValue(0));//depende del numero  DocCod
+                f.TipoDeDocumento = f.TipoDeDocumento.Trim();
+
+
+                switch (f.TipoDeDocumento)
+                {
+                    case "4":
+                        f.TipoDeDocumento = "FACE";
+                        break;
+                    case "12":
+                        f.TipoDeDocumento = "FCEE";
+                        break;
+                    case "18":
+                        f.TipoDeDocumento = "NCCE";
+                        break;
+                    default:
+                        break;
+                }
+
+                f.NumeroDelDocumento = Convert.ToString(r.GetValue(1));
+
+                //Ojo con estas fechas
+
+                f.FechaDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(r.GetValue(9)));
+                DateTime now = DateTime.Now;
+                f.FechaContableDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(now.Date));//"dia actual"
+                f.FechaDeVencimientoDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(r.GetValue(9)));
+
+                //que es la unidad de negocio?
+                f.CodigoDeUnidadDeNegocio = "";
+                f.RutCliente = validarRutQueVieneDeTranstecnia(Convert.ToString(r.GetValue(2)));
+                f.DireccionDelCliente = "Casa Matriz";
+                f.RutFacturador = "";
+                f.CodigoVendedor = "";
+                f.CodigoComisionista = "";
+                f.Probabilidad = "";
+                f.ListaPrecio = "";
+                f.PlazoPago = "P01";
+                f.MonedaDelDocumento = "CLP";
+                f.TasaDeCambio = "";
+                f.MontoAfecto = Convert.ToString(r.GetValue(11));//ECVNeto
+
+                f.MontoExento = Convert.ToString(r.GetValue(10));//ECVExento
+
+
+                f.MontoIva ="0";//ICVMonto
+
+                f.MontoImpuestosEspecificos = "";
+                f.MontoIvaRetenido = "";
+                f.MontoImpuestosRetenidos = "";
+                f.TipoDeDescuentoGlobal = "";
+                f.DescuentoGlobal = "";
+                f.TotalDelDocumento = Convert.ToString(Convert.ToInt32(f.MontoAfecto) + Convert.ToInt32(f.MontoExento) + Convert.ToInt32(f.MontoIva));  //afecto (o neto) + exento + iva
+                f.DeudaPendiente = f.TotalDelDocumento; //esto es el monto total
+                f.TipoDocReferencia = "";
+                f.NumDocReferencia = "";
+                f.FechaDocReferencia = "";
+
+
+
+                if (f.TipoDeDocumento == "FACE" ^ f.TipoDeDocumento == "NCCE")
+                {
+                    f.CodigoDelProducto = "420710";
+
+                }
+                else if (f.TipoDeDocumento == "FCEE")
+                {
+                    f.CodigoDelProducto = "420724E";
+                }
+
+
+                f.Cantidad = "1";
+                f.Unidad = "S.U.M";
+                f.PrecioUnitario = f.MontoAfecto;
+                f.MonedaDelDetalle = "CLP";
+                f.TasaDeCambio2 = "1";
+                f.NumeroDeSerie = "";
+                f.NumeroDeLote = "";
+                f.FechaDeVencimiento = "";
+                f.CentroDeCostos = Convert.ToString(r.GetValue(4));//sacar de transtecnia, es un numero CtroCod
+
+
+                String rutDeReceptor = "78462150-2";
+                Boolean esPSCP = false;
+                if (rutDeReceptor == "78877610-1")
+                {
+                    esPSCP = true;
+                }
+
+                switch (f.CentroDeCostos)
+                {
+                    case "5":
+                        f.CentroDeCostos = "202";
+                        if (esPSCP)
+                        {
+                            f.CentroDeCostos = "302";
+                        }
+                        break;
+                    case "3":
+                        f.CentroDeCostos = "201";
+                        if (esPSCP)
+                        {
+                            f.CentroDeCostos = "302";
+                        }
+                        break;
+                    case "11":
+                        f.CentroDeCostos = "200";
+                        if (esPSCP)
+                        {
+                            f.CentroDeCostos = "300";
+                        }
+                        break;
+                    case "10":
+                        f.CentroDeCostos = "207";
+                        if (esPSCP)
+                        {
+                            f.CentroDeCostos = "302";
+                        }
+                        break;
+                    case "16"://santiago sur es eccusa?
+                        f.CentroDeCostos = "206";
+                        if (esPSCP)
+                        {
+                            f.CentroDeCostos = "302";
+                        }
+                        break;
+                    case "9":
+                        //Santiago es emprendedor?
+                        f.CentroDeCostos = "206";
+                        if (esPSCP)
+                        {
+                            f.CentroDeCostos = "306";
+                        }
+                        break;
+                    case "7":
+                        f.CentroDeCostos = "205";
+                        if (esPSCP)
+                        {
+                            f.CentroDeCostos = "305";
+                        }
+                        break;
+                    case "1":
+                        f.CentroDeCostos = "204";
+                        if (esPSCP)
+                        {
+                            f.CentroDeCostos = "304";
+                        }
+                        break;
+                    case "12":
+                        f.CentroDeCostos = "204";
+                        if (esPSCP)
+                        {
+                            f.CentroDeCostos = "304";
+                        }
+                        break;
+                    case "13":
+                        f.CentroDeCostos = "204";
+                        if (esPSCP)
+                        {
+                            f.CentroDeCostos = "304";
+                        }
+                        break;
+                    case "6":
+                        f.CentroDeCostos = "204";
+                        if (esPSCP)
+                        {
+                            f.CentroDeCostos = "304";
+                        }
+                        break;
+                    default:
+                        f.CentroDeCostos = "204";
+                        if (esPSCP)
+                        {
+                            f.CentroDeCostos = "304";
+                        }
+                        break;
+
+                }
+
+                f.TipoDeDescuento = "";
+                f.Descuento = "";
+                f.Ubicacion = "";
+                f.Bodega = "";
+                f.Concepto1 = "";
+                f.Concepto2 = "";
+                f.Concepto3 = "";
+                f.Concepto4 = "";
+                f.Descripcion = "";
+                f.DescripcionAdicional = "";
+                f.Stock = "0";
+                f.Comentario11 = "";
+                f.Comentario21 = "";
+                f.Comentario31 = "";
+                f.Comentario41 = "";
+                f.Comentario51 = "";
+                f.CodigoImpuestoEspecifico1 = "";
+                f.MontoImpuestoEspecifico1 = "";
+                f.CodigoImpuestoEspecifico2 = "";
+                f.MontoImpuestoEspecifico2 = "";
+
+                //Modalidad es necesaria para la nota de credito
+                f.Modalidad = "";
+
+
+                f.Glosa = Convert.ToString(r.GetValue(5));//sacar de transtecnia
+                f.Referencia = "";
+                f.FechaDeComprometida = "";
+                f.PorcentajeCEEC = "";
+                f.ImpuestoLey18211 = "";
+                f.IvaLey18211 = "";
+                f.CodigoKitFlexible = "";
+                f.AjusteIva = "";
+
+                facturas.Add(f);
+
+                //if (Convert.ToInt32(f.MontoExento) > 0)
+                //{
+                //    Factura f2 = new Factura();
+                //    f2 = f;
+
+                //    f2.CodigoDelProducto = "420724E";
+                //    facturas.Add(f2);   
+
+                //}
+
+
+            }
+            con.Close();
+
+
+            //termino de seccion para facturas exentas
 
 
             var archivo = new FileInfo(@"C:\Users\Chelo\Desktop\excelsDeFacturas\FacturasEnExcelAPartirDeTranstecnia.xlsx");
