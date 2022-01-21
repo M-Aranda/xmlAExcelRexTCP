@@ -531,7 +531,7 @@ namespace FacturasXMLAExcelManager
                     f.PrecioUnitario = getValue("MntNeto", sFileName);
                     facturas.Add(f);
 
-                    if (Int16.Parse(f.MontoExento) > 0 && f.TipoDeDocumento == "FACE")
+                    if (Convert.ToInt32(f.MontoExento) > 0 && f.TipoDeDocumento == "FACE")
                     {
                         f = new Factura();
                         sFileName = item;
