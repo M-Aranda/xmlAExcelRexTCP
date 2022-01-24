@@ -203,7 +203,7 @@ namespace FacturasXMLAExcelManager
 
                     while (textReader.Read())
                     {
-                        Console.WriteLine("esto es un nodo");
+                       // Console.WriteLine("esto es un nodo");
                         String nombreItem = "";
                         //String cantidadItem = "";
                         //String unmdItem = "";
@@ -287,6 +287,10 @@ namespace FacturasXMLAExcelManager
                     f.FechaDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));
                     f.FechaContableDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));//que es la fecha de cancelacion?
                     f.FechaDeVencimientoDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));//convertirAFechaValida(getValue("FchVenc", sFileName));// fecha de vencimiento debe ser igual o mayor a fecha de emision
+                    
+                    
+
+                    
                     f.CodigoDeUnidadDeNegocio = "1"; //getValue("Folio", sFileName);
                     f.RutCliente = getValue("RUTEmisor", sFileName);
                     f.DireccionDelCliente = "Casa Matriz"; //getValue("DirRecep", sFileName);
@@ -716,6 +720,8 @@ namespace FacturasXMLAExcelManager
                         f.PrecioUnitario = f.MontoExento;
                         f.CodigoDelProducto = "420724E";
                         facturas.Add(f);
+
+
                     }
 
 
@@ -921,9 +927,9 @@ namespace FacturasXMLAExcelManager
                     case "4":
                         f.TipoDeDocumento = "FACE";
                         break;
-                    case "12":
-                        f.TipoDeDocumento = "FCEE";
-                        break;
+                    //case "12":
+                    //    f.TipoDeDocumento = "FCEE";
+                    //    break;
                     case "18":
                         f.TipoDeDocumento = "NCCE";
                         break;
@@ -940,8 +946,11 @@ namespace FacturasXMLAExcelManager
                 f.FechaContableDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(now.Date));//"dia actual"
                 f.FechaDeVencimientoDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(r.GetValue(7)));
 
+                f.FechaDeDocumento = f.FechaContableDeDocumento;
+                f.FechaDeVencimientoDeDocumento = f.FechaContableDeDocumento;
+
                 //que es la unidad de negocio?
-                f.CodigoDeUnidadDeNegocio = "";
+                f.CodigoDeUnidadDeNegocio = "1";
                 f.RutCliente = validarRutQueVieneDeTranstecnia(Convert.ToString(r.GetValue(2)));
                 f.DireccionDelCliente = "Casa Matriz"; 
                 f.RutFacturador = "";
@@ -970,16 +979,17 @@ namespace FacturasXMLAExcelManager
                 f.NumDocReferencia = "";
                 f.FechaDocReferencia = "";
 
+                f.CodigoDelProducto = "420710";
 
+                //if (f.TipoDeDocumento == "FACE" ^ f.TipoDeDocumento == "NCCE")
+                //{
+                //    f.CodigoDelProducto = "420710";
+               
 
-                if (f.TipoDeDocumento == "FACE" ^ f.TipoDeDocumento == "NCCE")
-                {
-                    f.CodigoDelProducto = "420710";
-
-                }else if (f.TipoDeDocumento == "FCEE")
-                {
-                    f.CodigoDelProducto = "420724E";
-                }
+                //}else if (f.TipoDeDocumento == "FCEE")
+                //{
+                //    f.CodigoDelProducto = "420724E";
+                //}
                 
                 
                 f.Cantidad = "1"; 
@@ -1124,6 +1134,89 @@ namespace FacturasXMLAExcelManager
                 f.CodigoKitFlexible = "";
                 f.AjusteIva = "";
 
+
+                if (Convert.ToInt32(f.MontoExento) > 0 && f.TipoDeDocumento == "FACE")
+                {
+                    Factura f2 = new Factura();
+
+
+                    f2.TipoDeDocumento = f.TipoDeDocumento;
+                    f2.NumeroDelDocumento = f.NumeroDelDocumento;
+                    f2.FechaContableDeDocumento = f.FechaContableDeDocumento;       
+
+                    f2.FechaDeDocumento = f2.FechaContableDeDocumento;
+                    f2.FechaDeVencimientoDeDocumento = f2.FechaContableDeDocumento;
+
+                    f2.CodigoDeUnidadDeNegocio = "1";
+                    f2.RutCliente = f.RutCliente;
+                    f2.DireccionDelCliente = "Casa Matriz";
+                    f2.RutFacturador = "";
+                    f2.CodigoVendedor = "";
+                    f2.CodigoComisionista = "";
+                    f2.Probabilidad = "";
+                    f2.ListaPrecio = "";
+                    f2.PlazoPago = "P01";
+                    f2.MonedaDelDocumento = "CLP";
+                    f2.TasaDeCambio = "";
+                    f2.MontoAfecto = f.MontoAfecto;
+                    f2.MontoExento = f.MontoExento;
+                    f2.MontoIva = f.MontoIva;
+                    f2.MontoImpuestosEspecificos = "";
+                    f2.MontoIvaRetenido = "";
+                    f2.MontoImpuestosRetenidos = "";
+                    f2.TipoDeDescuentoGlobal = "";
+                    f2.DescuentoGlobal = "";
+                    f2.TotalDelDocumento = Convert.ToString(Convert.ToInt32(f2.MontoAfecto) + Convert.ToInt32(f2.MontoExento) + Convert.ToInt32(f2.MontoIva));  //afecto (o neto) + exento + iva
+                    f2.DeudaPendiente = f.TotalDelDocumento;
+                    f2.TipoDocReferencia = "";
+                    f2.NumDocReferencia = "";
+                    f2.FechaDocReferencia = "";
+                    f2.Cantidad = "1";
+                    f2.Unidad = "S.U.M";
+                    f2.MonedaDelDetalle = "CLP";
+                    f2.TasaDeCambio2 = "1";
+                    f2.NumeroDeSerie = "";
+                    f2.NumeroDeLote = "";
+                    f2.FechaDeVencimiento = "";
+                    f2.CentroDeCostos = "";
+                    f2.TipoDeDescuento = "";
+                    f2.Descuento = "";
+                    f2.Ubicacion = "";
+                    f2.Bodega = "";
+                    f2.Concepto1 = "";
+                    f2.Concepto2 = "";
+                    f2.Concepto3 = "";
+                    f2.Concepto4 = "";
+                    f2.Descripcion = "";
+                    f2.DescripcionAdicional = "";
+                    f2.Stock = "0";
+                    f2.Comentario11 = "";
+                    f2.Comentario21 = "";
+                    f2.Comentario31 = "";
+                    f2.Comentario41 = "";
+                    f2.Comentario51 = "";
+                    f2.CodigoImpuestoEspecifico1 = "";
+                    f2.MontoImpuestoEspecifico1 = "";
+                    f2.CodigoImpuestoEspecifico2 = "";
+                    f2.MontoImpuestoEspecifico2 = "";
+                    f2.Modalidad = "";
+                    f2.Glosa = f.Glosa;
+                    f2.Referencia = "";
+                    f2.FechaDeComprometida = "";
+                    f2.PorcentajeCEEC = "";
+                    f2.ImpuestoLey18211 = "";
+                    f2.IvaLey18211 = "";
+                    f2.CodigoKitFlexible = "";
+                    f2.AjusteIva = "";
+
+                    f2.PrecioUnitario = f.MontoExento;
+                    f2.CodigoDelProducto = "420724E";
+
+                    
+                    facturas.Add(f2);
+
+                }
+
                 facturas.Add(f);
 
             }
@@ -1183,8 +1276,11 @@ namespace FacturasXMLAExcelManager
                 f.FechaContableDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(now.Date));//"dia actual"
                 f.FechaDeVencimientoDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(r.GetValue(9)));
 
+                f.FechaDeDocumento =f.FechaContableDeDocumento;
+                f.FechaDeVencimientoDeDocumento =f.FechaContableDeDocumento;
+
                 //que es la unidad de negocio?
-                f.CodigoDeUnidadDeNegocio = "";
+                f.CodigoDeUnidadDeNegocio = "1";
                 f.RutCliente = validarRutQueVieneDeTranstecnia(Convert.ToString(r.GetValue(2)));
                 f.DireccionDelCliente = "Casa Matriz";
                 f.RutFacturador = "";
@@ -1368,17 +1464,21 @@ namespace FacturasXMLAExcelManager
                 f.CodigoKitFlexible = "";
                 f.AjusteIva = "";
 
+                
+
+                if (Convert.ToInt32(f.MontoExento) > 0)
+                {
+                    Factura f2 = new Factura();
+                    f2 = f;
+                    f2.PrecioUnitario = f.MontoExento;
+                    f.CodigoDelProducto = "420710";
+
+                    f2.CodigoDelProducto = "420724E";
+                    facturas.Add(f2);
+
+                }
+
                 facturas.Add(f);
-
-                //if (Convert.ToInt32(f.MontoExento) > 0)
-                //{
-                //    Factura f2 = new Factura();
-                //    f2 = f;
-
-                //    f2.CodigoDelProducto = "420724E";
-                //    facturas.Add(f2);   
-
-                //}
 
 
             }
