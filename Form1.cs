@@ -14,6 +14,7 @@ using OfficeOpenXml;
 using LicenseContext = OfficeOpenXml.LicenseContext;
 using System.Data;
 using System.Data.SqlClient;
+using Windows.Storage;
 
 namespace FacturasXMLAExcelManager
 {
@@ -23,7 +24,7 @@ namespace FacturasXMLAExcelManager
         {
             InitializeComponent();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            //El excel a subir es el del formato de importación de documentos históricos con detalle
+            //El excel a subir es el del formato de importación de documentos contables con detalle
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -61,20 +62,7 @@ namespace FacturasXMLAExcelManager
 
 
                 //fijarse con el SII
-                switch (f.TipoDeDocumento)
-                {
-                    case "33":
-                        f.TipoDeDocumento = "FACE";
-                        break;
-                    case "34":
-                        f.TipoDeDocumento = "FCEE";
-                        break;
-                    case "61":
-                        f.TipoDeDocumento = "NCCE";
-                        break;
-                    default:
-                        break;
-                }
+                f.TipoDeDocumento = determinarTipoDeDocumento(f.TipoDeDocumento);
 
 
                 //Las fechas son en formato dd/mm/yyyy
@@ -165,11 +153,6 @@ namespace FacturasXMLAExcelManager
                 f.AjusteIva = "";//getValue("Folio", sFileName);
 
 
-
-
-
-
-
                 facturas.Add(f);
 
             }
@@ -222,9 +205,6 @@ namespace FacturasXMLAExcelManager
                                 nombreItem = detalle.NmbItem;
                                 Console.WriteLine(nombreItem);
 
-
-                               
-                           
                                 
                             }
                           
@@ -263,31 +243,16 @@ namespace FacturasXMLAExcelManager
 
 
                     f.TipoDeDocumento = getValue("TipoDTE", sFileName);
-                    
 
-                    //fijarse con el SII
-                    switch (f.TipoDeDocumento)
-                    {
-                        case "33":
-                            f.TipoDeDocumento = "FACE";
-                            break;
-                        case "34":
-                            f.TipoDeDocumento = "FCEE";
-                            break;
-                        case "61":
-                            f.TipoDeDocumento = "NCCE";
-                            break;
-                        default:
-                            break;
-                    }
 
-                    
+                    f.TipoDeDocumento = determinarTipoDeDocumento(f.TipoDeDocumento);
+
+
                     //Las fechas son en formato dd/mm/yyyy
                     f.NumeroDelDocumento = getValue("Folio", sFileName);
                     f.FechaDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));
                     f.FechaContableDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));//que es la fecha de cancelacion?
                     f.FechaDeVencimientoDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));//convertirAFechaValida(getValue("FchVenc", sFileName));// fecha de vencimiento debe ser igual o mayor a fecha de emision
-                    
                     
 
                     
@@ -437,68 +402,7 @@ namespace FacturasXMLAExcelManager
                         esPSCP = true;
                     }
 
-                    switch (f.CentroDeCostos)
-                    {
-                        case "CURICO":
-                            f.CentroDeCostos = "202";
-                            if (esPSCP)
-                            {
-                                f.CentroDeCostos = "302";
-                            }
-                            break;
-                        case "RANCAGUA":
-                            f.CentroDeCostos = "201";
-                            if (esPSCP)
-                            {
-                                f.CentroDeCostos = "302";
-                            }
-                            break;
-                        case "MELIPILLA":
-                            f.CentroDeCostos = "200";
-                            if (esPSCP)
-                            {
-                                f.CentroDeCostos = "300";
-                            }
-                            break;
-                        case "SAN ANTONIO":
-                            f.CentroDeCostos = "207";
-                            if (esPSCP)
-                            {
-                                f.CentroDeCostos = "302";
-                            }
-                            break;
-                        case "SANTIAGO SUR":
-                            f.CentroDeCostos = "206";
-                            if (esPSCP)
-                            {
-                                f.CentroDeCostos = "302";
-                            }
-                            break;
-                        case "SANTIAGO":
-                            //Santiago es emprendedor?
-                            f.CentroDeCostos = "206";
-                            if (esPSCP)
-                            {
-                                f.CentroDeCostos = "306";
-                            }
-                            break;
-                        case "ILLAPEL":
-                            f.CentroDeCostos = "205";
-                            if (esPSCP)
-                            {
-                                f.CentroDeCostos = "305";
-                            }
-                            break;
-                        default:
-                            //Interplantas, cuando no es ninguno de los anteriores
-                            f.CentroDeCostos = "204";
-                            if (esPSCP)
-                            {
-                                f.CentroDeCostos = "304";
-                            }
-                            break;
-
-                    }
+                    f.CentroDeCostos = determinarCentroDeCosto(f.CentroDeCostos, esPSCP);
 
                     f.TipoDeDescuento = "";//getValue("TipoDTE", sFileName);
                     f.Descuento = "";//getValue("Folio", sFileName);
@@ -547,20 +451,8 @@ namespace FacturasXMLAExcelManager
 
                         f.TipoDeDocumento = getValue("TipoDTE", sFileName);
 
-                        switch (f.TipoDeDocumento)
-                        {
-                            case "33":
-                                f.TipoDeDocumento = "FACE";
-                                break;
-                            case "34":
-                                f.TipoDeDocumento = "FCEE";
-                                break;
-                            case "61":
-                                f.TipoDeDocumento = "NCCE";
-                                break;
-                            default:
-                                break;
-                        }
+                        f.TipoDeDocumento = determinarTipoDeDocumento(f.TipoDeDocumento);
+                        
 
                         f.NumeroDelDocumento = getValue("Folio", sFileName);
                         f.FechaDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));
@@ -624,68 +516,7 @@ namespace FacturasXMLAExcelManager
                             esPSCP = true;
                         }
 
-                        switch (f.CentroDeCostos)
-                        {
-                            case "CURICO":
-                                f.CentroDeCostos = "202";
-                                if (esPSCP)
-                                {
-                                    f.CentroDeCostos = "302";
-                                }
-                                break;
-                            case "RANCAGUA":
-                                f.CentroDeCostos = "201";
-                                if (esPSCP)
-                                {
-                                    f.CentroDeCostos = "302";
-                                }
-                                break;
-                            case "MELIPILLA":
-                                f.CentroDeCostos = "200";
-                                if (esPSCP)
-                                {
-                                    f.CentroDeCostos = "300";
-                                }
-                                break;
-                            case "SAN ANTONIO":
-                                f.CentroDeCostos = "207";
-                                if (esPSCP)
-                                {
-                                    f.CentroDeCostos = "302";
-                                }
-                                break;
-                            case "SANTIAGO SUR":
-                                f.CentroDeCostos = "206";
-                                if (esPSCP)
-                                {
-                                    f.CentroDeCostos = "302";
-                                }
-                                break;
-                            case "SANTIAGO":
-                                //Santiago es emprendedor?
-                                f.CentroDeCostos = "206";
-                                if (esPSCP)
-                                {
-                                    f.CentroDeCostos = "306";
-                                }
-                                break;
-                            case "ILLAPEL":
-                                f.CentroDeCostos = "205";
-                                if (esPSCP)
-                                {
-                                    f.CentroDeCostos = "305";
-                                }
-                                break;
-                            default:
-                                //Interplantas, cuando no es ninguno de los anteriores
-                                f.CentroDeCostos = "204";
-                                if (esPSCP)
-                                {
-                                    f.CentroDeCostos = "304";
-                                }
-                                break;
-
-                        }
+                        f.CentroDeCostos = determinarCentroDeCosto(f.CentroDeCostos, esPSCP);
 
                         f.TipoDeDescuento = "";//getValue("TipoDTE", sFileName);
                         f.Descuento = "";//getValue("Folio", sFileName);
@@ -731,13 +562,11 @@ namespace FacturasXMLAExcelManager
             }
 
 
-
-            var archivo = new FileInfo(@"C:\Users\Chelo\Desktop\excelsDeFacturas\FacturasEnExcelAPartirDeXml.xlsx");
-
+            String pathDeDescargas = getCarpetaDeDescargas();
+            pathDeDescargas = pathDeDescargas + "" + @"\FacturasEnExcelAPartirDeXml.xlsx";
+            var archivo = new FileInfo(pathDeDescargas);
             SaveExcelFile(facturas, archivo);
-
-             MessageBox.Show("Archivo FacturasEnExcelAPartirDeXml creado!");
-
+            MessageBox.Show("Archivo FacturasEnExcelAPartirDeXml creado en carpeta de descargas!");
 
 
         }
@@ -829,14 +658,12 @@ namespace FacturasXMLAExcelManager
 
         private void button2_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Funcionalidad bajo investigación");
+            MessageBox.Show("Funcionalidad incompleta");
 
             //No estoy seguro de que se pueda manipular adecuadamente la información de un PDF
 
             List<Factura> facturas = new List<Factura>();
-            //var archivo = new FileInfo(@"C:\Users\Chelo\Desktop\excelsDeFacturas\FacturasEnExcelAPartirDePDF.xlsx");
-            //SaveExcelFile(facturas, archivo);
-            //MessageBox.Show("Archivo FacturasEnExcelAPartirDePDF creado!");
+
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -919,23 +746,10 @@ namespace FacturasXMLAExcelManager
 
 
                 f.TipoDeDocumento = Convert.ToString(r.GetValue(0));//depende del numero  DocCod
-                f.TipoDeDocumento=f.TipoDeDocumento.Trim(); 
+                f.TipoDeDocumento=f.TipoDeDocumento.Trim();
 
 
-                switch (f.TipoDeDocumento)
-                {
-                    case "4":
-                        f.TipoDeDocumento = "FACE";
-                        break;
-                    //case "12":
-                    //    f.TipoDeDocumento = "FCEE";
-                    //    break;
-                    case "18":
-                        f.TipoDeDocumento = "NCCE";
-                        break;
-                    default:
-                        break;
-                }
+                f.TipoDeDocumento = determinarTipoDeDocumentoProvenienteDeTranstecnia(f.TipoDeDocumento);
 
                 f.NumeroDelDocumento = Convert.ToString(r.GetValue(1));
 
@@ -1010,95 +824,7 @@ namespace FacturasXMLAExcelManager
                     esPSCP = true;
                 }
 
-                switch (f.CentroDeCostos)
-                {
-                    case "5":
-                        f.CentroDeCostos = "202";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "302";
-                        }
-                        break;
-                    case "3":
-                        f.CentroDeCostos = "201";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "302";
-                        }
-                        break;
-                    case "11":
-                        f.CentroDeCostos = "200";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "300";
-                        }
-                        break;
-                    case "10":
-                        f.CentroDeCostos = "207";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "302";
-                        }
-                        break;
-                    case "16"://santiago sur es eccusa?
-                        f.CentroDeCostos = "206";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "302";
-                        }
-                        break;
-                    case "9":
-                        //Santiago es emprendedor?
-                        f.CentroDeCostos = "206";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "306";
-                        }
-                        break;
-                    case "7":
-                        f.CentroDeCostos = "205";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "305";
-                        }
-                        break;
-                    case "1":
-                        f.CentroDeCostos = "204";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "304";
-                        }
-                        break;
-                    case "12":
-                        f.CentroDeCostos = "204";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "304";
-                        }
-                        break;
-                    case "13":
-                        f.CentroDeCostos = "204";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "304";
-                        }
-                        break;
-                    case "6":
-                        f.CentroDeCostos = "204";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "304";
-                        }
-                        break;
-                    default:
-                        f.CentroDeCostos = "204";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "304";
-                        }
-                        break;
-
-                }
+                f.CentroDeCostos = determinarCentroDeCostoProvenienteDeTranstecnia(f.CentroDeCostos, esPSCP);
 
                 f.TipoDeDescuento = "";
                 f.Descuento = "";
@@ -1208,6 +934,8 @@ namespace FacturasXMLAExcelManager
                     f2.IvaLey18211 = "";
                     f2.CodigoKitFlexible = "";
                     f2.AjusteIva = "";
+                    f2.CentroDeCostos = f.CentroDeCostos;
+                    
 
                     f2.PrecioUnitario = f.MontoExento;
                     f2.CodigoDelProducto = "420724E";
@@ -1252,20 +980,8 @@ namespace FacturasXMLAExcelManager
                 f.TipoDeDocumento = f.TipoDeDocumento.Trim();
 
 
-                switch (f.TipoDeDocumento)
-                {
-                    case "4":
-                        f.TipoDeDocumento = "FACE";
-                        break;
-                    case "12":
-                        f.TipoDeDocumento = "FCEE";
-                        break;
-                    case "18":
-                        f.TipoDeDocumento = "NCCE";
-                        break;
-                    default:
-                        break;
-                }
+                f.TipoDeDocumento = determinarTipoDeDocumentoProvenienteDeTranstecnia(f.TipoDeDocumento);
+        
 
                 f.NumeroDelDocumento = Convert.ToString(r.GetValue(1));
 
@@ -1310,7 +1026,6 @@ namespace FacturasXMLAExcelManager
                 f.FechaDocReferencia = "";
 
 
-
                 if (f.TipoDeDocumento == "FACE" ^ f.TipoDeDocumento == "NCCE")
                 {
                     f.CodigoDelProducto = "420710";
@@ -1340,95 +1055,7 @@ namespace FacturasXMLAExcelManager
                     esPSCP = true;
                 }
 
-                switch (f.CentroDeCostos)
-                {
-                    case "5":
-                        f.CentroDeCostos = "202";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "302";
-                        }
-                        break;
-                    case "3":
-                        f.CentroDeCostos = "201";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "302";
-                        }
-                        break;
-                    case "11":
-                        f.CentroDeCostos = "200";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "300";
-                        }
-                        break;
-                    case "10":
-                        f.CentroDeCostos = "207";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "302";
-                        }
-                        break;
-                    case "16"://santiago sur es eccusa?
-                        f.CentroDeCostos = "206";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "302";
-                        }
-                        break;
-                    case "9":
-                        //Santiago es emprendedor?
-                        f.CentroDeCostos = "206";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "306";
-                        }
-                        break;
-                    case "7":
-                        f.CentroDeCostos = "205";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "305";
-                        }
-                        break;
-                    case "1":
-                        f.CentroDeCostos = "204";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "304";
-                        }
-                        break;
-                    case "12":
-                        f.CentroDeCostos = "204";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "304";
-                        }
-                        break;
-                    case "13":
-                        f.CentroDeCostos = "204";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "304";
-                        }
-                        break;
-                    case "6":
-                        f.CentroDeCostos = "204";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "304";
-                        }
-                        break;
-                    default:
-                        f.CentroDeCostos = "204";
-                        if (esPSCP)
-                        {
-                            f.CentroDeCostos = "304";
-                        }
-                        break;
-
-                }
+                f.CentroDeCostos =determinarCentroDeCostoProvenienteDeTranstecnia(f.CentroDeCostos,esPSCP);
 
                 f.TipoDeDescuento = "";
                 f.Descuento = "";
@@ -1488,12 +1115,275 @@ namespace FacturasXMLAExcelManager
             //termino de seccion para facturas exentas
 
 
-            var archivo = new FileInfo(@"C:\Users\Chelo\Desktop\excelsDeFacturas\FacturasEnExcelAPartirDeTranstecnia.xlsx");
+            String pathDeDescargas = getCarpetaDeDescargas();
+            pathDeDescargas = pathDeDescargas + "" + @"\FacturasEnExcelAPartirDeTranstecnia.xlsx";
+            var archivo = new FileInfo(pathDeDescargas);
             SaveExcelFile(facturas, archivo);
-            MessageBox.Show("Archivo FacturasEnExcelAPartirDeTranstecnia creado!");
+            MessageBox.Show("Archivo FacturasEnExcelAPartirDeTranstecnia creado en carpeta de descargas!");
 
 
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Funcionalidad incompleta");
+
+
+
+
+            
+        }
+
+
+
+        private String determinarCentroDeCostoProvenienteDeTranstecnia(String centroDeCostoComoNumeroQueEsString, Boolean esPSCP)
+        {
+            String centroDeCosto = "";
+
+
+            switch (centroDeCostoComoNumeroQueEsString)
+            {
+                case "5":
+                    centroDeCosto = "202";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "302";
+                    }
+                    break;
+                case "3":
+                    centroDeCosto = "201";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "302";
+                    }
+                    break;
+                case "11":
+                    centroDeCosto = "200";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "300";
+                    }
+                    break;
+                case "10":
+                    centroDeCosto = "207";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "302";
+                    }
+                    break;
+                case "16"://santiago sur es eccusa?
+                    centroDeCosto = "206";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "302";
+                    }
+                    break;
+                case "9":
+                    //Santiago es emprendedor?
+                    centroDeCosto = "206";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "306";
+                    }
+                    break;
+                case "7":
+                    centroDeCosto = "205";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "305";
+                    }
+                    break;
+                case "1":
+                    centroDeCosto = "204";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "304";
+                    }
+                    break;
+                case "12":
+                    centroDeCosto = "204";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "304";
+                    }
+                    break;
+                case "13":
+                    centroDeCosto = "204";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "304";
+                    }
+                    break;
+                case "6":
+                    centroDeCosto = "204";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "304";
+                    }
+                    break;
+                default:
+                    centroDeCosto = "204";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "304";
+                    }
+                    break;
+
+            }
+
+
+
+            return centroDeCosto;
+
+
+        }
+
+
+        private String determinarCentroDeCosto(String centroDeCostoComoString, Boolean esPSCP)
+        {
+            String centroDeCosto = "";
+
+
+            switch (centroDeCostoComoString)
+            {
+                case "CURICO":
+                    centroDeCosto = "202";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "302";
+                    }
+                    break;
+                case "RANCAGUA":
+                    centroDeCosto = "201";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "302";
+                    }
+                    break;
+                case "MELIPILLA":
+                    centroDeCosto = "200";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "300";
+                    }
+                    break;
+                case "SAN ANTONIO":
+                    centroDeCosto = "207";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "302";
+                    }
+                    break;
+                case "SANTIAGO SUR":
+                    centroDeCosto = "206";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "302";
+                    }
+                    break;
+                case "SANTIAGO":
+                    //Santiago es emprendedor?
+                    centroDeCosto = "206";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "306";
+                    }
+                    break;
+                case "ILLAPEL":
+                    centroDeCosto = "205";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "305";
+                    }
+                    break;
+                default:
+                    //Interplantas, cuando no es ninguno de los anteriores
+                    centroDeCosto = "204";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "304";
+                    }
+                    break;
+
+            }
+
+
+
+            return centroDeCosto;
+
+
+        }
+
+
+        private String determinarTipoDeDocumento(String codigoDeDocumento)
+        {
+            String tipoDeFactura= "";
+
+
+            switch (codigoDeDocumento)
+            {
+                case "33":
+                    tipoDeFactura = "FACE";
+                    break;
+                case "34":
+                    tipoDeFactura = "FCEE";
+                    break;
+                case "61":
+                    tipoDeFactura = "NCCE";
+                    break;
+                default:
+                    break;
+            }
+
+
+            return tipoDeFactura;
+
+
+        }
+
+
+
+        private String determinarTipoDeDocumentoProvenienteDeTranstecnia(String codigoDeDocumento)
+        {
+            String tipoDeFactura = "";
+
+
+            switch (codigoDeDocumento)
+            {
+                case "4":
+                    tipoDeFactura = "FACE";
+                    break;
+                case "12":
+                    tipoDeFactura = "FCEE";
+                    break;
+                case "18":
+                    tipoDeFactura = "NCCE";
+                    break;
+                default:
+                    break;
+            }
+
+
+            return tipoDeFactura;
+
+
+        }
+
+
+        private String getCarpetaDeDescargas()
+        {
+            string localfolder = ApplicationData.Current.LocalFolder.Path;
+            var array = localfolder.Split('\\');
+            var username = array[2];
+            string downloads = @"C:\Users\" + username + @"\Downloads";
+          
+
+            return downloads;
+        }
+
+
+
+
     }
 
 
