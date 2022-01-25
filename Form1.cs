@@ -49,7 +49,6 @@ namespace FacturasXMLAExcelManager
             Boolean variasFacturas = true;
    
 
-
             if (variasFacturas == false)
             {
     
