@@ -717,6 +717,31 @@ namespace FacturasXMLAExcelManager
 
    WHERE A.DocCod=12";
 
+  //          AND(A.ECVNumDoc = 156 OR
+
+  //A.ECVNumDoc = 268 OR
+
+  //A.ECVNumDoc = 265 OR
+
+  //A.ECVNumDoc = 9555467 OR
+
+  //A.ECVNumDoc = 9561089 OR
+
+  //A.ECVNumDoc = 9561250 OR
+
+  //A.ECVNumDoc = 7363614 OR
+
+  //A.ECVNumDoc = 7366342 OR
+
+  //A.ECVNumDoc = 4324925 OR
+
+  //A.ECVNumDoc = 104401 OR
+
+  //A.ECVNumDoc = 173 OR
+
+  //A.ECVNumDoc = 1171
+  // )
+
             Console.WriteLine("[" + sql + "]");
             Console.WriteLine("[" + sql2 + "]");
 
