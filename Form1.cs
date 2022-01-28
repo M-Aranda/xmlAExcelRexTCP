@@ -611,14 +611,12 @@ namespace FacturasXMLAExcelManager
         {
             String fechaValida = "";
 
-
             string[] datos = fechaAConvertir.Split('-');
 
             //manager pide dd/mm/yyyy, pero en la ultima prueba solo tomo mm/dd/yyyy
             fechaValida = datos[1]+"/"+datos[2]+"/" + datos[0];
 
             return fechaValida;
-
 
         }
 
@@ -633,7 +631,7 @@ namespace FacturasXMLAExcelManager
 
             string [] partes= soloLaFechaDeTranstecnia.Split('/');
 
-            fechaValida = partes[0]+"/"+ partes[1] + "/" + partes[2] + "";
+            fechaValida = partes[1]+"/"+ partes[0] + "/" + partes[2] + "";
             
 
             return fechaValida;
@@ -714,33 +712,48 @@ namespace FacturasXMLAExcelManager
   FROM [C0012022].[dbo].[DetCpaVta] AS A
    JOIN [C0012022].[dbo].[EncCpaVta] AS B
    ON  A.ECVNumDoc=B.ECVNumDoc AND A.CpRut=B.CpRut
+   WHERE A.DocCod=12  
+    AND
+ (A.ECVNumDoc = 156 OR
+  A.ECVNumDoc = 268 OR
+  A.ECVNumDoc = 265 OR
+  A.ECVNumDoc = 9555467 OR
+  A.ECVNumDoc = 9561089 OR
+  A.ECVNumDoc = 9561250 OR
+  A.ECVNumDoc = 7363614 OR
+  A.ECVNumDoc = 7366342 OR
+  A.ECVNumDoc = 4324925 OR
+  A.ECVNumDoc = 104401 OR
+  A.ECVNumDoc = 173 OR
+  A.ECVNumDoc = 1171
+   )";
 
-   WHERE A.DocCod=12";
+            //          AND(A.ECVNumDoc = 156 OR
 
-  //          AND(A.ECVNumDoc = 156 OR
+            //A.ECVNumDoc = 268 OR
 
-  //A.ECVNumDoc = 268 OR
+            //A.ECVNumDoc = 265 OR
 
-  //A.ECVNumDoc = 265 OR
+            //A.ECVNumDoc = 9555467 OR
 
-  //A.ECVNumDoc = 9555467 OR
+            //A.ECVNumDoc = 9561089 OR
 
-  //A.ECVNumDoc = 9561089 OR
+            //A.ECVNumDoc = 9561250 OR
 
-  //A.ECVNumDoc = 9561250 OR
+            //A.ECVNumDoc = 7363614 OR
 
-  //A.ECVNumDoc = 7363614 OR
+            //A.ECVNumDoc = 7366342 OR
 
-  //A.ECVNumDoc = 7366342 OR
+            //A.ECVNumDoc = 4324925 OR
 
-  //A.ECVNumDoc = 4324925 OR
+            //A.ECVNumDoc = 104401 OR
 
-  //A.ECVNumDoc = 104401 OR
+            //A.ECVNumDoc = 173 OR
 
-  //A.ECVNumDoc = 173 OR
+            //A.ECVNumDoc = 1171
+            // )
 
-  //A.ECVNumDoc = 1171
-  // )
+
 
             Console.WriteLine("[" + sql + "]");
             Console.WriteLine("[" + sql2 + "]");
@@ -1069,7 +1082,7 @@ namespace FacturasXMLAExcelManager
                 f.NumeroDeSerie = "";
                 f.NumeroDeLote = "";
                 f.FechaDeVencimiento = "";
-                f.CentroDeCostos = Convert.ToString(r.GetValue(4));//sacar de transtecnia, es un numero CtroCod
+                f.CentroDeCostos = Convert.ToString(r.GetValue(5));//sacar de transtecnia, es un numero CtroCod
 
 
                 String rutDeReceptor = "78462150-2";
@@ -1106,7 +1119,7 @@ namespace FacturasXMLAExcelManager
                 f.Modalidad = "";
 
 
-                f.Glosa = Convert.ToString(r.GetValue(5));//sacar de transtecnia
+                f.Glosa = Convert.ToString(r.GetValue(8));//sacar de transtecnia
                 f.Referencia = "";
                 f.FechaDeComprometida = "";
                 f.PorcentajeCEEC = "";
@@ -1117,17 +1130,17 @@ namespace FacturasXMLAExcelManager
 
                 
 
-                if (Convert.ToInt32(f.MontoExento) > 0)
-                {
-                    Factura f2 = new Factura();
-                    f2 = f;
-                    f2.PrecioUnitario = f.MontoExento;
-                    f.CodigoDelProducto = "420710";
+                //if (Convert.ToInt32(f.MontoExento) > 0)
+                //{
+                //    Factura f2 = new Factura();
+                //    f2 = f;
+                //    f2.PrecioUnitario = f.MontoExento;
+                //    f.CodigoDelProducto = "420710";
 
-                    f2.CodigoDelProducto = "420724E";
-                    facturas.Add(f2);
+                //    f2.CodigoDelProducto = "420724E";
+                //    facturas.Add(f2);
 
-                }
+                //}
 
                 facturas.Add(f);
 
