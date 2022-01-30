@@ -41,4 +41,3 @@ C:\Users\Chelo\Desktop\xmlAExcelRexTCP\bin\Release\Uno.UI.FluentTheme.pdb
 C:\Users\Chelo\Desktop\xmlAExcelRexTCP\bin\Release\Uno.UI.FluentTheme.v1.pdb
 C:\Users\Chelo\Desktop\xmlAExcelRexTCP\bin\Release\Uno.UI.FluentTheme.v2.pdb
 C:\Users\Chelo\Desktop\xmlAExcelRexTCP\bin\Release\Uno.UI.Toolkit.pdb
-C:\Users\Chelo\Desktop\xmlAExcelRexTCP\obj\Release\FacturasXMLAExcelManager.csproj.SuggestedBindingRedirects.cache

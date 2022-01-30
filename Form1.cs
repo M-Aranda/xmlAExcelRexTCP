@@ -32,6 +32,8 @@ namespace FacturasXMLAExcelManager
 
             //excelAPartirDeXML
             List<Factura> facturas = new List<Factura>();
+            List<FacturaNCCE> facturasNCCE = new List<FacturaNCCE>();
+            
 
             string sFileName = "";
 
@@ -475,8 +477,15 @@ namespace FacturasXMLAExcelManager
                     }
 
 
-
-                    facturas.Add(f);
+                    if (f.TipoDeDocumento != "NCCE")
+                    {
+                        facturas.Add(f);
+                    }
+                    else
+                    {
+                        facturasNCCE.Add(convertirFacturaANCCE(f));
+                    }
+                    
 
                
                     //f.MontoExento = exentoAntes;
@@ -615,7 +624,12 @@ namespace FacturasXMLAExcelManager
             pathDeDescargas = pathDeDescargas + "" + @"\FacturasEnExcelAPartirDeXml.xlsx";
             var archivo = new FileInfo(pathDeDescargas);
             SaveExcelFile(facturas, archivo);
-            MessageBox.Show("Archivo FacturasEnExcelAPartirDeXml creado en carpeta de descargas!");
+
+            pathDeDescargas = getCarpetaDeDescargas()+ "" + @"\FacturasNCCEEnExcelAPartirDeXml.xlsx";
+             archivo = new FileInfo(pathDeDescargas);
+       
+            SaveExcelFileNCCE(facturasNCCE, archivo);
+            MessageBox.Show("Archivo FacturasEnExcelAPartirDeXml y archivo de FacturasNCCEEnExcelAPartirDeXML creado en carpeta de descargas!");
 
 
         }
@@ -634,6 +648,20 @@ namespace FacturasXMLAExcelManager
 
             await package.SaveAsync();
         }
+
+        private static async Task SaveExcelFileNCCE(List<FacturaNCCE> ncces, FileInfo file)
+        {
+            var package = new ExcelPackage(file);
+            var ws = package.Workbook.Worksheets.Add("Facturas");
+
+            var range = ws.Cells["A1"].LoadFromCollection(ncces, true);
+
+            range.AutoFitColumns();
+
+            await package.SaveAsync();
+        }
+
+
 
         public string getValue(string _clave, String pathDelArchivo)
         {
@@ -1473,6 +1501,83 @@ namespace FacturasXMLAExcelManager
           
 
             return downloads;
+        }
+
+        private FacturaNCCE convertirFacturaANCCE(Factura f)
+        {
+            FacturaNCCE facNCCE = new FacturaNCCE();
+
+            facNCCE.TipoDeDocumento = f.TipoDeDocumento;
+            facNCCE.NumeroDelDocumento = f.NumeroDelDocumento;
+            facNCCE.FechaDeDocumento = f.FechaDeDocumento;
+            facNCCE.FechaDeContableDeDocumento = f.FechaContableDeDocumento;
+            facNCCE.FechaDeVencimientoDeDocumento = f.FechaDeVencimientoDeDocumento;
+            facNCCE.CodigoUnidadDeNegocio = f.CodigoDeUnidadDeNegocio;
+            facNCCE.RutCliente = f.RutCliente;
+            facNCCE.DireccionCliente = f.DireccionDelCliente;
+            facNCCE.RutFacturador = f.RutFacturador;
+            facNCCE.CodigoVendedor = f.CodigoVendedor;
+            facNCCE.CodigoComisionista = f.CodigoComisionista;
+            facNCCE.Probablidad = f.Probabilidad;
+            facNCCE.ListaPrecio = f.ListaPrecio;
+            facNCCE.PlazoPago = f.PlazoPago;
+            facNCCE.MonedaDelDocumento = f.MonedaDelDocumento;
+            facNCCE.TasaDeCambio = f.TasaDeCambio;
+            facNCCE.MontoAfecto = f.MontoAfecto;
+            facNCCE.MontoExento = f.MontoExento;
+            facNCCE.MontoIva = f.MontoIva;
+            facNCCE.MontoImpuestosEspecificos = f.MontoImpuestosEspecificos;
+            facNCCE.MontoIvaRetenido = f.MontoIvaRetenido;
+            facNCCE.MontoImpuestosRetenidos = f.MontoImpuestosRetenidos;
+            facNCCE.TipoDeDescuentoGlobal = f.TipoDeDescuentoGlobal;
+            facNCCE.DescuentoGlobal = f.DescuentoGlobal;
+            facNCCE.TotalDelDocumento = f.TotalDelDocumento;
+            facNCCE.DeudaPendiente = f.DeudaPendiente;
+            facNCCE.TipoDocumentoReferencia = f.TipoDocReferencia;
+            facNCCE.NumDocReferencia = f.NumDocReferencia;
+            facNCCE.FechaDocumentoDeReferencia = f.FechaDocReferencia;
+            facNCCE.CodigoDelProducto = f.CodigoDelProducto;
+            facNCCE.Cantidad = f.Cantidad;
+            facNCCE.Unidad = f.Unidad;
+            facNCCE.PrecioUnitario = f.PrecioUnitario;
+            facNCCE.MonedaDelDetalle = f.MonedaDelDetalle;
+            facNCCE.TasaDeCambio2 = f.TasaDeCambio2;
+            facNCCE.NumeroDeSerie = f.NumeroDeSerie;
+            facNCCE.NumeroDeLote = f.NumeroDeLote;
+            facNCCE.FechaDeVencimiento = f.FechaDeVencimiento;
+            facNCCE.CentroDeCostos = f.CentroDeCostos;
+            facNCCE.TipoDeDescuento = f.TipoDeDescuento;
+            facNCCE.Descuento = f.Descuento;
+            facNCCE.Ubicacion = f.Ubicacion;
+            facNCCE.Bodega = f.Bodega;
+            facNCCE.Concepto1 = f.Concepto1;
+            facNCCE.Concepto2 = f.Concepto2;
+            facNCCE.Concepto3 = f.Concepto3;
+            facNCCE.Concepto4 = f.Concepto4;
+            facNCCE.Descripcion = f.Descripcion;
+            facNCCE.DescripcionAdicional = f.DescripcionAdicional;
+            facNCCE.Stock = f.Stock;
+            facNCCE.Comentario1 = f.Comentario11;
+            facNCCE.Comentario2 = f.Comentario21;
+            facNCCE.Comentario3 = f.Comentario31;
+            facNCCE.Comentario4 = f.Comentario41;
+            facNCCE.Comentario5 = f.Comentario51;
+            facNCCE.CodigoImpEspecial1 = f.CodigoImpuestoEspecifico1;
+            facNCCE.MontoImpEspecial1 = f.MontoImpuestoEspecifico1;
+            facNCCE.CodigoImpEspecial2 = f.CodigoImpuestoEspecifico2;
+            facNCCE.MontoImpEspecial2 = f.MontoImpuestoEspecifico2;
+            facNCCE.Modalidad = f.Modalidad;
+            facNCCE.Glosa = f.Glosa;
+            facNCCE.Referencia = f.Referencia;
+            facNCCE.FechaDeComprometida = f.FechaDeComprometida;
+            facNCCE.PorcentajeCEEC = "";
+            facNCCE.TipoDeDocumentoDeOrigen = "";
+            facNCCE.NumeroDocumentoDeOrigen = "";
+            facNCCE.NumeroDetalleOrigen = "";
+            facNCCE.CodigoKitFlexible = f.CodigoKitFlexible;
+            facNCCE.AjusteIva = f.AjusteIva;
+
+            return facNCCE;
         }
 
 
