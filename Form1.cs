@@ -164,6 +164,17 @@ namespace FacturasXMLAExcelManager
             {
                 foreach (var item in arrAllFiles)
                 {
+
+
+                    // los ruts de CCU son:
+                    // 91041000-8
+                    //96989120-4
+                    //99501760-1
+                    //99554560-8
+                    //99586280-8
+                  
+
+
                      sFileName = item; 
                    // XmlTextReader reader = new XmlTextReader(URLString);
 
@@ -807,6 +818,8 @@ namespace FacturasXMLAExcelManager
             Factura f = new Factura();
 
             int ano = 2022;
+            //el rut de Copec es 995200007
+
 
             string str = @"Data Source=172.16.1.198\SQLEXPRESS;Initial Catalog=C001" + ano + ";User ID=sa;Password=Super123";
             Console.WriteLine(str);
