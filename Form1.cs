@@ -313,6 +313,8 @@ namespace FacturasXMLAExcelManager
                     420710
                     420724E
 
+ 
+
         110904	Impuesto Específico	Generico		
 		310101	Fletes Interplantas	Servicio	
 		310201	Fletes Emprendedores	Servicio	
@@ -373,7 +375,7 @@ namespace FacturasXMLAExcelManager
 
 */
 
-                    
+
 
 
 
@@ -439,7 +441,7 @@ namespace FacturasXMLAExcelManager
                         f.Modalidad = "3";
                     }
 
-                    f.Glosa = "Factrua de compra";//getValue("Folio", sFileName);
+                    f.Glosa = "Factura de compra";//getValue("Folio", sFileName);
                     f.Referencia = "";//getValue("Folio", sFileName);
                     f.FechaDeComprometida = "";//getValue("Folio", sFileName);
                     f.PorcentajeCEEC = "";//getValue("Folio", sFileName);
@@ -483,7 +485,40 @@ namespace FacturasXMLAExcelManager
                     }
                     else
                     {
-                        facturasNCCE.Add(convertirFacturaANCCE(f));
+
+                        FacturaNCCE facNCCE = convertirFacturaANCCE(f);
+                        facNCCE.TipoDeDocumentoDeOrigen = determinarTipoDeDocumento(getValue("TpoDocRef",sFileName));
+                        facNCCE.NumeroDocumentoDeOrigen = getValue("FolioRef", sFileName);
+
+           
+
+                        facNCCE.FechaDeContableDeDocumento = convertirAFechaValida2(facNCCE.FechaDeContableDeDocumento);
+                        facNCCE.FechaDeDocumento = facNCCE.FechaDeContableDeDocumento;
+                        facNCCE.FechaDeVencimientoDeDocumento = facNCCE.FechaDeContableDeDocumento;
+
+                       
+
+                        //420724E
+                        facturasNCCE.Add(facNCCE);
+
+                        // si el exento es distinto a 0, las notas de credito tienen que tener el mismo traqtamiento con las face cuyo exento es superior a 0
+                        if(facNCCE.MontoExento!="0")
+                        {
+                            FacturaNCCE facNCCE2 = new FacturaNCCE();
+                            facNCCE2 = convertirFacturaANCCE(f);
+                            facNCCE2.PrecioUnitario = facNCCE2.MontoExento;
+                            facNCCE2.CodigoDelProducto = "420724E";
+
+                            facNCCE2.TipoDeDocumentoDeOrigen = facNCCE.TipoDeDocumentoDeOrigen;
+                            facNCCE2.NumeroDocumentoDeOrigen = facNCCE.NumeroDocumentoDeOrigen;
+
+                            facNCCE2.FechaDeContableDeDocumento = convertirAFechaValida2(facNCCE2.FechaDeContableDeDocumento);
+                            facNCCE2.FechaDeDocumento = facNCCE2.FechaDeContableDeDocumento;
+                            facNCCE2.FechaDeVencimientoDeDocumento = facNCCE2.FechaDeContableDeDocumento;
+
+                            facturasNCCE.Add(facNCCE2);
+
+                        }
                     }
                     
 
@@ -512,7 +547,7 @@ namespace FacturasXMLAExcelManager
                         f.FechaDeVencimientoDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));//convertirAFechaValida(getValue("FchVenc", sFileName));// fecha de vencimiento debe ser igual o mayor a fecha de emision
 
                         DateTime fechaActual = DateTime.Now;
-                        f.FechaContableDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(fechaActual.Date));//"dia actual"
+                        f.FechaContableDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(now.Date));//"dia actual"
 
                         f.FechaDeDocumento = f.FechaContableDeDocumento;
                         f.FechaDeVencimientoDeDocumento = f.FechaContableDeDocumento;
@@ -704,6 +739,21 @@ namespace FacturasXMLAExcelManager
 
         }
 
+        public String convertirAFechaValida2(String fechaAConvertir)
+        {
+            String fechaValida = "";
+
+            string[] datos = fechaAConvertir.Split('/');
+
+            //manager pide dd/mm/yyyy, pero en la ultima prueba solo tomo mm/dd/yyyy
+
+            fechaValida = datos[1] + "/" + datos[0] + "/" + datos[2];
+
+             return fechaValida;
+      
+
+        }
+
 
         public String convertirAFechaValidaDesdeTranstecnia(String fechaAConvertir)
         {
@@ -762,23 +812,52 @@ namespace FacturasXMLAExcelManager
             SqlConnection con = new SqlConnection(str);
             SqlCommand cmd = new SqlCommand();
             SqlDataReader r;
+            
+            //En transtecnia ImpCod = 3 es especifico no recuperable (69%) e ImpCod= 1 es iva (19%)
             string sql = @"SELECT 
-      A.DocCod
-      ,A.ECVNumDoc
-      ,A.CpRut
-      ,B.CtaCod
-      ,B.CtroCod
-      ,B.DCVGlosa
-      ,C.ECVFecha
-      ,C.ECVVence
-      ,C.ECVExento
-      ,C.ECVNeto
-      ,A.ICVMonto
-       FROM [C0012022].[dbo].[ImpCpaVta]AS A
-       JOIN [C0012022].[dbo].[DetCpaVta] AS B
-       ON A.ECVNumDoc=B.ECVNumDoc AND A.CpRut=B.CpRut
-       JOIN [C0012022].[dbo].[EncCpaVta] AS C
-       ON A.ECVNumDoc=C.ECVNumDoc AND A.CpRut=C.CpRut";
+              A.DocCod
+              ,A.ECVNumDoc
+              ,A.CpRut
+              ,B.CtaCod
+              ,B.CtroCod
+              ,B.DCVGlosa
+              ,C.ECVFecha
+              ,C.ECVVence
+              ,C.ECVExento
+              ,C.ECVNeto
+              ,A.ICVMonto
+              ,A.ICVBase
+              ,A.ImpCod
+               FROM [C0012022].[dbo].[ImpCpaVta]AS A
+               JOIN [C0012022].[dbo].[DetCpaVta] AS B
+               ON A.ECVNumDoc=B.ECVNumDoc AND A.CpRut=B.CpRut
+               JOIN [C0012022].[dbo].[EncCpaVta] AS C
+               ON A.ECVNumDoc=C.ECVNumDoc AND A.CpRut=C.CpRut
+                AND A.CpRut= ' 995200007'
+                ";
+
+
+
+
+            //string sql = @"SELECT 
+            //  A.DocCod
+            //  ,A.ECVNumDoc
+            //  ,A.CpRut
+            //  ,B.CtaCod
+            //  ,B.CtroCod
+            //  ,B.DCVGlosa
+            //  ,C.ECVFecha
+            //  ,C.ECVVence
+            //  ,C.ECVExento
+            //  ,C.ECVNeto
+            //  ,A.ICVMonto
+            //   FROM [C0012022].[dbo].[ImpCpaVta]AS A
+            //   JOIN [C0012022].[dbo].[DetCpaVta] AS B
+            //   ON A.ECVNumDoc=B.ECVNumDoc AND A.CpRut=B.CpRut
+            //   JOIN [C0012022].[dbo].[EncCpaVta] AS C
+            //   ON A.ECVNumDoc=C.ECVNumDoc AND A.CpRut=C.CpRut
+            //    AND A.CpRut= ' 995200007'
+            //    ";
 
             string sql2 = @"SELECT 
        A.DocCod
@@ -797,23 +876,10 @@ namespace FacturasXMLAExcelManager
   FROM [C0012022].[dbo].[DetCpaVta] AS A
    JOIN [C0012022].[dbo].[EncCpaVta] AS B
    ON  A.ECVNumDoc=B.ECVNumDoc AND A.CpRut=B.CpRut
-   WHERE A.DocCod=12  
-    AND
- (A.ECVNumDoc = 156 OR
-  A.ECVNumDoc = 268 OR
-  A.ECVNumDoc = 265 OR
-  A.ECVNumDoc = 9555467 OR
-  A.ECVNumDoc = 9561089 OR
-  A.ECVNumDoc = 9561250 OR
-  A.ECVNumDoc = 7363614 OR
-  A.ECVNumDoc = 7366342 OR
-  A.ECVNumDoc = 4324925 OR
-  A.ECVNumDoc = 104401 OR
-  A.ECVNumDoc = 173 OR
-  A.ECVNumDoc = 1171
-   )";
+   WHERE A.DocCod=12
+    AND A.CpRut= ' 995200007'";
 
-            //          AND(A.ECVNumDoc = 156 OR
+            //    A.DocCod=12        AND(A.ECVNumDoc = 156 OR
 
             //A.ECVNumDoc = 268 OR
 
@@ -879,7 +945,7 @@ namespace FacturasXMLAExcelManager
 
                 f.FechaDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(r.GetValue(6)));
                 DateTime now = DateTime.Now;
-                f.FechaContableDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(now.Date));//"dia actual"
+                f.FechaContableDeDocumento =   convertirAFechaValidaDesdeTranstecnia(Convert.ToString(now.Date));//"dia actual"
                 f.FechaDeVencimientoDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(r.GetValue(7)));
 
                 f.FechaDeDocumento = f.FechaContableDeDocumento;
@@ -897,14 +963,36 @@ namespace FacturasXMLAExcelManager
                 f.PlazoPago = "P01";
                 f.MonedaDelDocumento = "CLP";
                 f.TasaDeCambio = "";
+                //hay que alterar cosas aqui
                 f.MontoAfecto = Convert.ToString(r.GetValue(9));//ECVNeto
 
                 f.MontoExento = Convert.ToString(r.GetValue(8));//ECVExento
-
-
-                f.MontoIva = Convert.ToString(r.GetValue(10));//ICVMonto
-
                 f.MontoImpuestosEspecificos = "";
+
+                String codigoDeImpuesto = Convert.ToString(r.GetValue(12)); // ImpCod
+
+
+                //410104   Petroleo Gasto
+                //110904  Impuesto Específico Generico
+
+                if (codigoDeImpuesto == "1")
+                {
+                    f.MontoIva = Convert.ToString(r.GetValue(10));//ICVMonto
+                    f.CodigoDelProducto = "410104";
+                }
+                else if(codigoDeImpuesto=="3")
+                {
+                    f.MontoIva = "0";
+                    f.MontoImpuestosEspecificos = Convert.ToString(r.GetValue(10));
+                    f.CodigoDelProducto = "110904";
+                }
+
+                //parece que el codigo de producto especifico no esta asociado al producto???
+
+                // Convert.ToString(r.GetValue(11)); // ICVBase
+
+
+
                 f.MontoIvaRetenido = "";
                 f.MontoImpuestosRetenidos = "";
                 f.TipoDeDescuentoGlobal = "";
@@ -1066,6 +1154,7 @@ namespace FacturasXMLAExcelManager
                     facturas.Add(f2);
 
                 }
+
 
                 facturas.Add(f);
 
@@ -1235,6 +1324,7 @@ namespace FacturasXMLAExcelManager
 
 
             //termino de seccion para facturas exentas
+
 
 
             String pathDeDescargas = getCarpetaDeDescargas();
