@@ -517,7 +517,7 @@ namespace FacturasXMLAExcelManager
                             facNCCE2.FechaDeVencimientoDeDocumento = facNCCE2.FechaDeContableDeDocumento;
 
                             facturasNCCE.Add(facNCCE2);
-                            //test
+                            
 
                         }
                     }
