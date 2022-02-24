@@ -25,6 +25,12 @@ namespace FacturasXMLAExcelManager
             InitializeComponent();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             //El excel a subir es el del formato de importación de documentos contables con detalle
+            //estos botones son para las otras funciones
+            button2.Visible = false;
+            button3.Visible = false;
+            button4.Visible = false;
+            button5.Visible = false;
+
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -124,7 +130,7 @@ namespace FacturasXMLAExcelManager
                 f.NumeroDeSerie = "";//getValue("Folio", sFileName);
                 f.NumeroDeLote = "";//getValue("Folio", sFileName);
                 f.FechaDeVencimiento = "";// getValue("Folio", sFileName);
-                f.CentroDeCostos = getValue("CmnaDest", sFileName);
+                f.CentroDeCostos = getValue("DirOrigen", sFileName);//no es CmnaDest el dato que me da la dirección, es DirOrigen
                 f.TipoDeDescuento = "";//getValue("TipoDTE", sFileName);
                 f.Descuento = "";//getValue("Folio", sFileName);
                 f.Ubicacion = "";//getValue("Folio", sFileName);
@@ -399,7 +405,7 @@ namespace FacturasXMLAExcelManager
                     f.NumeroDeSerie = "";//getValue("Folio", sFileName);
                     f.NumeroDeLote = "";//getValue("Folio", sFileName);
                     f.FechaDeVencimiento = "";// getValue("Folio", sFileName);
-                    f.CentroDeCostos = getValue("DirOrigen", sFileName); //Este es el centro de costos
+                    f.CentroDeCostos = getValue("DirOrigen", sFileName);//no es CmnaDest el dato que me da la dirección, es DirOrigen
 
                     //determinar a donde se costea
                     //los codigos de centros de costo son (numero de la izquierda: TCP, numero de la derecha: PSCP): 
@@ -490,8 +496,23 @@ namespace FacturasXMLAExcelManager
                     }
 
 
+                    if (f.RutCliente != "91041000-8" & f.RutCliente != "96989120-4" & f.RutCliente != "99501760-1" & f.RutCliente != "99554560-8" & f.RutCliente != "99586280-8")
+                    {
+                        f.CodigoDelProducto = "110804";
+                        f.CentroDeCostos = "209";
+                    }
+
                     if (f.TipoDeDocumento != "NCCE")
                     {
+
+                        if (f.MontoIva == "0" && f.TipoDeDocumento=="FACE")
+                        {
+                            f.TipoDeDocumento = "FCEE";
+                            f.CodigoDelProducto = "420724E";
+                            
+                        }
+
+
                         facturas.Add(f);
                     }
                     else
@@ -507,7 +528,11 @@ namespace FacturasXMLAExcelManager
                         facNCCE.FechaDeDocumento = facNCCE.FechaDeContableDeDocumento;
                         facNCCE.FechaDeVencimientoDeDocumento = facNCCE.FechaDeContableDeDocumento;
 
-                       
+                        if (facNCCE.RutCliente != "91041000-8" & facNCCE.RutCliente != "96989120-4" & facNCCE.RutCliente != "99501760-1" & facNCCE.RutCliente != "99554560-8" & facNCCE.RutCliente != "99586280-8")
+                        {
+                            facNCCE.CodigoDelProducto = "110804";
+                            facNCCE.CentroDeCostos = "209";
+                        }
 
                         //420724E
                         facturasNCCE.Add(facNCCE);
@@ -526,6 +551,13 @@ namespace FacturasXMLAExcelManager
                             facNCCE2.FechaDeContableDeDocumento = convertirAFechaValida2(facNCCE2.FechaDeContableDeDocumento);
                             facNCCE2.FechaDeDocumento = facNCCE2.FechaDeContableDeDocumento;
                             facNCCE2.FechaDeVencimientoDeDocumento = facNCCE2.FechaDeContableDeDocumento;
+
+                            if (facNCCE2.RutCliente != "91041000-8" & facNCCE2.RutCliente != "96989120-4" & facNCCE2.RutCliente != "99501760-1" & facNCCE2.RutCliente != "99554560-8" & facNCCE2.RutCliente != "99586280-8")
+                            {
+                                facNCCE2.CodigoDelProducto = "110804";
+                                facNCCE2.CentroDeCostos = "209";
+                            }
+
 
                             facturasNCCE.Add(facNCCE2);
                             
@@ -655,10 +687,23 @@ namespace FacturasXMLAExcelManager
 
                         f.PrecioUnitario = f.MontoExento;
                         f.CodigoDelProducto = "420724E";
+
+
+                        if (f.RutCliente != "91041000-8" & f.RutCliente != "96989120-4" & f.RutCliente != "99501760-1" & f.RutCliente != "99554560-8" & f.RutCliente != "99586280-8")
+                        {
+                            f.CodigoDelProducto = "110804";
+                            f.CentroDeCostos = "209";
+                        }
+
+
                         facturas.Add(f);
 
 
                     }
+
+
+              
+
 
 
                 }
@@ -702,6 +747,18 @@ namespace FacturasXMLAExcelManager
             var ws = package.Workbook.Worksheets.Add("Facturas");
 
             var range = ws.Cells["A1"].LoadFromCollection(ncces, true);
+
+            range.AutoFitColumns();
+
+            await package.SaveAsync();
+        }
+
+        private static async Task SaveExcelFileMatches(List<MatchFacturaManagerCTACTE> coincidencias, FileInfo file)
+        {
+            var package = new ExcelPackage(file);
+            var ws = package.Workbook.Worksheets.Add("Match");
+
+            var range = ws.Cells["A1"].LoadFromCollection(coincidencias, true);
 
             range.AutoFitColumns();
 
@@ -1468,6 +1525,7 @@ namespace FacturasXMLAExcelManager
         private String determinarCentroDeCosto(String centroDeCostoComoString, Boolean esPSCP)
         {
             String centroDeCosto = "";
+            //se supone que a veces vienen cosas como STGO PN8000
 
 
             switch (centroDeCostoComoString)
@@ -1497,14 +1555,14 @@ namespace FacturasXMLAExcelManager
                     centroDeCosto = "207";
                     if (esPSCP)
                     {
-                        centroDeCosto = "302";
+                        centroDeCosto = "307";
                     }
                     break;
                 case "SANTIAGO SUR":
                     centroDeCosto = "206";
                     if (esPSCP)
                     {
-                        centroDeCosto = "302";
+                        centroDeCosto = "306";
                     }
                     break;
                 case "SANTIAGO":
@@ -1524,19 +1582,16 @@ namespace FacturasXMLAExcelManager
                     break;
                 default:
                     //Interplantas, cuando no es ninguno de los anteriores
-                    centroDeCosto = "204";
+                    centroDeCosto = "204";//"204";
                     if (esPSCP)
                     {
-                        centroDeCosto = "304";
+                        centroDeCosto = "304";//"304";
                     }
                     break;
 
             }
 
-
-
             return centroDeCosto;
-
 
         }
 
@@ -1684,8 +1739,199 @@ namespace FacturasXMLAExcelManager
             return facNCCE;
         }
 
+        private void button5_Click(object sender, EventArgs e)
+        {
+
+            List<FacturaManager> facturasDeManager = new List<FacturaManager>();
+            List<CobroCTACTE> cobrosCTACTE = new List<CobroCTACTE>();
+
+            List<MatchFacturaManagerCTACTE> listadoDeFacturasParaElTercerExcel = new List<MatchFacturaManagerCTACTE>();
+
+            string sFileName = "";
+
+            OpenFileDialog choofdlog = new OpenFileDialog();
+            choofdlog.Filter = "Archivos XLSX (*.xlsx)|*.xlsx";
+            choofdlog.FilterIndex = 1;
+            choofdlog.Multiselect = true;
+
+            string[] arrAllFiles = new string[] { };
+
+            MessageBox.Show("Seleccionar excel de facturas de manager");
+            if (choofdlog.ShowDialog() == DialogResult.OK)
+            {
+                sFileName = choofdlog.FileName;
+                arrAllFiles = choofdlog.FileNames; //used when Multiselect = true           
+            }
 
 
+            facturasDeManager = leerExcelDeFacturasDeManager(sFileName);
+
+            MessageBox.Show("Seleccionar excel de cobros");
+            if (choofdlog.ShowDialog() == DialogResult.OK)
+            {
+                sFileName = choofdlog.FileName;
+                arrAllFiles = choofdlog.FileNames; //used when Multiselect = true           
+            }
+            cobrosCTACTE = leerExcelDeCobrosCTACTE(sFileName);
+
+            
+            foreach (var item in facturasDeManager)
+            {
+
+                foreach (var i in cobrosCTACTE)
+                {
+                    if((item.Total==i.Monto) && (item.FechaDoc1==i.Fecha))
+                    {
+                        MatchFacturaManagerCTACTE matchFacturaManagerCTACTE = new MatchFacturaManagerCTACTE();
+
+                        matchFacturaManagerCTACTE.Fecha = i.Fecha;
+                        matchFacturaManagerCTACTE.Monto = i.Monto;
+                        matchFacturaManagerCTACTE.Centro = i.CtoCosto;
+
+                        switch (matchFacturaManagerCTACTE.Centro)
+                        {
+                            case "CURICO":
+                                matchFacturaManagerCTACTE.Centro ="202";
+                                break;
+                            case "RANCAGUA":
+                                matchFacturaManagerCTACTE.Centro = "201";
+                                break;
+                            case "MELIPILLA":
+                                matchFacturaManagerCTACTE.Centro = "200";
+                                break;
+                            case "SAN ANTONIO":
+                                matchFacturaManagerCTACTE.Centro = "207";
+                                break;
+                            case "SANTIAGO":
+                                matchFacturaManagerCTACTE.Centro = "206";
+                                break;
+                            case "SANTIAGO-SUR":
+                                matchFacturaManagerCTACTE.Centro = "206";
+                                break;
+                            case "ILLAPEL":
+                                matchFacturaManagerCTACTE.Centro = "205";
+                                break;
+                            default:
+                                //administracion
+                                matchFacturaManagerCTACTE.Centro = "204";
+                                break;
+      
+                        }
+
+                        listadoDeFacturasParaElTercerExcel.Add(matchFacturaManagerCTACTE);
+                    }
+                }
+
+
+
+
+            }
+
+
+
+            //aqui habria que guardar el Excel
+
+            String pathDeDescargas = getCarpetaDeDescargas();
+            pathDeDescargas = pathDeDescargas + "" + @"\Match de facturas.xlsx";
+            var archivo = new FileInfo(pathDeDescargas);
+            SaveExcelFileMatches(listadoDeFacturasParaElTercerExcel, archivo);
+            MessageBox.Show("Archivo Match de facturas entre Manager y CTA cte creado en carpeta de descargas!");
+
+
+
+        }
+
+
+        private List<CobroCTACTE> leerExcelDeCobrosCTACTE(String filePath)
+        {
+            List<CobroCTACTE>listadoDeCobros=new List<CobroCTACTE>();
+
+            FileInfo existingFile = new FileInfo(filePath);
+            using (ExcelPackage package = new ExcelPackage(existingFile))
+            {
+                //get the first worksheet in the workbook
+                ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+                int colCount = worksheet.Dimension.End.Column;  //get Column Count
+                int rowCount = worksheet.Dimension.End.Row;     //get row count
+                CobroCTACTE  encabezado = new CobroCTACTE();
+                encabezado.Fecha = "Fecha";
+                encabezado.CtoCosto = "CtoCosto";
+                encabezado.Monto = "Monto";
+
+                listadoDeCobros.Add(encabezado);
+
+
+                for (int row = 1; row <= rowCount; row++)
+                {
+
+                    CobroCTACTE c = new CobroCTACTE();
+                    c.Fecha = worksheet.Cells[row, 1].Value?.ToString().Trim();
+                    c.CtoCosto = worksheet.Cells[row, 2].Value?.ToString().Trim();
+                    c.Monto = worksheet.Cells[row, 3].Value?.ToString().Trim();
+               
+                    if (c.Monto != "Monto")
+                    {
+                        listadoDeCobros.Add(c);
+                    }
+
+                }
+            }
+
+
+
+            return listadoDeCobros;
+
+        }
+
+
+        private List<FacturaManager> leerExcelDeFacturasDeManager(String filePath)
+        {
+            List<FacturaManager> listadoDeFacturasDeManager = new List<FacturaManager>();
+
+            FileInfo existingFile = new FileInfo(filePath);
+            using (ExcelPackage package = new ExcelPackage(existingFile))
+            {
+                //get the first worksheet in the workbook
+                ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+                int colCount = worksheet.Dimension.End.Column;  //get Column Count
+                int rowCount = worksheet.Dimension.End.Row;     //get row count
+                FacturaManager encabezado = new FacturaManager();
+                encabezado.Numero = "Numero";
+                encabezado.Rut = "Rut";
+                encabezado.Proveedor = "Proveedor";
+                encabezado.Moneda = "Moneda";
+                encabezado.TipoCambio = "TipoCambio";
+                encabezado.FechaDoc1 = "Fecha";
+                encabezado.Total = "Total";
+                encabezado.Estado = "Estado";
+                encabezado.Glosa = "Glosa";
+
+
+
+                listadoDeFacturasDeManager.Add(encabezado);
+
+
+                for (int row = 1; row <= rowCount; row++)
+                {
+
+                    FacturaManager fm = new FacturaManager();
+                    fm.Numero = worksheet.Cells[row, 1].Value?.ToString().Trim();
+                    fm.FechaDoc1 = worksheet.Cells[row, 6].Value?.ToString().Trim();
+                    fm.Total = worksheet.Cells[row, 7].Value?.ToString().Trim();
+
+                    if (fm.Total != "Total")
+                    {
+                        listadoDeFacturasDeManager.Add(fm);
+                    }
+
+                }
+            }
+
+
+
+            return listadoDeFacturasDeManager;
+
+        }
 
     }
 
