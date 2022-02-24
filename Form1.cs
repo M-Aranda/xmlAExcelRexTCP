@@ -1612,7 +1612,12 @@ namespace FacturasXMLAExcelManager
                 case "61":
                     tipoDeFactura = "NCCE";
                     break;
+                case "52":
+                    //es guia de despacho
+                    tipoDeFactura = "guia de despacho";
+                    break;
                 default:
+                    tipoDeFactura = codigoDeDocumento;
                     break;
             }
 
