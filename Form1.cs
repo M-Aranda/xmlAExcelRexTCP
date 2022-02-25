@@ -178,10 +178,14 @@ namespace FacturasXMLAExcelManager
                     //99501760-1
                     //99554560-8
                     //99586280-8
-                  
 
 
-                     sFileName = item; 
+                    //el rut de COPEC es:
+                    //99520000-7, y se supone que es el único que tiene que tener
+                    //tratamiento especial
+
+
+                    sFileName = item; 
                    // XmlTextReader reader = new XmlTextReader(URLString);
 
                     Factura f = new Factura();
@@ -458,7 +462,7 @@ namespace FacturasXMLAExcelManager
                         f.Modalidad = "3";
                     }
 
-                    f.Glosa = "Factura de compra";//getValue("Folio", sFileName);
+                    f.Glosa = "Factura de compra subida automaticamente";//getValue("Folio", sFileName);
                     f.Referencia = "";//getValue("Folio", sFileName);
                     f.FechaDeComprometida = "";//getValue("Folio", sFileName);
                     f.PorcentajeCEEC = "";//getValue("Folio", sFileName);
@@ -492,6 +496,8 @@ namespace FacturasXMLAExcelManager
                         f.PrecioUnitario = f.TotalDelDocumento;
                         f.MontoExento = f.TotalDelDocumento;
                         f.TipoDeDocumento = "FCEE";
+
+
                         esFacturaDeEnvases = true;
                     }
 
@@ -499,6 +505,10 @@ namespace FacturasXMLAExcelManager
                     if (f.RutCliente != "91041000-8" & f.RutCliente != "96989120-4" & f.RutCliente != "99501760-1" & f.RutCliente != "99554560-8" & f.RutCliente != "99586280-8")
                     {
                         f.CodigoDelProducto = "110804";
+                        if (f.RutCliente == "99520000-7")
+                        {
+                            f.CodigoDelProducto = "410104";
+                        }
                         f.CentroDeCostos = "209";
                     }
 
@@ -511,6 +521,16 @@ namespace FacturasXMLAExcelManager
                             f.CodigoDelProducto = "420724E";
                             
                         }
+
+
+
+                        //si es una factura Exenta el iva y el afecto DEBEN ser 0
+                        if (f.TipoDeDocumento == "FCEE")
+                        {
+                            f.MontoAfecto = "0";
+                            f.MontoIva = "0";
+                        }
+
 
 
                         facturas.Add(f);
@@ -532,6 +552,11 @@ namespace FacturasXMLAExcelManager
                         {
                             facNCCE.CodigoDelProducto = "110804";
                             facNCCE.CentroDeCostos = "209";
+
+                            if (facNCCE.RutCliente == "99520000-7")
+                            {
+                                facNCCE.CodigoDelProducto = "410104";
+                            }
                         }
 
                         //420724E
@@ -556,8 +581,12 @@ namespace FacturasXMLAExcelManager
                             {
                                 facNCCE2.CodigoDelProducto = "110804";
                                 facNCCE2.CentroDeCostos = "209";
-                            }
 
+                                if (facNCCE2.RutCliente == "99520000-7")
+                                {
+                                    facNCCE2.CodigoDelProducto = "410104";
+                                }
+                            }
 
                             facturasNCCE.Add(facNCCE2);
                             
@@ -676,7 +705,7 @@ namespace FacturasXMLAExcelManager
                         f.CodigoImpuestoEspecifico2 = "";//getValue("Folio", sFileName);
                         f.MontoImpuestoEspecifico2 = "";//getValue("Folio", sFileName);
                         f.Modalidad = "";//getValue("Folio", sFileName);
-                        f.Glosa = "Factura de compra";//getValue("Folio", sFileName);
+                        f.Glosa = "Factura de compra automatica";//getValue("Folio", sFileName);
                         f.Referencia = "";//getValue("Folio", sFileName);
                         f.FechaDeComprometida = "";//getValue("Folio", sFileName);
                         f.PorcentajeCEEC = "";//getValue("Folio", sFileName);
@@ -692,6 +721,10 @@ namespace FacturasXMLAExcelManager
                         if (f.RutCliente != "91041000-8" & f.RutCliente != "96989120-4" & f.RutCliente != "99501760-1" & f.RutCliente != "99554560-8" & f.RutCliente != "99586280-8")
                         {
                             f.CodigoDelProducto = "110804";
+                            if (f.RutCliente == "99520000-7")
+                            {
+                                f.CodigoDelProducto = "110804E";
+                            }
                             f.CentroDeCostos = "209";
                         }
 
@@ -1044,7 +1077,10 @@ namespace FacturasXMLAExcelManager
 
 
                 //410104   Petroleo Gasto
+
                 //110904  Impuesto Específico Generico
+                //110804 Pendiente
+                //110804E Pendiente Exento
 
                 if (codigoDeImpuesto == "1")
                 {
@@ -1613,7 +1649,7 @@ namespace FacturasXMLAExcelManager
                     tipoDeFactura = "NCCE";
                     break;
                 case "52":
-                    //es guia de despacho
+                    //es guia de despacho, así que no se ingresa a Manager
                     tipoDeFactura = "guia de despacho";
                     break;
                 default:
