@@ -532,6 +532,11 @@ namespace FacturasXMLAExcelManager
                         }
 
 
+                        
+                        f.MontoIva=calcularIvaComoManager(f.MontoAfecto,f.MontoIva,f);
+
+                        f.MontoExento = determinarNuevoValorDeExentoAPartirDeMultiplesImpuestos(sFileName);
+                        recalcularTotales(f);
 
                         facturas.Add(f);
                     }
@@ -560,9 +565,92 @@ namespace FacturasXMLAExcelManager
                         }
 
                         //420724E
-                        facturasNCCE.Add(facNCCE);
+                        //si nota de credito hace referencia a un folio que es 0, la factura tiene que subirse a documento contable
+                        if (facNCCE.NumeroDocumentoDeOrigen == "0")
+                        {
+                            Factura factuarNCCEADocumentoContable = new Factura();
+                            factuarNCCEADocumentoContable.TipoDeDocumento = facNCCE.TipoDeDocumento;
+                            factuarNCCEADocumentoContable.NumeroDelDocumento = facNCCE.NumeroDelDocumento;
+                            factuarNCCEADocumentoContable.FechaDeDocumento = facNCCE.FechaDeDocumento;
+                            factuarNCCEADocumentoContable.FechaContableDeDocumento = facNCCE.FechaDeContableDeDocumento;
 
-                        // si el exento es distinto a 0, las notas de credito tienen que tener el mismo traqtamiento con las face cuyo exento es superior a 0
+                            factuarNCCEADocumentoContable.FechaDeVencimientoDeDocumento = facNCCE.FechaDeVencimientoDeDocumento;
+                            factuarNCCEADocumentoContable.CodigoDeUnidadDeNegocio = facNCCE.CodigoUnidadDeNegocio;
+                            factuarNCCEADocumentoContable.RutCliente = facNCCE.RutCliente;
+                            factuarNCCEADocumentoContable.DireccionDelCliente = facNCCE.DireccionCliente;
+                            factuarNCCEADocumentoContable.RutFacturador = facNCCE.RutFacturador;
+                            factuarNCCEADocumentoContable.CodigoVendedor = facNCCE.CodigoVendedor;
+                            factuarNCCEADocumentoContable.CodigoComisionista = facNCCE.CodigoComisionista;
+                            factuarNCCEADocumentoContable.Probabilidad = facNCCE.Probablidad;
+                            factuarNCCEADocumentoContable.ListaPrecio = facNCCE.ListaPrecio;
+                            factuarNCCEADocumentoContable.PlazoPago = facNCCE.PlazoPago;
+                            factuarNCCEADocumentoContable.MonedaDelDocumento = facNCCE.MonedaDelDocumento;
+                            factuarNCCEADocumentoContable.TasaDeCambio = facNCCE.TasaDeCambio;
+                            factuarNCCEADocumentoContable.MontoAfecto = facNCCE.MontoAfecto;
+                            factuarNCCEADocumentoContable.MontoExento = facNCCE.MontoExento;
+                            factuarNCCEADocumentoContable.MontoIva = facNCCE.MontoIva;
+                            factuarNCCEADocumentoContable.MontoImpuestosEspecificos = facNCCE.MontoImpuestosEspecificos;
+                            factuarNCCEADocumentoContable.MontoIvaRetenido = facNCCE.MontoIvaRetenido;
+                            factuarNCCEADocumentoContable.MontoImpuestosRetenidos = facNCCE.MontoImpuestosRetenidos;
+                            factuarNCCEADocumentoContable.TipoDeDescuentoGlobal = facNCCE.TipoDeDescuentoGlobal;
+                            factuarNCCEADocumentoContable.DescuentoGlobal = facNCCE.DescuentoGlobal;
+                            factuarNCCEADocumentoContable.TotalDelDocumento = facNCCE.TotalDelDocumento;
+                            factuarNCCEADocumentoContable.DeudaPendiente = facNCCE.DeudaPendiente;
+                            factuarNCCEADocumentoContable.TipoDocReferencia = "";//no se ingresa en documento contable con detalles
+                            factuarNCCEADocumentoContable.NumDocReferencia = "";//no se ingresa en documento contable con detalles
+                            factuarNCCEADocumentoContable.FechaDocReferencia = "";// no se ingresa en documento contable con detalles
+                            factuarNCCEADocumentoContable.CodigoDelProducto = facNCCE.CodigoDelProducto;
+                            factuarNCCEADocumentoContable.Cantidad = facNCCE.Cantidad;
+                            factuarNCCEADocumentoContable.Unidad = facNCCE.Unidad;
+                            factuarNCCEADocumentoContable.PrecioUnitario = facNCCE.PrecioUnitario;
+                            factuarNCCEADocumentoContable.MonedaDelDetalle = facNCCE.MonedaDelDetalle;
+                            factuarNCCEADocumentoContable.TasaDeCambio2 = facNCCE.TasaDeCambio2;
+                            factuarNCCEADocumentoContable.NumeroDeSerie = facNCCE.NumeroDeSerie;
+                            factuarNCCEADocumentoContable.NumeroDeLote = facNCCE.NumeroDeLote;
+                            factuarNCCEADocumentoContable.FechaDeVencimiento = facNCCE.FechaDeVencimiento;
+                            factuarNCCEADocumentoContable.CentroDeCostos = facNCCE.CentroDeCostos;
+                            factuarNCCEADocumentoContable.TipoDeDescuento = facNCCE.TipoDeDescuento;
+                            factuarNCCEADocumentoContable.Descuento = facNCCE.Descuento;
+                            factuarNCCEADocumentoContable.Ubicacion = facNCCE.Ubicacion;
+                            factuarNCCEADocumentoContable.Bodega = facNCCE.Bodega;
+                            factuarNCCEADocumentoContable.Concepto1 = facNCCE.Concepto1;
+                            factuarNCCEADocumentoContable.Concepto2 = facNCCE.Concepto2;
+                            factuarNCCEADocumentoContable.Concepto3 = facNCCE.Concepto3;
+                            factuarNCCEADocumentoContable.Concepto4 = facNCCE.Concepto4;
+                            factuarNCCEADocumentoContable.Descripcion = facNCCE.Descripcion;
+                            factuarNCCEADocumentoContable.DescripcionAdicional = facNCCE.DescripcionAdicional;
+                            factuarNCCEADocumentoContable.Stock = facNCCE.Stock;
+                            factuarNCCEADocumentoContable.Comentario11 = facNCCE.Comentario1;
+                            factuarNCCEADocumentoContable.Comentario21 = facNCCE.Comentario2;
+                            factuarNCCEADocumentoContable.Comentario31 = facNCCE.Comentario3;
+                            factuarNCCEADocumentoContable.Comentario41 = facNCCE.Comentario4;
+                            factuarNCCEADocumentoContable.Comentario51 = facNCCE.Comentario5;
+                            factuarNCCEADocumentoContable.CodigoImpuestoEspecifico1 = "";
+                            factuarNCCEADocumentoContable.MontoImpuestoEspecifico1 = "";
+                            factuarNCCEADocumentoContable.CodigoImpuestoEspecifico2 = "";
+                            factuarNCCEADocumentoContable.MontoImpuestoEspecifico2 = "";
+                            factuarNCCEADocumentoContable.Modalidad = facNCCE.Modalidad;
+                            factuarNCCEADocumentoContable.Glosa = "NOTA DE CREDITO CON FOLIO 0";
+                            factuarNCCEADocumentoContable.Referencia = facNCCE.Referencia;
+                            factuarNCCEADocumentoContable.FechaDeComprometida = facNCCE.FechaDeComprometida;
+                            factuarNCCEADocumentoContable.PorcentajeCEEC = facNCCE.PorcentajeCEEC;
+                            factuarNCCEADocumentoContable.ImpuestoLey18211 = "";
+                            factuarNCCEADocumentoContable.IvaLey18211 = "";
+                            factuarNCCEADocumentoContable.CodigoKitFlexible = facNCCE.CodigoKitFlexible;
+                            factuarNCCEADocumentoContable.AjusteIva = facNCCE.AjusteIva;
+
+
+                            facturas.Add(factuarNCCEADocumentoContable);
+                        }
+                        else
+                        {
+                            facturasNCCE.Add(facNCCE);
+                        }
+
+                        
+                        
+
+                        // si el exento es distinto a 0, las notas de credito tienen que tener el mismo tratamiento con las face cuyo exento es superior a 0
                         if(facNCCE.MontoExento!="0")
                         {
                             FacturaNCCE facNCCE2 = new FacturaNCCE();
@@ -588,8 +676,91 @@ namespace FacturasXMLAExcelManager
                                 }
                             }
 
-                            facturasNCCE.Add(facNCCE2);
-                            
+
+
+                            //si nota de credito hace referencia a un folio que es 0, la factura tiene que subirse a documento contable
+                            if (facNCCE2.NumeroDocumentoDeOrigen == "0")
+                            {
+                                Factura factuarNCCEADocumentoContable2 = new Factura();
+                                factuarNCCEADocumentoContable2.TipoDeDocumento = facNCCE2.TipoDeDocumento;
+                                factuarNCCEADocumentoContable2.NumeroDelDocumento = facNCCE2.NumeroDelDocumento;
+                                factuarNCCEADocumentoContable2.FechaDeDocumento = facNCCE2.FechaDeDocumento;
+                                factuarNCCEADocumentoContable2.FechaContableDeDocumento = facNCCE2.FechaDeContableDeDocumento;
+
+                                factuarNCCEADocumentoContable2.FechaDeVencimientoDeDocumento = facNCCE2.FechaDeVencimientoDeDocumento;
+                                factuarNCCEADocumentoContable2.CodigoDeUnidadDeNegocio = facNCCE2.CodigoUnidadDeNegocio;
+                                factuarNCCEADocumentoContable2.RutCliente = facNCCE2.RutCliente;
+                                factuarNCCEADocumentoContable2.DireccionDelCliente = facNCCE2.DireccionCliente;
+                                factuarNCCEADocumentoContable2.RutFacturador = facNCCE2.RutFacturador;
+                                factuarNCCEADocumentoContable2.CodigoVendedor = facNCCE2.CodigoVendedor;
+                                factuarNCCEADocumentoContable2.CodigoComisionista = facNCCE2.CodigoComisionista;
+                                factuarNCCEADocumentoContable2.Probabilidad = facNCCE2.Probablidad;
+                                factuarNCCEADocumentoContable2.ListaPrecio = facNCCE2.ListaPrecio;
+                                factuarNCCEADocumentoContable2.PlazoPago = facNCCE2.PlazoPago;
+                                factuarNCCEADocumentoContable2.MonedaDelDocumento = facNCCE2.MonedaDelDocumento;
+                                factuarNCCEADocumentoContable2.TasaDeCambio = facNCCE2.TasaDeCambio;
+                                factuarNCCEADocumentoContable2.MontoAfecto = facNCCE2.MontoAfecto;
+                                factuarNCCEADocumentoContable2.MontoExento = facNCCE2.MontoExento;
+                                factuarNCCEADocumentoContable2.MontoIva = facNCCE2.MontoIva;
+                                factuarNCCEADocumentoContable2.MontoImpuestosEspecificos = facNCCE2.MontoImpuestosEspecificos;
+                                factuarNCCEADocumentoContable2.MontoIvaRetenido = facNCCE2.MontoIvaRetenido;
+                                factuarNCCEADocumentoContable2.MontoImpuestosRetenidos = facNCCE2.MontoImpuestosRetenidos;
+                                factuarNCCEADocumentoContable2.TipoDeDescuentoGlobal = facNCCE2.TipoDeDescuentoGlobal;
+                                factuarNCCEADocumentoContable2.DescuentoGlobal = facNCCE2.DescuentoGlobal;
+                                factuarNCCEADocumentoContable2.TotalDelDocumento = facNCCE2.TotalDelDocumento;
+                                factuarNCCEADocumentoContable2.DeudaPendiente = facNCCE2.DeudaPendiente;
+                                factuarNCCEADocumentoContable2.TipoDocReferencia = "";//no se ingresa en documento contable con detalles
+                                factuarNCCEADocumentoContable2.NumDocReferencia = "";//no se ingresa en documento contable con detalles
+                                factuarNCCEADocumentoContable2.FechaDocReferencia = "";// no se ingresa en documento contable con detalles
+                                factuarNCCEADocumentoContable2.CodigoDelProducto = facNCCE2.CodigoDelProducto;
+                                factuarNCCEADocumentoContable2.Cantidad = facNCCE2.Cantidad;
+                                factuarNCCEADocumentoContable2.Unidad = facNCCE2.Unidad;
+                                factuarNCCEADocumentoContable2.PrecioUnitario = facNCCE2.PrecioUnitario;
+                                factuarNCCEADocumentoContable2.MonedaDelDetalle = facNCCE2.MonedaDelDetalle;
+                                factuarNCCEADocumentoContable2.TasaDeCambio2 = facNCCE2.TasaDeCambio2;
+                                factuarNCCEADocumentoContable2.NumeroDeSerie = facNCCE2.NumeroDeSerie;
+                                factuarNCCEADocumentoContable2.NumeroDeLote = facNCCE2.NumeroDeLote;
+                                factuarNCCEADocumentoContable2.FechaDeVencimiento = facNCCE2.FechaDeVencimiento;
+                                factuarNCCEADocumentoContable2.CentroDeCostos = facNCCE2.CentroDeCostos;
+                                factuarNCCEADocumentoContable2.TipoDeDescuento = facNCCE2.TipoDeDescuento;
+                                factuarNCCEADocumentoContable2.Descuento = facNCCE2.Descuento;
+                                factuarNCCEADocumentoContable2.Ubicacion = facNCCE2.Ubicacion;
+                                factuarNCCEADocumentoContable2.Bodega = facNCCE2.Bodega;
+                                factuarNCCEADocumentoContable2.Concepto1 = facNCCE2.Concepto1;
+                                factuarNCCEADocumentoContable2.Concepto2 = facNCCE2.Concepto2;
+                                factuarNCCEADocumentoContable2.Concepto3 = facNCCE2.Concepto3;
+                                factuarNCCEADocumentoContable2.Concepto4 = facNCCE2.Concepto4;
+                                factuarNCCEADocumentoContable2.Descripcion = facNCCE2.Descripcion;
+                                factuarNCCEADocumentoContable2.DescripcionAdicional = facNCCE2.DescripcionAdicional;
+                                factuarNCCEADocumentoContable2.Stock = facNCCE2.Stock;
+                                factuarNCCEADocumentoContable2.Comentario11 = facNCCE2.Comentario1;
+                                factuarNCCEADocumentoContable2.Comentario21 = facNCCE2.Comentario2;
+                                factuarNCCEADocumentoContable2.Comentario31 = facNCCE2.Comentario3;
+                                factuarNCCEADocumentoContable2.Comentario41 = facNCCE2.Comentario4;
+                                factuarNCCEADocumentoContable2.Comentario51 = facNCCE2.Comentario5;
+                                factuarNCCEADocumentoContable2.CodigoImpuestoEspecifico1 = "";
+                                factuarNCCEADocumentoContable2.MontoImpuestoEspecifico1 = "";
+                                factuarNCCEADocumentoContable2.CodigoImpuestoEspecifico2 = "";
+                                factuarNCCEADocumentoContable2.MontoImpuestoEspecifico2 = "";
+                                factuarNCCEADocumentoContable2.Modalidad = facNCCE2.Modalidad;
+                                factuarNCCEADocumentoContable2.Glosa = "NOTA DE CREDITO CON FOLIO 0";
+                                factuarNCCEADocumentoContable2.Referencia = facNCCE2.Referencia;
+                                factuarNCCEADocumentoContable2.FechaDeComprometida = facNCCE2.FechaDeComprometida;
+                                factuarNCCEADocumentoContable2.PorcentajeCEEC = facNCCE2.PorcentajeCEEC;
+                                factuarNCCEADocumentoContable2.ImpuestoLey18211 = "";
+                                factuarNCCEADocumentoContable2.IvaLey18211 = "";
+                                factuarNCCEADocumentoContable2.CodigoKitFlexible = facNCCE2.CodigoKitFlexible;
+                                factuarNCCEADocumentoContable2.AjusteIva = facNCCE2.AjusteIva;
+
+
+                                facturas.Add(factuarNCCEADocumentoContable2);
+                            }
+                            else
+                            {
+                                facturasNCCE.Add(facNCCE2);
+                            }
+
+
 
                         }
                     }
@@ -728,6 +899,13 @@ namespace FacturasXMLAExcelManager
                             f.CentroDeCostos = "209";
                         }
 
+             
+
+                        f.MontoExento = determinarNuevoValorDeExentoAPartirDeMultiplesImpuestos(sFileName);
+                        f.PrecioUnitario = f.MontoExento;
+                        f.MontoIva = calcularIvaComoManager(f.MontoAfecto,f.MontoIva,f);
+                        recalcularTotales(f);
+
 
                         facturas.Add(f);
 
@@ -821,6 +999,9 @@ namespace FacturasXMLAExcelManager
             textReader.Close();
             return "";
         }
+
+
+
 
         public String convertirAFechaValida(String fechaAConvertir)
         {
@@ -1973,6 +2154,85 @@ namespace FacturasXMLAExcelManager
             return listadoDeFacturasDeManager;
 
         }
+
+
+
+        private String calcularIvaComoManager(String afecto, String iva, Factura f)
+        {
+            String valorDeIvaARetornar = iva;
+
+            float valorIvaCalculado = (int.Parse(afecto) * 19) / 100;
+            String valorIvaCalculadoComoString = valorIvaCalculado.ToString();
+
+            if (valorIvaCalculadoComoString != iva)
+            {
+                valorDeIvaARetornar = valorIvaCalculadoComoString;
+                f.Glosa = "IVA alterado, favor revisar factura";
+
+            }
+
+            return valorDeIvaARetornar;
+
+        }
+
+    
+
+
+
+        private String determinarNuevoValorDeExentoAPartirDeMultiplesImpuestos(String sFileName)
+        {
+            XmlTextReader reader = new XmlTextReader(sFileName);
+            Boolean esMontoDeImpuesto = false;
+            String impuestosSumados = "";
+            int valorDeImpuesto = 0;
+
+            while (reader.Read())
+            {
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.Element: // The node is an element.
+                        if (reader.Name == "MontoImp")
+                        {
+                            esMontoDeImpuesto = true;
+                            Console.Write("<" + reader.Name);
+                            while (reader.MoveToNextAttribute()) // Read the attributes.
+                                Console.Write(" " + reader.Name + "='" + reader.Value + "'");
+                            Console.Write(">");
+                        }
+
+
+                        break;
+                    case XmlNodeType.Text: //Display the text in each element.
+                        if (esMontoDeImpuesto == true)
+                        {
+                            Console.WriteLine(reader.Value);
+                            valorDeImpuesto=valorDeImpuesto + int.Parse(reader.Value);
+                        }
+
+                        esMontoDeImpuesto = false;
+                        break;
+
+                }
+            }
+
+            impuestosSumados = valorDeImpuesto.ToString();
+            return impuestosSumados;
+        }
+
+        private void recalcularTotales(Factura f)
+        {
+            
+            int afecto = int.Parse(f.MontoAfecto);
+            int exento = int.Parse(f.MontoExento);
+            int iva = int.Parse(f.MontoIva);
+
+            int total = afecto + exento + iva;
+            f.TotalDelDocumento=total.ToString();
+            f.DeudaPendiente=total.ToString();
+
+        }
+
+
 
     }
 
