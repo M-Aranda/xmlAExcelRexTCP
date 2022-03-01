@@ -39,7 +39,13 @@ namespace FacturasXMLAExcelManager
             //excelAPartirDeXML
             List<Factura> facturas = new List<Factura>();
             List<FacturaNCCE> facturasNCCE = new List<FacturaNCCE>();
-            
+            List<Factura> guiasDeDespacho = new List<Factura>();
+
+            int cantidadFACE = 0;
+            int cantidadFCEE = 0;
+            int cantidadNCCE = 0;
+            int cantidadDeGuiasDeDespacho = 0;
+
 
             string sFileName = "";
 
@@ -168,6 +174,9 @@ namespace FacturasXMLAExcelManager
 
             else
             {
+
+
+
                 foreach (var item in arrAllFiles)
                 {
 
@@ -254,16 +263,7 @@ namespace FacturasXMLAExcelManager
 
                     }
 
-          
-
-                   
-
-                    //foreach (var i in detalles)
-                    //{
-                    //    //Console.WriteLine(i.NmbItem);
-
-                    //}
-
+         
 
 
                     f.TipoDeDocumento = getValue("TipoDTE", sFileName);
@@ -542,12 +542,31 @@ namespace FacturasXMLAExcelManager
 
                         
                         recalcularTotales(f);
-                        
+
+                        switch (f.TipoDeDocumento)
+                        {
+                            case "FACE":
+                                cantidadFACE++;
+                                break;
+                            case "FCEE":
+                                cantidadFCEE++;
+                                break;
+                            case "NCCE":
+                                cantidadNCCE++;
+                                break;
+                            case "guia de despacho":
+                                cantidadDeGuiasDeDespacho++;
+                                break;
+                            default:
+                                break;
+                        }
 
                         facturas.Add(f);
                     }
                     else
                     {
+
+                        cantidadNCCE++;
 
                         FacturaNCCE facNCCE = convertirFacturaANCCE(f);
                         facNCCE.TipoDeDocumentoDeOrigen = determinarTipoDeDocumento(getValue("TpoDocRef",sFileName));
@@ -770,6 +789,8 @@ namespace FacturasXMLAExcelManager
 
 
                         }
+
+
                     }
                     
 
@@ -929,17 +950,22 @@ namespace FacturasXMLAExcelManager
 
             }
 
+            int totalDeFacturas = cantidadFACE+cantidadFCEE+cantidadNCCE+cantidadDeGuiasDeDespacho;
+
+            MessageBox.Show("Se procesaron "+cantidadFACE.ToString()+" facturas afectas, "+cantidadFCEE.ToString()+" facturas exentas, "+cantidadNCCE.ToString()+" notas de crédito y "+cantidadDeGuiasDeDespacho.ToString()+" guías de despacho. El total fue de "+totalDeFacturas); 
+
+
 
             String pathDeDescargas = getCarpetaDeDescargas();
-            pathDeDescargas = pathDeDescargas + "" + @"\FacturasEnExcelAPartirDeXml.xlsx";
+            pathDeDescargas = pathDeDescargas + "" + @"\Archivo de facturas.xlsx";
             var archivo = new FileInfo(pathDeDescargas);
             SaveExcelFile(facturas, archivo);
 
-            pathDeDescargas = getCarpetaDeDescargas()+ "" + @"\FacturasNCCEEnExcelAPartirDeXml.xlsx";
+            pathDeDescargas = getCarpetaDeDescargas()+ "" + @"\Notas de credito con folio.xlsx";
              archivo = new FileInfo(pathDeDescargas);
        
             SaveExcelFileNCCE(facturasNCCE, archivo);
-            MessageBox.Show("Archivo FacturasEnExcelAPartirDeXml y archivo de FacturasNCCEEnExcelAPartirDeXML creado en carpeta de descargas!");
+            MessageBox.Show("Archivo de facturas y archivo de notas de credito con folio creado en carpeta de descargas!");
 
 
         }
@@ -2256,19 +2282,15 @@ namespace FacturasXMLAExcelManager
         private void recalcularTotales(Factura f)
         {
 
-
-
-  
-              int afecto = int.Parse(f.MontoAfecto);
-              int exento = int.Parse(f.MontoExento);
-              int iva = int.Parse(f.MontoIva);
+            int afecto = int.Parse(f.MontoAfecto);
+            int exento = int.Parse(f.MontoExento);
+            int iva = int.Parse(f.MontoIva);
            
 
             int total = afecto + exento + iva;
             f.TotalDelDocumento=total.ToString();
             f.DeudaPendiente=total.ToString();
-            
-
+           
         }
 
 
