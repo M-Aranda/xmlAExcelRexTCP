@@ -529,14 +529,20 @@ namespace FacturasXMLAExcelManager
                         {
                             f.MontoAfecto = "0";
                             f.MontoIva = "0";
+                            f.PrecioUnitario = f.MontoExento;    
                         }
 
 
-                        
-                        f.MontoIva=calcularIvaComoManager(f.MontoAfecto,f.MontoIva,f);
+                        if (f.TipoDeDocumento != "FCEE")
+                        {
+                            f.MontoIva = calcularIvaComoManager(f.MontoAfecto, f.MontoIva, f);
+                            f.MontoExento = determinarNuevoValorDeExentoAPartirDeMultiplesImpuestos(sFileName);
 
-                        f.MontoExento = determinarNuevoValorDeExentoAPartirDeMultiplesImpuestos(sFileName);
+                        }
+
+                        
                         recalcularTotales(f);
+                        
 
                         facturas.Add(f);
                     }
@@ -721,7 +727,7 @@ namespace FacturasXMLAExcelManager
                                 factuarNCCEADocumentoContable2.NumeroDeSerie = facNCCE2.NumeroDeSerie;
                                 factuarNCCEADocumentoContable2.NumeroDeLote = facNCCE2.NumeroDeLote;
                                 factuarNCCEADocumentoContable2.FechaDeVencimiento = facNCCE2.FechaDeVencimiento;
-                                factuarNCCEADocumentoContable2.CentroDeCostos = facNCCE2.CentroDeCostos;
+                                factuarNCCEADocumentoContable2.CentroDeCostos = "209";//facNCCE2.CentroDeCostos;
                                 factuarNCCEADocumentoContable2.TipoDeDescuento = facNCCE2.TipoDeDescuento;
                                 factuarNCCEADocumentoContable2.Descuento = facNCCE2.Descuento;
                                 factuarNCCEADocumentoContable2.Ubicacion = facNCCE2.Ubicacion;
@@ -743,7 +749,7 @@ namespace FacturasXMLAExcelManager
                                 factuarNCCEADocumentoContable2.CodigoImpuestoEspecifico2 = "";
                                 factuarNCCEADocumentoContable2.MontoImpuestoEspecifico2 = "";
                                 factuarNCCEADocumentoContable2.Modalidad = facNCCE2.Modalidad;
-                                factuarNCCEADocumentoContable2.Glosa = "NOTA DE CREDITO CON FOLIO 0";
+                                factuarNCCEADocumentoContable2.Glosa = "NOTA DE CREDITO CON FOLIO 0, REVISAR";
                                 factuarNCCEADocumentoContable2.Referencia = facNCCE2.Referencia;
                                 factuarNCCEADocumentoContable2.FechaDeComprometida = facNCCE2.FechaDeComprometida;
                                 factuarNCCEADocumentoContable2.PorcentajeCEEC = facNCCE2.PorcentajeCEEC;
@@ -757,6 +763,7 @@ namespace FacturasXMLAExcelManager
                             }
                             else
                             {
+                                //el formato para las fechas si es nota de credito es distinto parece
                                 facturasNCCE.Add(facNCCE2);
                             }
 
@@ -899,10 +906,10 @@ namespace FacturasXMLAExcelManager
                             f.CentroDeCostos = "209";
                         }
 
-             
 
-                        f.MontoExento = determinarNuevoValorDeExentoAPartirDeMultiplesImpuestos(sFileName);
                         f.PrecioUnitario = f.MontoExento;
+                        
+                        //f.MontoExento = determinarNuevoValorDeExentoAPartirDeMultiplesImpuestos(sFileName);
                         f.MontoIva = calcularIvaComoManager(f.MontoAfecto,f.MontoIva,f);
                         recalcularTotales(f);
 
@@ -2161,16 +2168,25 @@ namespace FacturasXMLAExcelManager
         {
             String valorDeIvaARetornar = iva;
 
-            float valorIvaCalculado = (int.Parse(afecto) * 19) / 100;
+            if (String.IsNullOrEmpty(afecto))
+            {
+                afecto = "0";
+            }
+            
+
+            Double valorIvaCalculado = (int.Parse(afecto) * 19) / 100;
             String valorIvaCalculadoComoString = valorIvaCalculado.ToString();
 
             if (valorIvaCalculadoComoString != iva)
             {
                 valorDeIvaARetornar = valorIvaCalculadoComoString;
-                f.Glosa = "IVA alterado, favor revisar factura";
+                f.Glosa = "IVA alterado, favor revisar factura y costeo";
+                f.CentroDeCostos = "209";
 
             }
 
+
+            
             return valorDeIvaARetornar;
 
         }
@@ -2186,34 +2202,52 @@ namespace FacturasXMLAExcelManager
             String impuestosSumados = "";
             int valorDeImpuesto = 0;
 
-            while (reader.Read())
+            try
             {
-                switch (reader.NodeType)
+                while (reader.Read())
                 {
-                    case XmlNodeType.Element: // The node is an element.
-                        if (reader.Name == "MontoImp")
-                        {
-                            esMontoDeImpuesto = true;
-                            Console.Write("<" + reader.Name);
-                            while (reader.MoveToNextAttribute()) // Read the attributes.
-                                Console.Write(" " + reader.Name + "='" + reader.Value + "'");
-                            Console.Write(">");
-                        }
+                    switch (reader.NodeType)
+                    {
+                        case XmlNodeType.Element: // The node is an element.
+                            if (reader.Name == "MontoImp")
+                            {
+                                esMontoDeImpuesto = true;
+                                Console.Write("<" + reader.Name);
+                                while (reader.MoveToNextAttribute()) // Read the attributes.
+                                    Console.Write(" " + reader.Name + "='" + reader.Value + "'");
+                                Console.Write(">");
+                            }
 
 
-                        break;
-                    case XmlNodeType.Text: //Display the text in each element.
-                        if (esMontoDeImpuesto == true)
-                        {
-                            Console.WriteLine(reader.Value);
-                            valorDeImpuesto=valorDeImpuesto + int.Parse(reader.Value);
-                        }
+                            break;
+                        case XmlNodeType.Text: //Display the text in each element.
+                            if (esMontoDeImpuesto == true)
+                            {
+                                Console.WriteLine(reader.Value);
+                                if (String.IsNullOrEmpty(reader.Value) == true)
+                                {
+                                    valorDeImpuesto = valorDeImpuesto + 0;
+                                }
+                                else
+                                {
+                                    valorDeImpuesto = valorDeImpuesto + int.Parse(reader.Value);
+                                }
 
-                        esMontoDeImpuesto = false;
-                        break;
+                            }
 
+                            esMontoDeImpuesto = false;
+                            break;
+
+                    }
                 }
             }
+            catch (Exception e)
+            {
+                Console.Write(e);
+                
+                throw;
+            }
+
 
             impuestosSumados = valorDeImpuesto.ToString();
             return impuestosSumados;
@@ -2221,14 +2255,19 @@ namespace FacturasXMLAExcelManager
 
         private void recalcularTotales(Factura f)
         {
-            
-            int afecto = int.Parse(f.MontoAfecto);
-            int exento = int.Parse(f.MontoExento);
-            int iva = int.Parse(f.MontoIva);
+
+
+
+  
+              int afecto = int.Parse(f.MontoAfecto);
+              int exento = int.Parse(f.MontoExento);
+              int iva = int.Parse(f.MontoIva);
+           
 
             int total = afecto + exento + iva;
             f.TotalDelDocumento=total.ToString();
             f.DeudaPendiente=total.ToString();
+            
 
         }
 
