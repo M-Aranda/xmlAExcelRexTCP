@@ -39,7 +39,7 @@ namespace FacturasXMLAExcelManager
             //excelAPartirDeXML
             List<Factura> facturas = new List<Factura>();
             List<FacturaNCCE> facturasNCCE = new List<FacturaNCCE>();
-            List<Factura> guiasDeDespacho = new List<Factura>();
+            List<GuiaDeDespacho> guiasDeDespacho = new List<GuiaDeDespacho>();
 
             int cantidadFACE = 0;
             int cantidadFCEE = 0;
@@ -175,8 +175,6 @@ namespace FacturasXMLAExcelManager
             else
             {
 
-
-
                 foreach (var item in arrAllFiles)
                 {
 
@@ -209,80 +207,32 @@ namespace FacturasXMLAExcelManager
                     XmlTextReader textReader = new XmlTextReader(sFileName);
                     textReader.Read();
                     
-                    //List<DetalleDeFactura> detalles = new List<DetalleDeFactura>();
-                    //DetalleDeFactura detalle = new DetalleDeFactura();
+
 
                     List<String> datos = new List<String>();
-
-
                     List<List<String>> datosDeDatos = new List<List<string>>();
-
-                    while (textReader.Read())
-                    {
-                       // Console.WriteLine("esto es un nodo");
-                        String nombreItem = "";
-                        //String cantidadItem = "";
-                        //String unmdItem = "";
-                        //String prcItem = "";
-                        //String codImpAdic = "";
-                        //String montoItem = "";
-
-                        //textReader.MoveToElement();
-                        //if (textReader.Name == "NmbItem")
-                        //{
-                        //    textReader.Read();
-                        //    if (textReader.Value.ToString().Trim() != "")
-                        //    {
-                        //        detalle.NmbItem = textReader.Value.ToString();
-
-                        //        nombreItem = detalle.NmbItem;
-                        //        Console.WriteLine(nombreItem);
-
-                                
-                        //    }
-                          
-
-                        //}
-
-
-
-
-                        //detalle = new DetalleDeFactura();
-                        //detalle.NmbItem= nombreItem;
-                        ////detalle.QtyItem= cantidadItem;
-                        ////detalle.UnmdItem= unmdItem ;
-                        ////detalle.PrcItem= prcItem ;
-                        ////detalle.CodImpAdic= codImpAdic ;
-                        ////detalle.MontoItem= montoItem ;
-
-                        //detalles.Add(detalle);
-
-                        
-
-                      
-
-                    }
-
-         
 
 
                     f.TipoDeDocumento = getValue("TipoDTE", sFileName);
-
-
                     f.TipoDeDocumento = determinarTipoDeDocumento(f.TipoDeDocumento);
-
+                    f.NumeroDelDocumento = getValue("Folio", sFileName);
 
                     //Las fechas son en formato dd/mm/yyyy
-                    f.NumeroDelDocumento = getValue("Folio", sFileName);
-                    f.FechaDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));
-                    f.FechaContableDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));//que es la fecha de cancelacion?
-                    f.FechaDeVencimientoDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));//convertirAFechaValida(getValue("FchVenc", sFileName));// fecha de vencimiento debe ser igual o mayor a fecha de emision
 
-                    DateTime now = DateTime.Now;
-                    f.FechaContableDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(now.Date));//"dia actual"
+                    f.FechaDeDocumento = convertirAFechaValida3(getValue("FchEmis", sFileName));
+                    f.FechaContableDeDocumento = f.FechaDeDocumento;
+                    f.FechaDeVencimientoDeDocumento = convertirAFechaValida3(getValue("FchVenc", sFileName));//convertirAFechaValida(getValue("FchVenc", sFileName));// fecha de vencimiento debe ser igual o mayor a fecha de emision
 
-                    f.FechaDeDocumento = f.FechaContableDeDocumento;
-                    f.FechaDeVencimientoDeDocumento = f.FechaContableDeDocumento;
+                    if (f.RutCliente == "99520000-7")
+                    {
+                        f.FechaDeVencimientoDeDocumento = calcularFechaDeVencimientoDeCopec(f.FechaDeDocumento);
+                    }
+
+                   // DateTime now = DateTime.Now;
+                    //f.FechaContableDeDocumento = Convert.ToString(now.Date);//"dia actual"convertirAFechaValidaDesdeTranstecnia
+
+                    //f.FechaDeDocumento = f.FechaContableDeDocumento;
+                    //f.FechaDeVencimientoDeDocumento = f.FechaContableDeDocumento;
 
 
                     f.CodigoDeUnidadDeNegocio = "1"; //getValue("Folio", sFileName);
@@ -400,7 +350,7 @@ namespace FacturasXMLAExcelManager
 
 
 
-                    f.CodigoDelProducto = "420710";//getValue("TipoDTE", sFileName);
+                    f.CodigoDelProducto = "420724";//getValue("TipoDTE", sFileName);
                     f.Cantidad = "1"; //getValue("Folio", sFileName);
                     f.Unidad = "S.U.M"; //getValue("Folio", sFileName);
                     f.PrecioUnitario = getValue("MntNeto", sFileName);
@@ -472,7 +422,7 @@ namespace FacturasXMLAExcelManager
                     f.AjusteIva = "";//getValue("Folio", sFileName);
 
 
-                    f.CodigoDelProducto = "420710";
+                    f.CodigoDelProducto = "420724";
                     f.PrecioUnitario = getValue("MntNeto", sFileName);
                     if (String.IsNullOrEmpty(f.MontoExento) == true)
                     {
@@ -561,7 +511,86 @@ namespace FacturasXMLAExcelManager
                                 break;
                         }
 
-                        facturas.Add(f);
+                      if(f.TipoDeDocumento!= "guia de despacho")
+                        {
+                            facturas.Add(f);
+                        }
+                        else
+                        {
+                            GuiaDeDespacho g = new GuiaDeDespacho();
+                            g.TipoDeDocumento = f.TipoDeDocumento;
+                            g.NumeroDelDocumento = f.NumeroDelDocumento;
+                            g.FechaDeDocumento = f.FechaDeDocumento;
+                            g.FechaContableDeDocumento = f.FechaContableDeDocumento;
+                            g.FechaDeVencimientoDeDocumento = f.FechaDeVencimientoDeDocumento;
+                            g.CodigoDeUnidadDeNegocio = f.CodigoDeUnidadDeNegocio;
+                            g.RutCliente = f.RutCliente;
+                            g.DireccionDelCliente = f.DireccionDelCliente;
+                            g.RutFacturador = f.RutFacturador;
+                            g.CodigoVendedor = f.CodigoVendedor;
+                            g.CodigoComisionista = f.CodigoComisionista;
+                            g.Probabilidad = f.Probabilidad;
+                            g.ListaPrecio = f.ListaPrecio;
+                            g.PlazoPago = f.PlazoPago;
+                            g.MonedaDelDocumento = f.MonedaDelDocumento;
+                            g.TasaDeCambio = f.TasaDeCambio;
+                            g.MontoAfecto = f.MontoAfecto;
+                            g.MontoExento = f.MontoExento;
+                            g.MontoIva = f.MontoIva;
+                            g.MontoImpuestosEspecificos = f.MontoImpuestosEspecificos;
+                            g.MontoIvaRetenido = f.MontoIvaRetenido;
+                            g.MontoImpuestosRetenidos = f.MontoImpuestosRetenidos;
+                            g.TipoDeDescuentoGlobal = f.TipoDeDescuentoGlobal;
+                            g.DescuentoGlobal = f.DescuentoGlobal;
+                            g.TotalDelDocumento = f.TotalDelDocumento;
+                            g.DeudaPendiente = f.DeudaPendiente;
+                            g.TipoDocReferencia = "";//no se ingresa en documento contable con detalles
+                            g.NumDocReferencia = "";//no se ingresa en documento contable con detalles
+                            g.FechaDocReferencia = "";// no se ingresa en documento contable con detalles
+                            g.CodigoDelProducto = f.CodigoDelProducto;
+                            g.Cantidad = f.Cantidad;
+                            g.Unidad = f.Unidad;
+                            g.PrecioUnitario = f.PrecioUnitario;
+                            g.MonedaDelDetalle = f.MonedaDelDetalle;
+                            g.TasaDeCambio2 = f.TasaDeCambio2;
+                            g.NumeroDeSerie = f.NumeroDeSerie;
+                            g.NumeroDeLote = f.NumeroDeLote;
+                            g.FechaDeVencimiento = f.FechaDeVencimiento;
+                            g.CentroDeCostos = f.CentroDeCostos;
+                            g.TipoDeDescuento = f.TipoDeDescuento;
+                            g.Descuento = f.Descuento;
+                            g.Ubicacion = f.Ubicacion;
+                            g.Bodega = f.Bodega;
+                            g.Concepto1 = f.Concepto1;
+                            g.Concepto2 = f.Concepto2;
+                            g.Concepto3 = f.Concepto3;
+                            g.Concepto4 = f.Concepto4;
+                            g.Descripcion = f.Descripcion;
+                            g.DescripcionAdicional = f.DescripcionAdicional;
+                            g.Stock = f.Stock;
+                            g.Comentario11 = f.Comentario11;
+                            g.Comentario21 = f.Comentario21;
+                            g.Comentario31 = f.Comentario31;
+                            g.Comentario41 = f.Comentario41;
+                            g.Comentario51 = f.Comentario51;
+                            g.CodigoImpuestoEspecifico1 = "";
+                            g.MontoImpuestoEspecifico1 = "";
+                            g.CodigoImpuestoEspecifico2 = "";
+                            g.MontoImpuestoEspecifico2 = "";
+                            g.Modalidad = f.Modalidad;
+                            g.Glosa = "GUIA DE DESPACHO, NO SUBIR";
+                            g.Referencia = f.Referencia;
+                            g.FechaDeComprometida = f.FechaDeComprometida;
+                            g.PorcentajeCEEC = f.PorcentajeCEEC;
+                            g.ImpuestoLey18211 = "";
+                            g.IvaLey18211 = "";
+                            g.CodigoKitFlexible = f.CodigoKitFlexible;
+                            g.AjusteIva = f.AjusteIva;
+
+                             guiasDeDespacho.Add(g);
+                        }
+
+                        
                     }
                     else
                     {
@@ -574,7 +603,7 @@ namespace FacturasXMLAExcelManager
 
            
 
-                        facNCCE.FechaDeContableDeDocumento = convertirAFechaValida2(facNCCE.FechaDeContableDeDocumento);
+                        facNCCE.FechaDeContableDeDocumento = facNCCE.FechaDeContableDeDocumento;
                         facNCCE.FechaDeDocumento = facNCCE.FechaDeContableDeDocumento;
                         facNCCE.FechaDeVencimientoDeDocumento = facNCCE.FechaDeContableDeDocumento;
 
@@ -596,10 +625,11 @@ namespace FacturasXMLAExcelManager
                             Factura factuarNCCEADocumentoContable = new Factura();
                             factuarNCCEADocumentoContable.TipoDeDocumento = facNCCE.TipoDeDocumento;
                             factuarNCCEADocumentoContable.NumeroDelDocumento = facNCCE.NumeroDelDocumento;
+
                             factuarNCCEADocumentoContable.FechaDeDocumento = facNCCE.FechaDeDocumento;
                             factuarNCCEADocumentoContable.FechaContableDeDocumento = facNCCE.FechaDeContableDeDocumento;
-
                             factuarNCCEADocumentoContable.FechaDeVencimientoDeDocumento = facNCCE.FechaDeVencimientoDeDocumento;
+
                             factuarNCCEADocumentoContable.CodigoDeUnidadDeNegocio = facNCCE.CodigoUnidadDeNegocio;
                             factuarNCCEADocumentoContable.RutCliente = facNCCE.RutCliente;
                             factuarNCCEADocumentoContable.DireccionDelCliente = facNCCE.DireccionCliente;
@@ -686,7 +716,7 @@ namespace FacturasXMLAExcelManager
                             facNCCE2.TipoDeDocumentoDeOrigen = facNCCE.TipoDeDocumentoDeOrigen;
                             facNCCE2.NumeroDocumentoDeOrigen = facNCCE.NumeroDocumentoDeOrigen;
 
-                            facNCCE2.FechaDeContableDeDocumento = convertirAFechaValida2(facNCCE2.FechaDeContableDeDocumento);
+                            facNCCE2.FechaDeContableDeDocumento = facNCCE2.FechaDeContableDeDocumento;
                             facNCCE2.FechaDeDocumento = facNCCE2.FechaDeContableDeDocumento;
                             facNCCE2.FechaDeVencimientoDeDocumento = facNCCE2.FechaDeContableDeDocumento;
 
@@ -814,15 +844,20 @@ namespace FacturasXMLAExcelManager
                         
 
                         f.NumeroDelDocumento = getValue("Folio", sFileName);
-                        f.FechaDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));
-                        f.FechaContableDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));//que es la fecha de cancelacion?
-                        f.FechaDeVencimientoDeDocumento = convertirAFechaValida(getValue("FchEmis", sFileName));//convertirAFechaValida(getValue("FchVenc", sFileName));// fecha de vencimiento debe ser igual o mayor a fecha de emision
+                        f.FechaDeDocumento = convertirAFechaValida3(getValue("FchEmis", sFileName));
+                        f.FechaContableDeDocumento = f.FechaDeDocumento;
+                        f.FechaDeVencimientoDeDocumento = convertirAFechaValida3(getValue("FchVenc", sFileName));//convertirAFechaValida(getValue("FchVenc", sFileName));// fecha de vencimiento debe ser igual o mayor a fecha de emision
 
-                        DateTime fechaActual = DateTime.Now;
-                        f.FechaContableDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(now.Date));//"dia actual"
+                        if (f.RutCliente == "99520000-7")
+                        {
+                            f.FechaDeVencimientoDeDocumento = calcularFechaDeVencimientoDeCopec(f.FechaDeDocumento);
+                        }
 
-                        f.FechaDeDocumento = f.FechaContableDeDocumento;
-                        f.FechaDeVencimientoDeDocumento = f.FechaContableDeDocumento;
+                        //DateTime fechaActual = DateTime.Now;
+                        //f.FechaContableDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(now.Date));//"dia actual"
+
+                        //f.FechaDeDocumento = f.FechaContableDeDocumento;
+                        //f.FechaDeVencimientoDeDocumento = f.FechaContableDeDocumento;
 
                         f.CodigoDeUnidadDeNegocio = "1"; //getValue("Folio", sFileName);
                         f.RutCliente = getValue("RUTEmisor", sFileName);
@@ -860,7 +895,7 @@ namespace FacturasXMLAExcelManager
                         f.TipoDocReferencia = "";//getValue("Folio", sFileName);
                         f.NumDocReferencia = "";//getValue("Folio", sFileName);
                         f.FechaDocReferencia = "";//getValue("Folio", sFileName);
-                        f.CodigoDelProducto = "420710";//getValue("TipoDTE", sFileName);
+                        f.CodigoDelProducto = "420724";//getValue("TipoDTE", sFileName);
                         f.Cantidad = "1"; //getValue("Folio", sFileName);
                         f.Unidad = "S.U.M"; //getValue("Folio", sFileName);
                         f.PrecioUnitario = getValue("MntNeto", sFileName);
@@ -934,15 +969,10 @@ namespace FacturasXMLAExcelManager
                         f.MontoIva = calcularIvaComoManager(f.MontoAfecto,f.MontoIva,f);
                         recalcularTotales(f);
 
-
                         facturas.Add(f);
 
 
                     }
-
-
-              
-
 
 
                 }
@@ -954,18 +984,24 @@ namespace FacturasXMLAExcelManager
 
             MessageBox.Show("Se procesaron "+cantidadFACE.ToString()+" facturas afectas, "+cantidadFCEE.ToString()+" facturas exentas, "+cantidadNCCE.ToString()+" notas de crédito y "+cantidadDeGuiasDeDespacho.ToString()+" guías de despacho. El total fue de "+totalDeFacturas); 
 
+            
 
 
             String pathDeDescargas = getCarpetaDeDescargas();
-            pathDeDescargas = pathDeDescargas + "" + @"\Archivo de facturas.xlsx";
+            pathDeDescargas = pathDeDescargas + "" + @"\Archivo de facturas (subir a Documentos con detalle).xlsx";
             var archivo = new FileInfo(pathDeDescargas);
             SaveExcelFile(facturas, archivo);
 
-            pathDeDescargas = getCarpetaDeDescargas()+ "" + @"\Notas de credito con folio.xlsx";
-             archivo = new FileInfo(pathDeDescargas);
-       
+            pathDeDescargas = getCarpetaDeDescargas()+ "" + @"\Notas de credito con folio (subir a Documentos de Ciclo).xlsx";
+            archivo = new FileInfo(pathDeDescargas);
             SaveExcelFileNCCE(facturasNCCE, archivo);
-            MessageBox.Show("Archivo de facturas y archivo de notas de credito con folio creado en carpeta de descargas!");
+
+
+            pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Guias de despacho (NO SUBIR).xlsx";
+            archivo = new FileInfo(pathDeDescargas);
+            SaveExcelFileGuiasDeDespacho(guiasDeDespacho, archivo);
+
+            MessageBox.Show("Archivo de facturas, archivo de notas de credito con folio y archivo de guias de despacho creados en carpeta de descargas!");
 
 
         }
@@ -988,9 +1024,21 @@ namespace FacturasXMLAExcelManager
         private static async Task SaveExcelFileNCCE(List<FacturaNCCE> ncces, FileInfo file)
         {
             var package = new ExcelPackage(file);
-            var ws = package.Workbook.Worksheets.Add("Facturas");
+            var ws = package.Workbook.Worksheets.Add("Notas de credito con folio");
 
             var range = ws.Cells["A1"].LoadFromCollection(ncces, true);
+
+            range.AutoFitColumns();
+
+            await package.SaveAsync();
+        }
+
+        private static async Task SaveExcelFileGuiasDeDespacho(List<GuiaDeDespacho> guiasdeDespacho, FileInfo file)
+        {
+            var package = new ExcelPackage(file);
+            var ws = package.Workbook.Worksheets.Add("Guias de despacho");
+
+            var range = ws.Cells["A1"].LoadFromCollection(guiasdeDespacho, true);
 
             range.AutoFitColumns();
 
@@ -1324,12 +1372,11 @@ namespace FacturasXMLAExcelManager
                 f.NumDocReferencia = "";
                 f.FechaDocReferencia = "";
 
-                f.CodigoDelProducto = "420710";
+                f.CodigoDelProducto = "420724";
 
                 //if (f.TipoDeDocumento == "FACE" ^ f.TipoDeDocumento == "NCCE")
                 //{
-                //    f.CodigoDelProducto = "420710";
-               
+                //    f.CodigoDelProducto = "420710";           
 
                 //}else if (f.TipoDeDocumento == "FCEE")
                 //{
@@ -1560,7 +1607,7 @@ namespace FacturasXMLAExcelManager
 
                 if (f.TipoDeDocumento == "FACE" ^ f.TipoDeDocumento == "NCCE")
                 {
-                    f.CodigoDelProducto = "420710";
+                    f.CodigoDelProducto = "420724";
 
                 }
                 else if (f.TipoDeDocumento == "FCEE")
@@ -2291,6 +2338,110 @@ namespace FacturasXMLAExcelManager
             f.TotalDelDocumento=total.ToString();
             f.DeudaPendiente=total.ToString();
            
+        }
+
+
+
+ 
+
+        private String determinarNumeroDeMesAPartirDePalabra(String mes)
+        {
+            String mesComoNumero = "";
+
+            switch (mes)
+            {
+                case "ENERO":
+                    mesComoNumero = "01";
+                    break;
+                case "FEBRERO":
+                    mesComoNumero = "02";
+                    break;
+                case "MARZO":
+                    mesComoNumero = "03";
+                    break;
+                case "ABRIL":
+                    mesComoNumero = "04";
+                    break;
+                case "MAYO":
+                    mesComoNumero = "05";
+                    break;
+                case "JUNIO":
+                    mesComoNumero = "06";
+                    break;
+                case "JULIO":
+                    mesComoNumero = "07";
+                    break;
+                case "AGOSTO":
+                    mesComoNumero = "08";
+                    break;
+                case "SEPTIEMBRE":
+                    mesComoNumero = "09";
+                    break;
+                case "OCTUBRE":
+                    mesComoNumero = "10";
+                    break;
+                case "NOVIEMBRE":
+                    mesComoNumero = "11";
+                    break;
+                case "DICIEMBRE":
+                    mesComoNumero = "12";
+                    break;
+                default:
+                    break;
+            }
+
+
+            return mesComoNumero;   
+
+        }
+
+        public String convertirAFechaValida3(String fechaAConvertir)
+        {
+            String fechaValida = "";
+            if (String.IsNullOrEmpty(fechaAConvertir)!=true)
+            {
+                string[] datos = fechaAConvertir.Split('-');
+                //MessageBox.Show(datos[0]);//ano
+                //MessageBox.Show(datos[1]);//mes
+                //MessageBox.Show(datos[2]);//dia
+                fechaValida = datos[2] + "/" + datos[1] + "/" + datos[0];
+            }
+            else
+            {
+                fechaValida = "Fecha de vencimiento ausente en factura";
+            }
+            return fechaValida;
+
+        }
+
+        public String convertirAFechaValidaParaNCEEConFolio(String fechaAConvertir)
+        {
+            String fechaValida = "";
+            if (String.IsNullOrEmpty(fechaAConvertir) != true)
+            {
+                string[] datos = fechaAConvertir.Split('/');
+
+                fechaValida = datos[1] + "/" + datos[2] + "/" + datos[0];
+            }
+            else
+            {
+                fechaValida = "Fecha de vencimiento ausente en factura";
+            }
+            return fechaValida;
+
+        }
+
+
+
+
+
+        public String calcularFechaDeVencimientoDeCopec(String fechaDeEmision)
+        {
+            String fechaVencimientoDeFactura = "Esta debiese ser una fecha de vencimientoDeCopec";
+
+
+            return fechaVencimientoDeFactura;
+
         }
 
 
