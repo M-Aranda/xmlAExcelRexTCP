@@ -31,20 +31,78 @@ namespace FacturasXMLAExcelManager
             button4.Visible = false;
             button5.Visible = false;
 
+
+            //hay que generar los siguientes excel:
+            //uno para los documentos de CCU que sean FACE o FCEE, esos van contabilizados de una (documento con detalles (contabilizado))
+            //uno para los documentos no CCU y las notas de credito de cualquier cliente (documento con detalle)
+            //otro para las guias de despacho
+
+
+
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
 
             //excelAPartirDeXML
-            List<Factura> facturas = new List<Factura>();
+            List<Factura> facturasAIngresar = new List<Factura>();
+            List<FacturaContabilizada> facturasAIngresarContabilizadas = new List<FacturaContabilizada>();
             List<FacturaNCCE> facturasNCCE = new List<FacturaNCCE>();
             List<GuiaDeDespacho> guiasDeDespacho = new List<GuiaDeDespacho>();
+            List<DireccionDeCCU> direccionesDeCCU = new List<DireccionDeCCU>();
 
             int cantidadFACE = 0;
             int cantidadFCEE = 0;
             int cantidadNCCE = 0;
             int cantidadDeGuiasDeDespacho = 0;
+            int cantidadNDCE = 0;
+
+
+            int totalAdministracion = 0;
+            int totalInterplantas = 0;
+            int totalEmprendedores = 0;
+            int totalIllapel = 0;
+            int totalSanAntonio = 0;
+            int totalMelipilla = 0;
+            int totalSantiago = 0;
+            int totalRancagua = 0;
+            int totalCurico = 0;
+            int totalPendientes = 0;
+
+
+            int cantidadDeFACEsAdministracion = 0;
+            int cantidadDeFACEsInterplantas = 0;
+            int cantidadDeFACEsEmprendedores = 0;
+            int cantidadDeFACEsIllapel = 0;
+            int cantidadDeFACEsSanAntonio = 0;
+            int cantidadDeFACEsMelipilla = 0;
+            int cantidadDeFACEsSantiago = 0;
+            int cantidadDeFACEsRancagua = 0;
+            int cantidadDeFACEsCurico = 0;
+            int cantidadDeFACEsPendientes = 0;
+
+            int cantidadDeFCEEsAdministracion = 0;
+            int cantidadDeFCEEsInterplantas = 0;
+            int cantidadDeFCEEsEmprendedores = 0;
+            int cantidadDeFCEEsIllapel = 0;
+            int cantidadDeFCEEsSanAntonio = 0;
+            int cantidadDeFCEEsMelipilla = 0;
+            int cantidadDeFCEEsSantiago = 0;
+            int cantidadDeFCEEsRancagua = 0;
+            int cantidadDeFCEEsCurico = 0;
+            int cantidadDeFCEEsPendientes = 0;
+
+            int cantidadDeNCCEsAdministracion = 0;
+            int cantidadDeNCCEsInterplantas = 0;
+            int cantidadDeNCCEsEmprendedores = 0;
+            int cantidadDeNCCEsIllapel = 0;
+            int cantidadDeNCCEsSanAntonio = 0;
+            int cantidadDeNCCEsMelipilla = 0;
+            int cantidadDeNCCEsSantiago = 0;
+            int cantidadDeNCCEsRancagua = 0;
+            int cantidadDeNCCEsCurico = 0;
+            int cantidadDeNCCEsPendientes = 0;
+
 
 
             string sFileName = "";
@@ -168,7 +226,7 @@ namespace FacturasXMLAExcelManager
                 f.AjusteIva = "";//getValue("Folio", sFileName);
 
 
-                facturas.Add(f);
+                facturasAIngresar.Add(f);
 
             }
 
@@ -178,7 +236,7 @@ namespace FacturasXMLAExcelManager
                 foreach (var item in arrAllFiles)
                 {
 
-
+                    DireccionDeCCU dCCU = new DireccionDeCCU();
                     // los ruts de CCU son:
                     // 91041000-8
                     //96989120-4
@@ -192,8 +250,8 @@ namespace FacturasXMLAExcelManager
                     //tratamiento especial
 
 
-                    sFileName = item; 
-                   // XmlTextReader reader = new XmlTextReader(URLString);
+                    sFileName = item;
+                    // XmlTextReader reader = new XmlTextReader(URLString);
 
                     Factura f = new Factura();
 
@@ -206,7 +264,7 @@ namespace FacturasXMLAExcelManager
 
                     XmlTextReader textReader = new XmlTextReader(sFileName);
                     textReader.Read();
-                    
+
 
 
                     List<String> datos = new List<String>();
@@ -222,13 +280,14 @@ namespace FacturasXMLAExcelManager
                     f.FechaDeDocumento = convertirAFechaValida3(getValue("FchEmis", sFileName));
                     f.FechaContableDeDocumento = f.FechaDeDocumento;
                     f.FechaDeVencimientoDeDocumento = convertirAFechaValida3(getValue("FchVenc", sFileName));//convertirAFechaValida(getValue("FchVenc", sFileName));// fecha de vencimiento debe ser igual o mayor a fecha de emision
+                    f.FechaDeVencimientoDeDocumento = validarQueFechaVencimientoNoPrecedaAFechaDeEmision(f.FechaDeDocumento, f.FechaDeVencimientoDeDocumento);
 
                     if (f.RutCliente == "99520000-7")
                     {
                         f.FechaDeVencimientoDeDocumento = calcularFechaDeVencimientoDeCopec(f.FechaDeDocumento);
                     }
 
-                   // DateTime now = DateTime.Now;
+                    // DateTime now = DateTime.Now;
                     //f.FechaContableDeDocumento = Convert.ToString(now.Date);//"dia actual"convertirAFechaValidaDesdeTranstecnia
 
                     //f.FechaDeDocumento = f.FechaContableDeDocumento;
@@ -247,15 +306,16 @@ namespace FacturasXMLAExcelManager
                     f.MonedaDelDocumento = "CLP";//getValue("Folio", sFileName);
                     f.TasaDeCambio = "";// getValue("TipoDTE", sFileName);
                     f.MontoAfecto = getValue("MntNeto", sFileName);
-         
+
 
 
                     f.MontoExento = getValue("MontoImp", sFileName);
 
 
 
-                    if (f.TipoDeDocumento=="FCEE")
-                    {f.MontoExento= getValue("MntExe", sFileName);
+                    if (f.TipoDeDocumento == "FCEE")
+                    {
+                        f.MontoExento = getValue("MntExe", sFileName);
 
                     }
                     //ojo con el monto exento
@@ -361,6 +421,17 @@ namespace FacturasXMLAExcelManager
                     f.FechaDeVencimiento = "";// getValue("Folio", sFileName);
                     f.CentroDeCostos = getValue("DirOrigen", sFileName);//no es CmnaDest el dato que me da la dirección, es DirOrigen
 
+
+
+                    dCCU.Rut = f.RutCliente;
+                    dCCU.Direccion = f.CentroDeCostos;
+                    dCCU.Folio = f.NumeroDelDocumento;
+                    if (determinarSiEsRutDeCCU(dCCU.Rut) == true)
+                    {
+                        direccionesDeCCU.Add(dCCU);
+                    }
+                
+
                     //determinar a donde se costea
                     //los codigos de centros de costo son (numero de la izquierda: TCP, numero de la derecha: PSCP): 
 
@@ -454,6 +525,7 @@ namespace FacturasXMLAExcelManager
 
                     if (f.RutCliente != "91041000-8" & f.RutCliente != "96989120-4" & f.RutCliente != "99501760-1" & f.RutCliente != "99554560-8" & f.RutCliente != "99586280-8")
                     {
+
                         f.CodigoDelProducto = "110804";
                         if (f.RutCliente == "99520000-7")
                         {
@@ -511,9 +583,31 @@ namespace FacturasXMLAExcelManager
                                 break;
                         }
 
-                      if(f.TipoDeDocumento!= "guia de despacho")
+                        //Dejar dirección vacia si es uno de los clientes sin direccion
+                        f.DireccionDelCliente = direccionSiEsQueEnManagerNoTiene(f.RutCliente);
+
+                      if (f.TipoDeDocumento!= "guia de despacho")
                         {
-                            facturas.Add(f);
+                            if (f.RutCliente == "91041000-8" || f.RutCliente == "96989120-4" || f.RutCliente == "99501760-1" || f.RutCliente == "99554560-8" || f.RutCliente == "99586280-8")
+                            {
+                                //se sube a documento con detalle (contabilizado)
+                                FacturaContabilizada fc = new FacturaContabilizada();
+                                fc = fc.convertirFacturaAIngresarAFacturaContabilizada(f);
+                                facturasAIngresarContabilizadas.Add(fc);
+                            }
+                            else if (f.RutCliente != "91041000-8" && f.RutCliente != "96989120-4" && f.RutCliente != "99501760-1" && f.RutCliente != "99554560-8" && f.RutCliente != "99586280-8")
+                            {
+                                //si es una FACE o FCEE que NO sea de CCU O es una nota de credito de quien sea
+                                //entonces se sube a documento con detalle (sin contabilizar)
+                                if (f.TipoDeDocumento == "FCEE")
+                                {
+                                    f.CodigoDelProducto = "110804E";
+                                }
+
+                                facturasAIngresar.Add(f);
+
+                            }
+
                         }
                         else
                         {
@@ -620,7 +714,7 @@ namespace FacturasXMLAExcelManager
 
                         //420724E
                         //si nota de credito hace referencia a un folio que es 0, la factura tiene que subirse a documento contable
-                        if (facNCCE.NumeroDocumentoDeOrigen == "0")
+                        if (facNCCE.RutCliente == "91041000-8" || facNCCE.RutCliente == "96989120-4" || facNCCE.RutCliente == "99501760-1" || facNCCE.RutCliente == "99554560-8" || facNCCE.RutCliente == "99586280-8")
                         {
                             Factura factuarNCCEADocumentoContable = new Factura();
                             factuarNCCEADocumentoContable.TipoDeDocumento = facNCCE.TipoDeDocumento;
@@ -685,7 +779,7 @@ namespace FacturasXMLAExcelManager
                             factuarNCCEADocumentoContable.CodigoImpuestoEspecifico2 = "";
                             factuarNCCEADocumentoContable.MontoImpuestoEspecifico2 = "";
                             factuarNCCEADocumentoContable.Modalidad = facNCCE.Modalidad;
-                            factuarNCCEADocumentoContable.Glosa = "NOTA DE CREDITO CON FOLIO 0";
+                            factuarNCCEADocumentoContable.Glosa = "NOTA DE CREDITO CON FOLIO "+ facNCCE.NumeroDocumentoDeOrigen;
                             factuarNCCEADocumentoContable.Referencia = facNCCE.Referencia;
                             factuarNCCEADocumentoContable.FechaDeComprometida = facNCCE.FechaDeComprometida;
                             factuarNCCEADocumentoContable.PorcentajeCEEC = facNCCE.PorcentajeCEEC;
@@ -695,10 +789,84 @@ namespace FacturasXMLAExcelManager
                             factuarNCCEADocumentoContable.AjusteIva = facNCCE.AjusteIva;
 
 
-                            facturas.Add(factuarNCCEADocumentoContable);
+                            FacturaContabilizada fcNCCE1 = new FacturaContabilizada();
+                            facturasAIngresarContabilizadas.Add(fcNCCE1.convertirFacturaAIngresarAFacturaContabilizada(factuarNCCEADocumentoContable));
                         }
                         else
                         {
+                            Factura facturaNCCEaFactura1 = new Factura();
+                            facturaNCCEaFactura1.TipoDeDocumento = facNCCE.TipoDeDocumento;
+                            facturaNCCEaFactura1.NumeroDelDocumento = facNCCE.NumeroDelDocumento;
+                            facturaNCCEaFactura1.FechaDeDocumento = facNCCE.FechaDeDocumento;
+                            facturaNCCEaFactura1.FechaContableDeDocumento = facNCCE.FechaDeContableDeDocumento;
+                            facturaNCCEaFactura1.FechaDeVencimientoDeDocumento = facNCCE.FechaDeVencimientoDeDocumento;
+                            facturaNCCEaFactura1.CodigoDeUnidadDeNegocio = facNCCE.CodigoUnidadDeNegocio;
+                            facturaNCCEaFactura1.RutCliente = facNCCE.RutCliente;
+                            facturaNCCEaFactura1.DireccionDelCliente = facNCCE.DireccionCliente;
+                            facturaNCCEaFactura1.RutFacturador = facNCCE.RutFacturador;
+                            facturaNCCEaFactura1.CodigoVendedor = facNCCE.CodigoVendedor;
+                            facturaNCCEaFactura1.CodigoComisionista = facNCCE.CodigoComisionista;
+                            facturaNCCEaFactura1.Probabilidad = facNCCE.Probablidad;
+                            facturaNCCEaFactura1.ListaPrecio = facNCCE.ListaPrecio;
+                            facturaNCCEaFactura1.PlazoPago = facNCCE.PlazoPago;
+                            facturaNCCEaFactura1.MonedaDelDocumento = facNCCE.MonedaDelDocumento;
+                            facturaNCCEaFactura1.TasaDeCambio = facNCCE.TasaDeCambio;
+                            facturaNCCEaFactura1.MontoAfecto = facNCCE.MontoAfecto;
+                            facturaNCCEaFactura1.MontoExento = facNCCE.MontoExento;
+                            facturaNCCEaFactura1.MontoIva = facNCCE.MontoIva;
+                            facturaNCCEaFactura1.MontoImpuestosEspecificos = facNCCE.MontoImpuestosEspecificos;
+                            facturaNCCEaFactura1.MontoIvaRetenido = facNCCE.MontoIvaRetenido;
+                            facturaNCCEaFactura1.MontoImpuestosRetenidos = facNCCE.MontoImpuestosRetenidos;
+                            facturaNCCEaFactura1.TipoDeDescuentoGlobal = facNCCE.TipoDeDescuentoGlobal;
+                            facturaNCCEaFactura1.DescuentoGlobal = facNCCE.DescuentoGlobal;
+                            facturaNCCEaFactura1.TotalDelDocumento = facNCCE.TotalDelDocumento;
+                            facturaNCCEaFactura1.DeudaPendiente = facNCCE.DeudaPendiente;
+                            facturaNCCEaFactura1.TipoDocReferencia = "";//no se ingresa en documento contable con detalles
+                            facturaNCCEaFactura1.NumDocReferencia = "";//no se ingresa en documento contable con detalles
+                            facturaNCCEaFactura1.FechaDocReferencia = "";// no se ingresa en documento contable con detalles
+                            facturaNCCEaFactura1.CodigoDelProducto = facNCCE.CodigoDelProducto;
+                            facturaNCCEaFactura1.Cantidad = facNCCE.Cantidad;
+                            facturaNCCEaFactura1.Unidad = facNCCE.Unidad;
+                            facturaNCCEaFactura1.PrecioUnitario = facNCCE.PrecioUnitario;
+                            facturaNCCEaFactura1.MonedaDelDetalle = facNCCE.MonedaDelDetalle;
+                            facturaNCCEaFactura1.TasaDeCambio2 = facNCCE.TasaDeCambio2;
+                            facturaNCCEaFactura1.NumeroDeSerie = facNCCE.NumeroDeSerie;
+                            facturaNCCEaFactura1.NumeroDeLote = facNCCE.NumeroDeLote;
+                            facturaNCCEaFactura1.FechaDeVencimiento = facNCCE.FechaDeVencimiento;
+                            facturaNCCEaFactura1.CentroDeCostos = facNCCE.CentroDeCostos;
+                            facturaNCCEaFactura1.TipoDeDescuento = facNCCE.TipoDeDescuento;
+                            facturaNCCEaFactura1.Descuento = facNCCE.Descuento;
+                            facturaNCCEaFactura1.Ubicacion = facNCCE.Ubicacion;
+                            facturaNCCEaFactura1.Bodega = facNCCE.Bodega;
+                            facturaNCCEaFactura1.Concepto1 = facNCCE.Concepto1;
+                            facturaNCCEaFactura1.Concepto2 = facNCCE.Concepto2;
+                            facturaNCCEaFactura1.Concepto3 = facNCCE.Concepto3;
+                            facturaNCCEaFactura1.Concepto4 = facNCCE.Concepto4;
+                            facturaNCCEaFactura1.Descripcion = facNCCE.Descripcion;
+                            facturaNCCEaFactura1.DescripcionAdicional = facNCCE.DescripcionAdicional;
+                            facturaNCCEaFactura1.Stock = facNCCE.Stock;
+                            facturaNCCEaFactura1.Comentario11 = facNCCE.Comentario1;
+                            facturaNCCEaFactura1.Comentario21 = facNCCE.Comentario2;
+                            facturaNCCEaFactura1.Comentario31 = facNCCE.Comentario3;
+                            facturaNCCEaFactura1.Comentario41 = facNCCE.Comentario4;
+                            facturaNCCEaFactura1.Comentario51 = facNCCE.Comentario5;
+                            facturaNCCEaFactura1.CodigoImpuestoEspecifico1 = "";
+                            facturaNCCEaFactura1.MontoImpuestoEspecifico1 = "";
+                            facturaNCCEaFactura1.CodigoImpuestoEspecifico2 = "";
+                            facturaNCCEaFactura1.MontoImpuestoEspecifico2 = "";
+                            facturaNCCEaFactura1.Modalidad = facNCCE.Modalidad;
+                            facturaNCCEaFactura1.Glosa = "NOTA DE CREDITO CON FOLIO " + facNCCE.NumeroDocumentoDeOrigen;
+                            facturaNCCEaFactura1.Referencia = facNCCE.Referencia;
+                            facturaNCCEaFactura1.FechaDeComprometida = facNCCE.FechaDeComprometida;
+                            facturaNCCEaFactura1.PorcentajeCEEC = facNCCE.PorcentajeCEEC;
+                            facturaNCCEaFactura1.ImpuestoLey18211 = "";
+                            facturaNCCEaFactura1.IvaLey18211 = "";
+                            facturaNCCEaFactura1.CodigoKitFlexible = facNCCE.CodigoKitFlexible;
+                            facturaNCCEaFactura1.AjusteIva = facNCCE.AjusteIva;
+
+
+                            facturasAIngresar.Add(facturaNCCEaFactura1);
+
                             facturasNCCE.Add(facNCCE);
                         }
 
@@ -734,7 +902,7 @@ namespace FacturasXMLAExcelManager
 
 
                             //si nota de credito hace referencia a un folio que es 0, la factura tiene que subirse a documento contable
-                            if (facNCCE2.NumeroDocumentoDeOrigen == "0")
+                            if (facNCCE2.RutCliente == "91041000-8" || facNCCE2.RutCliente == "96989120-4" || facNCCE2.RutCliente == "99501760-1" || facNCCE2.RutCliente == "99554560-8" || facNCCE2.RutCliente == "99586280-8")
                             {
                                 Factura factuarNCCEADocumentoContable2 = new Factura();
                                 factuarNCCEADocumentoContable2.TipoDeDocumento = facNCCE2.TipoDeDocumento;
@@ -776,7 +944,7 @@ namespace FacturasXMLAExcelManager
                                 factuarNCCEADocumentoContable2.NumeroDeSerie = facNCCE2.NumeroDeSerie;
                                 factuarNCCEADocumentoContable2.NumeroDeLote = facNCCE2.NumeroDeLote;
                                 factuarNCCEADocumentoContable2.FechaDeVencimiento = facNCCE2.FechaDeVencimiento;
-                                factuarNCCEADocumentoContable2.CentroDeCostos = "209";//facNCCE2.CentroDeCostos;
+                                factuarNCCEADocumentoContable2.CentroDeCostos = facNCCE2.CentroDeCostos;
                                 factuarNCCEADocumentoContable2.TipoDeDescuento = facNCCE2.TipoDeDescuento;
                                 factuarNCCEADocumentoContable2.Descuento = facNCCE2.Descuento;
                                 factuarNCCEADocumentoContable2.Ubicacion = facNCCE2.Ubicacion;
@@ -798,7 +966,7 @@ namespace FacturasXMLAExcelManager
                                 factuarNCCEADocumentoContable2.CodigoImpuestoEspecifico2 = "";
                                 factuarNCCEADocumentoContable2.MontoImpuestoEspecifico2 = "";
                                 factuarNCCEADocumentoContable2.Modalidad = facNCCE2.Modalidad;
-                                factuarNCCEADocumentoContable2.Glosa = "NOTA DE CREDITO CON FOLIO 0, REVISAR";
+                                factuarNCCEADocumentoContable2.Glosa = "NOTA DE CREDITO CON FOLIO "+ facNCCE2.NumeroDocumentoDeOrigen;
                                 factuarNCCEADocumentoContable2.Referencia = facNCCE2.Referencia;
                                 factuarNCCEADocumentoContable2.FechaDeComprometida = facNCCE2.FechaDeComprometida;
                                 factuarNCCEADocumentoContable2.PorcentajeCEEC = facNCCE2.PorcentajeCEEC;
@@ -807,13 +975,90 @@ namespace FacturasXMLAExcelManager
                                 factuarNCCEADocumentoContable2.CodigoKitFlexible = facNCCE2.CodigoKitFlexible;
                                 factuarNCCEADocumentoContable2.AjusteIva = facNCCE2.AjusteIva;
 
-
-                                facturas.Add(factuarNCCEADocumentoContable2);
+                                FacturaContabilizada fcNCCE2 = new FacturaContabilizada();  
+                                facturasAIngresarContabilizadas.Add(fcNCCE2.convertirFacturaAIngresarAFacturaContabilizada(factuarNCCEADocumentoContable2));
                             }
                             else
                             {
+
+                                Factura facturaNCCEaFactura2 = new Factura();
+
+                                facturaNCCEaFactura2.TipoDeDocumento = facNCCE2.TipoDeDocumento;
+                                facturaNCCEaFactura2.NumeroDelDocumento = facNCCE2.NumeroDelDocumento;
+                                facturaNCCEaFactura2.FechaDeDocumento = facNCCE2.FechaDeDocumento;
+                                facturaNCCEaFactura2.FechaContableDeDocumento = facNCCE2.FechaDeContableDeDocumento;
+                                facturaNCCEaFactura2.FechaDeVencimientoDeDocumento = facNCCE2.FechaDeVencimientoDeDocumento;
+                                facturaNCCEaFactura2.CodigoDeUnidadDeNegocio = facNCCE2.CodigoUnidadDeNegocio;
+                                facturaNCCEaFactura2.RutCliente = facNCCE2.RutCliente;
+                                facturaNCCEaFactura2.DireccionDelCliente = facNCCE2.DireccionCliente;
+                                facturaNCCEaFactura2.RutFacturador = facNCCE2.RutFacturador;
+                                facturaNCCEaFactura2.CodigoVendedor = facNCCE2.CodigoVendedor;
+                                facturaNCCEaFactura2.CodigoComisionista = facNCCE2.CodigoComisionista;
+                                facturaNCCEaFactura2.Probabilidad = facNCCE2.Probablidad;
+                                facturaNCCEaFactura2.ListaPrecio = facNCCE2.ListaPrecio;
+                                facturaNCCEaFactura2.PlazoPago = facNCCE2.PlazoPago;
+                                facturaNCCEaFactura2.MonedaDelDocumento = facNCCE2.MonedaDelDocumento;
+                                facturaNCCEaFactura2.TasaDeCambio = facNCCE2.TasaDeCambio;
+                                facturaNCCEaFactura2.MontoAfecto = facNCCE2.MontoAfecto;
+                                facturaNCCEaFactura2.MontoExento = facNCCE2.MontoExento;
+                                facturaNCCEaFactura2.MontoIva = facNCCE2.MontoIva;
+                                facturaNCCEaFactura2.MontoImpuestosEspecificos = facNCCE2.MontoImpuestosEspecificos;
+                                facturaNCCEaFactura2.MontoIvaRetenido = facNCCE2.MontoIvaRetenido;
+                                facturaNCCEaFactura2.MontoImpuestosRetenidos = facNCCE2.MontoImpuestosRetenidos;
+                                facturaNCCEaFactura2.TipoDeDescuentoGlobal = facNCCE2.TipoDeDescuentoGlobal;
+                                facturaNCCEaFactura2.DescuentoGlobal = facNCCE2.DescuentoGlobal;
+                                facturaNCCEaFactura2.TotalDelDocumento = facNCCE2.TotalDelDocumento;
+                                facturaNCCEaFactura2.DeudaPendiente = facNCCE2.DeudaPendiente;
+                                facturaNCCEaFactura2.TipoDocReferencia = "";//no se ingresa en documento contable con detalles
+                                facturaNCCEaFactura2.NumDocReferencia = "";//no se ingresa en documento contable con detalles
+                                facturaNCCEaFactura2.FechaDocReferencia = "";// no se ingresa en documento contable con detalles
+                                facturaNCCEaFactura2.CodigoDelProducto = facNCCE2.CodigoDelProducto;
+                                facturaNCCEaFactura2.Cantidad = facNCCE2.Cantidad;
+                                facturaNCCEaFactura2.Unidad = facNCCE2.Unidad;
+                                facturaNCCEaFactura2.PrecioUnitario = facNCCE2.PrecioUnitario;
+                                facturaNCCEaFactura2.MonedaDelDetalle = facNCCE2.MonedaDelDetalle;
+                                facturaNCCEaFactura2.TasaDeCambio2 = facNCCE2.TasaDeCambio2;
+                                facturaNCCEaFactura2.NumeroDeSerie = facNCCE2.NumeroDeSerie;
+                                facturaNCCEaFactura2.NumeroDeLote = facNCCE2.NumeroDeLote;
+                                facturaNCCEaFactura2.FechaDeVencimiento = facNCCE2.FechaDeVencimiento;
+                                facturaNCCEaFactura2.CentroDeCostos = facNCCE2.CentroDeCostos;
+                                facturaNCCEaFactura2.TipoDeDescuento = facNCCE2.TipoDeDescuento;
+                                facturaNCCEaFactura2.Descuento = facNCCE2.Descuento;
+                                facturaNCCEaFactura2.Ubicacion = facNCCE2.Ubicacion;
+                                facturaNCCEaFactura2.Bodega = facNCCE2.Bodega;
+                                facturaNCCEaFactura2.Concepto1 = facNCCE2.Concepto1;
+                                facturaNCCEaFactura2.Concepto2 = facNCCE2.Concepto2;
+                                facturaNCCEaFactura2.Concepto3 = facNCCE2.Concepto3;
+                                facturaNCCEaFactura2.Concepto4 = facNCCE2.Concepto4;
+                                facturaNCCEaFactura2.Descripcion = facNCCE2.Descripcion;
+                                facturaNCCEaFactura2.DescripcionAdicional = facNCCE2.DescripcionAdicional;
+                                facturaNCCEaFactura2.Stock = facNCCE2.Stock;
+                                facturaNCCEaFactura2.Comentario11 = facNCCE2.Comentario1;
+                                facturaNCCEaFactura2.Comentario21 = facNCCE2.Comentario2;
+                                facturaNCCEaFactura2.Comentario31 = facNCCE2.Comentario3;
+                                facturaNCCEaFactura2.Comentario41 = facNCCE2.Comentario4;
+                                facturaNCCEaFactura2.Comentario51 = facNCCE2.Comentario5;
+                                facturaNCCEaFactura2.CodigoImpuestoEspecifico1 = "";
+                                facturaNCCEaFactura2.MontoImpuestoEspecifico1 = "";
+                                facturaNCCEaFactura2.CodigoImpuestoEspecifico2 = "";
+                                facturaNCCEaFactura2.MontoImpuestoEspecifico2 = "";
+                                facturaNCCEaFactura2.Modalidad = facNCCE2.Modalidad;
+                                facturaNCCEaFactura2.Glosa = "NOTA DE CREDITO CON FOLIO " + facNCCE2.NumeroDocumentoDeOrigen;
+                                facturaNCCEaFactura2.Referencia = facNCCE2.Referencia;
+                                facturaNCCEaFactura2.FechaDeComprometida = facNCCE2.FechaDeComprometida;
+                                facturaNCCEaFactura2.PorcentajeCEEC = facNCCE2.PorcentajeCEEC;
+                                facturaNCCEaFactura2.ImpuestoLey18211 = "";
+                                facturaNCCEaFactura2.IvaLey18211 = "";
+                                facturaNCCEaFactura2.CodigoKitFlexible = facNCCE2.CodigoKitFlexible;
+                                facturaNCCEaFactura2.AjusteIva = facNCCE2.AjusteIva;
+
+
+                                facturasAIngresar.Add(facturaNCCEaFactura2);
+
                                 //el formato para las fechas si es nota de credito es distinto parece
                                 facturasNCCE.Add(facNCCE2);
+
+
                             }
 
 
@@ -847,6 +1092,7 @@ namespace FacturasXMLAExcelManager
                         f.FechaDeDocumento = convertirAFechaValida3(getValue("FchEmis", sFileName));
                         f.FechaContableDeDocumento = f.FechaDeDocumento;
                         f.FechaDeVencimientoDeDocumento = convertirAFechaValida3(getValue("FchVenc", sFileName));//convertirAFechaValida(getValue("FchVenc", sFileName));// fecha de vencimiento debe ser igual o mayor a fecha de emision
+                        f.FechaDeVencimientoDeDocumento = validarQueFechaVencimientoNoPrecedaAFechaDeEmision(f.FechaDeDocumento,f.FechaDeVencimientoDeDocumento);
 
                         if (f.RutCliente == "99520000-7")
                         {
@@ -939,7 +1185,7 @@ namespace FacturasXMLAExcelManager
                         f.CodigoImpuestoEspecifico2 = "";//getValue("Folio", sFileName);
                         f.MontoImpuestoEspecifico2 = "";//getValue("Folio", sFileName);
                         f.Modalidad = "";//getValue("Folio", sFileName);
-                        f.Glosa = "Factura de compra automatica";//getValue("Folio", sFileName);
+                        f.Glosa = "Factura de compra subida automaticamente";//getValue("Folio", sFileName);
                         f.Referencia = "";//getValue("Folio", sFileName);
                         f.FechaDeComprometida = "";//getValue("Folio", sFileName);
                         f.PorcentajeCEEC = "";//getValue("Folio", sFileName);
@@ -954,10 +1200,11 @@ namespace FacturasXMLAExcelManager
 
                         if (f.RutCliente != "91041000-8" & f.RutCliente != "96989120-4" & f.RutCliente != "99501760-1" & f.RutCliente != "99554560-8" & f.RutCliente != "99586280-8")
                         {
-                            f.CodigoDelProducto = "110804";
+                            f.CodigoDelProducto = "110804E";
+                            
                             if (f.RutCliente == "99520000-7")
                             {
-                                f.CodigoDelProducto = "110804E";
+                                f.CodigoDelProducto = "410104E"; 
                             }
                             f.CentroDeCostos = "209";
                         }
@@ -969,7 +1216,72 @@ namespace FacturasXMLAExcelManager
                         f.MontoIva = calcularIvaComoManager(f.MontoAfecto,f.MontoIva,f);
                         recalcularTotales(f);
 
-                        facturas.Add(f);
+                        if (f.CentroDeCostos == "209" && f.RutCliente!= "99520000-7")
+                        {
+                            f.CodigoDelProducto = "410104E";
+                        }
+
+                        if (f.RutCliente == "91041000-8" || f.RutCliente == "96989120-4" || f.RutCliente == "99501760-1" || f.RutCliente == "99554560-8" || f.RutCliente == "99586280-8")
+                        {
+                            //se sube a documento con detalle (contabilizado)
+                            FacturaContabilizada fc = new FacturaContabilizada();
+                            fc = fc.convertirFacturaAIngresarAFacturaContabilizada(f);
+                            facturasAIngresarContabilizadas.Add(fc);
+                        }
+                        else if (f.RutCliente != "91041000-8" && f.RutCliente != "96989120-4" && f.RutCliente != "99501760-1" && f.RutCliente != "99554560-8" && f.RutCliente != "99586280-8")
+                        {
+                            //si es una FACE o FCEE que NO sea de CCU O es una nota de credito de quien sea
+                            //entonces se sube a documento con detalle (sin contabilizar)
+
+                            if (f.TipoDeDocumento == "FCEE")
+                            {
+                                f.CodigoDelProducto = "110804E";
+                            }
+                            facturasAIngresar.Add(f);
+
+                        }
+
+
+
+                    }
+
+
+
+                    switch (f.CentroDeCostos)
+                    {
+                        case "203":
+                            totalAdministracion = totalAdministracion + int.Parse(f.TotalDelDocumento);
+                            break;
+                        case "204":
+                            totalInterplantas = totalInterplantas + int.Parse(f.TotalDelDocumento);
+                            break;
+                        case "208":
+                            totalEmprendedores = totalEmprendedores + int.Parse(f.TotalDelDocumento);
+                            break;
+                        case "205":
+                            totalIllapel = totalIllapel + int.Parse(f.TotalDelDocumento);
+                            break;
+                        case "207":
+                            totalSanAntonio = totalSanAntonio + int.Parse(f.TotalDelDocumento);
+                            break;
+                        case "200":
+                            totalMelipilla = totalMelipilla + int.Parse(f.TotalDelDocumento);
+                            break;
+                        case "206":
+                            totalSantiago = totalSantiago + int.Parse(f.TotalDelDocumento);
+                            break;
+                        case "201":
+                            totalRancagua = totalRancagua + int.Parse(f.TotalDelDocumento);
+                            break;
+                        case "202":
+                            totalCurico = totalCurico + int.Parse(f.TotalDelDocumento);
+                            break;
+                        case "209":
+                            totalPendientes = totalPendientes + int.Parse(f.TotalDelDocumento);
+                            break;
+                        default:
+                            //no se suma nada
+                            break;
 
 
                     }
@@ -978,19 +1290,49 @@ namespace FacturasXMLAExcelManager
                 }
 
 
+
+
             }
+
+            Reporte rAdministracion = new Reporte("203","Administracion",totalAdministracion.ToString());
+            Reporte rInterplantas = new Reporte("204", "Interplantas", totalInterplantas.ToString());
+            Reporte rEmprendedores = new Reporte("208", "Emprendedores", totalEmprendedores.ToString());
+            Reporte rIllapel = new Reporte("205", "Illapel", totalIllapel.ToString());
+            Reporte rSanAntonio = new Reporte("207", "San Antonio", totalSanAntonio.ToString());
+            Reporte rMelipilla = new Reporte("200", "Melipilla", totalMelipilla.ToString());
+            Reporte rSantiago = new Reporte("206", "Santiago", totalSantiago.ToString());
+            Reporte rRancagua = new Reporte("201", "Rancagua", totalRancagua.ToString());
+            Reporte rCurico = new Reporte("202", "Curico", totalCurico.ToString());
+            Reporte rPendientes = new Reporte("209", "Pendientes", totalPendientes.ToString());
+
+            List<Reporte> listadoDeReportes = new List<Reporte>();
+            listadoDeReportes.Add(rAdministracion);
+            listadoDeReportes.Add(rInterplantas);
+            listadoDeReportes.Add(rEmprendedores);
+            listadoDeReportes.Add(rIllapel);
+            listadoDeReportes.Add(rSanAntonio);
+            listadoDeReportes.Add(rMelipilla);
+            listadoDeReportes.Add(rSantiago);
+            listadoDeReportes.Add(rRancagua);
+            listadoDeReportes.Add(rCurico);
+            listadoDeReportes.Add(rPendientes);
+
+
 
             int totalDeFacturas = cantidadFACE+cantidadFCEE+cantidadNCCE+cantidadDeGuiasDeDespacho;
 
-            MessageBox.Show("Se procesaron "+cantidadFACE.ToString()+" facturas afectas, "+cantidadFCEE.ToString()+" facturas exentas, "+cantidadNCCE.ToString()+" notas de crédito y "+cantidadDeGuiasDeDespacho.ToString()+" guías de despacho. El total fue de "+totalDeFacturas); 
-
-            
+            MessageBox.Show("Se procesaron "+cantidadFACE.ToString()+" facturas afectas, "+cantidadFCEE.ToString()+" facturas exentas, "+cantidadNCCE.ToString()+" notas de crédito y "+cantidadDeGuiasDeDespacho.ToString()+" guías de despacho. El total fue de "+totalDeFacturas);
 
 
             String pathDeDescargas = getCarpetaDeDescargas();
-            pathDeDescargas = pathDeDescargas + "" + @"\Archivo de facturas (subir a Documentos con detalle).xlsx";
+            pathDeDescargas = pathDeDescargas + "" + @"\Archivo de facturas de CCU para subir a Documentos con detalle (contabilizado).xlsx";
             var archivo = new FileInfo(pathDeDescargas);
-            SaveExcelFile(facturas, archivo);
+            SaveExcelFileFacturasCCU(facturasAIngresarContabilizadas, archivo);
+
+            pathDeDescargas = getCarpetaDeDescargas();
+            pathDeDescargas = pathDeDescargas + "" + @"\Archivo de facturas (NO CCU) para subir a Documentos con detalle.xlsx";
+            archivo = new FileInfo(pathDeDescargas);
+            SaveExcelFile(facturasAIngresar, archivo);
 
             pathDeDescargas = getCarpetaDeDescargas()+ "" + @"\Notas de credito con folio (subir a Documentos de Ciclo).xlsx";
             archivo = new FileInfo(pathDeDescargas);
@@ -1000,6 +1342,14 @@ namespace FacturasXMLAExcelManager
             pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Guias de despacho (NO SUBIR).xlsx";
             archivo = new FileInfo(pathDeDescargas);
             SaveExcelFileGuiasDeDespacho(guiasDeDespacho, archivo);
+
+            pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Direcciones de CCU (NO SUBIR).xlsx";
+            archivo = new FileInfo(pathDeDescargas);
+            SaveExcelFileDireccionesDeCCU(direccionesDeCCU, archivo);
+
+            pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Reporte de totales (NO SUBIR).xlsx";
+            archivo = new FileInfo(pathDeDescargas);
+            SaveExcelFileReportes(listadoDeReportes, archivo);
 
             MessageBox.Show("Archivo de facturas, archivo de notas de credito con folio y archivo de guias de despacho creados en carpeta de descargas!");
 
@@ -1045,12 +1395,48 @@ namespace FacturasXMLAExcelManager
             await package.SaveAsync();
         }
 
+        private static async Task SaveExcelFileFacturasCCU(List<FacturaContabilizada> facturasContabilizadas, FileInfo file)
+        {
+            var package = new ExcelPackage(file);
+            var ws = package.Workbook.Worksheets.Add("Facturas contabilizadas");
+
+            var range = ws.Cells["A1"].LoadFromCollection(facturasContabilizadas, true);
+
+            range.AutoFitColumns();
+
+            await package.SaveAsync();
+        }
+
         private static async Task SaveExcelFileMatches(List<MatchFacturaManagerCTACTE> coincidencias, FileInfo file)
         {
             var package = new ExcelPackage(file);
             var ws = package.Workbook.Worksheets.Add("Match");
 
             var range = ws.Cells["A1"].LoadFromCollection(coincidencias, true);
+
+            range.AutoFitColumns();
+
+            await package.SaveAsync();
+        }
+
+        private static async Task SaveExcelFileDireccionesDeCCU(List<DireccionDeCCU> direcciones, FileInfo file)
+        {
+            var package = new ExcelPackage(file);
+            var ws = package.Workbook.Worksheets.Add("Direcciones");
+
+            var range = ws.Cells["A1"].LoadFromCollection(direcciones, true);
+
+            range.AutoFitColumns();
+
+            await package.SaveAsync();
+        }
+
+        private static async Task SaveExcelFileReportes(List<Reporte> direcciones, FileInfo file)
+        {
+            var package = new ExcelPackage(file);
+            var ws = package.Workbook.Worksheets.Add("Reporte");
+
+            var range = ws.Cells["A1"].LoadFromCollection(direcciones, true);
 
             range.AutoFitColumns();
 
@@ -1425,7 +1811,7 @@ namespace FacturasXMLAExcelManager
                 f.CodigoImpuestoEspecifico2 = "";
                 f.MontoImpuestoEspecifico2 = "";
 
-                //Modalidad es necesaria para la nota de credito
+                //Modalidad es necesaria solo para las notas de credito
                 f.Modalidad = "";
 
 
@@ -1822,12 +2208,18 @@ namespace FacturasXMLAExcelManager
         private String determinarCentroDeCosto(String centroDeCostoComoString, Boolean esPSCP)
         {
             String centroDeCosto = "";
-            //se supone que a veces vienen cosas como STGO PN8000
 
 
             switch (centroDeCostoComoString)
             {
                 case "CURICO":
+                    centroDeCosto = "202";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "302";
+                    }
+                    break;
+                case "TALCA":
                     centroDeCosto = "202";
                     if (esPSCP)
                     {
@@ -1855,6 +2247,13 @@ namespace FacturasXMLAExcelManager
                         centroDeCosto = "307";
                     }
                     break;
+                case "CURAUMA":
+                    centroDeCosto = "207";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "307";
+                    }
+                    break;
                 case "SANTIAGO SUR":
                     centroDeCosto = "206";
                     if (esPSCP)
@@ -1862,8 +2261,21 @@ namespace FacturasXMLAExcelManager
                         centroDeCosto = "306";
                     }
                     break;
+                case "STGO PN1500":
+                    centroDeCosto = "206";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "306";
+                    }
+                    break;
+                case "STGO PN8000":
+                    centroDeCosto = "208";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "308";
+                    }
+                    break;
                 case "SANTIAGO":
-                    //Santiago es emprendedor?
                     centroDeCosto = "206";
                     if (esPSCP)
                     {
@@ -1875,6 +2287,20 @@ namespace FacturasXMLAExcelManager
                     if (esPSCP)
                     {
                         centroDeCosto = "305";
+                    }
+                    break;
+                case "COQUIMBO":
+                    centroDeCosto = "204";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "304";
+                    }
+                    break;
+                case "OVALLE":
+                    centroDeCosto = "204";
+                    if (esPSCP)
+                    {
+                        centroDeCosto = "304";
                     }
                     break;
                 default:
@@ -1912,6 +2338,12 @@ namespace FacturasXMLAExcelManager
                 case "52":
                     //es guia de despacho, así que no se ingresa a Manager
                     tipoDeFactura = "guia de despacho";
+                    break;
+                case "51":
+                    tipoDeFactura = "NDCE";
+                    break;
+                case "56":
+                    tipoDeFactura = "NDCE";
                     break;
                 default:
                     tipoDeFactura = codigoDeDocumento;
@@ -2125,10 +2557,7 @@ namespace FacturasXMLAExcelManager
                 }
 
 
-
-
             }
-
 
 
             //aqui habria que guardar el Excel
@@ -2247,14 +2676,15 @@ namespace FacturasXMLAExcelManager
             }
             
 
-            Double valorIvaCalculado = (int.Parse(afecto) * 19) / 100;
+            Double valorIvaCalculado = Math.Round((int.Parse(afecto) * 0.19));
             String valorIvaCalculadoComoString = valorIvaCalculado.ToString();
 
             if (valorIvaCalculadoComoString != iva)
             {
                 valorDeIvaARetornar = valorIvaCalculadoComoString;
-                f.Glosa = "IVA alterado, favor revisar factura y costeo";
-                f.CentroDeCostos = "209";
+                //f.Glosa = "Iva no coincide con calculos de Manager";
+                //f.CentroDeCostos = "209";
+                
 
             }
 
@@ -2408,11 +2838,38 @@ namespace FacturasXMLAExcelManager
             }
             else
             {
+                //si la fecha de vencimiento no esta presente, entonces la fecha de vencimiento debiese ser igual a la fecha de emision
                 fechaValida = "Fecha de vencimiento ausente en factura";
             }
             return fechaValida;
 
         }
+
+        public String validarQueFechaVencimientoNoPrecedaAFechaDeEmision(String fechaDeEmision, String fechaDeVencimiento)
+        {
+            String fechaCorrectaDeVencimiento = fechaDeVencimiento;
+
+            string[] datos = fechaDeEmision.Split('/');
+            if (fechaDeVencimiento != "Fecha de vencimiento ausente en factura")
+            {
+                //fecha de vencimiento no esta vacia
+                string[] datos2 = fechaDeVencimiento.Split('/');
+
+                if (int.Parse(datos[0]) > int.Parse(datos2[0]))
+                {
+                  
+                    fechaCorrectaDeVencimiento = fechaDeEmision;
+                }
+
+            }
+            else
+            {
+                fechaCorrectaDeVencimiento = fechaDeEmision;
+            }
+            
+            return fechaCorrectaDeVencimiento;
+        }
+
 
         public String convertirAFechaValidaParaNCEEConFolio(String fechaAConvertir)
         {
@@ -2440,8 +2897,101 @@ namespace FacturasXMLAExcelManager
             String fechaVencimientoDeFactura = "Esta debiese ser una fecha de vencimientoDeCopec";
 
 
+            string[] datos = fechaDeEmision.Split('/');
+
+            int mes = int.Parse(datos[1]);
+            int anio = int.Parse(datos[0]);
+            if (mes == 12)
+            {
+                anio = anio + 1;
+                mes = 01;
+            }
+            else
+            {
+                mes = mes + 1;
+            }
+
+            fechaVencimientoDeFactura = datos[2] + "/" + mes.ToString() + "/" + anio.ToString();
+
             return fechaVencimientoDeFactura;
 
+        }
+
+        public String determinarCodigoDeProducto(String rutCliente, String tipoDeFactura, String codigoDelProducto)
+        {
+
+            // los ruts de CCU son:
+            // 91041000-8
+            //96989120-4
+            //99501760-1
+            //99554560-8
+            //99586280-8
+
+            //el rut de COPEC es:
+            //99520000-7, y se supone que es el único que tiene que tener
+            //tratamiento especial
+
+            String codigoDeProducto = "";
+            if (rutCliente== "91041000-8" || rutCliente == "96989120-4" || rutCliente == "99501760-1" || rutCliente == "99554560-8" || rutCliente == "99586280-8")
+            {
+                if (tipoDeFactura == "FCEE")
+                {
+                    codigoDeProducto = "420724E";
+                }
+                else
+                {
+                    codigoDeProducto = "420724";
+                }
+            }
+            else
+            {
+                codigoDeProducto = codigoDelProducto;
+            }
+
+            return codigoDeProducto;
+        }
+
+        public Boolean determinarSiEsRutDeCCU(String rutAVerificar)
+        {
+            Boolean esRutDeCCU = false;
+
+
+            switch (rutAVerificar)
+            {
+                case "91041000-8":
+                    esRutDeCCU = true;
+                    break;
+                case "96989120-4":
+                    esRutDeCCU = true;
+                    break;
+                case "99501760-1":
+                    esRutDeCCU = true;
+                    break;
+                case "99554560-8":
+                    esRutDeCCU = true;
+                    break;
+                case "99586280-8":
+                    esRutDeCCU = true;
+                    break;
+                default:
+                    esRutDeCCU = false;
+                    break;
+            }
+
+            return esRutDeCCU;
+
+        }
+
+        public String direccionSiEsQueEnManagerNoTiene(String rut)
+        {
+            String dir = "Casa Matriz";
+
+            if(rut== "19043336-6" || rut == "79936340-2" || rut == "77178392-9")
+            {
+                dir = "";
+            }
+
+            return dir;
         }
 
 
