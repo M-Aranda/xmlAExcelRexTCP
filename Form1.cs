@@ -32,6 +32,7 @@ namespace FacturasXMLAExcelManager
             button5.Visible = false;
 
 
+
             //hay que generar los siguientes excel:
             //uno para los documentos de CCU que sean FACE o FCEE, esos van contabilizados de una (documento con detalles (contabilizado))
             //uno para los documentos no CCU y las notas de credito de cualquier cliente (documento con detalle)
@@ -2677,14 +2678,21 @@ namespace FacturasXMLAExcelManager
             
 
             Double valorIvaCalculado = Math.Round((int.Parse(afecto) * 0.19));
+
+
             String valorIvaCalculadoComoString = valorIvaCalculado.ToString();
 
             if (valorIvaCalculadoComoString != iva)
             {
                 valorDeIvaARetornar = valorIvaCalculadoComoString;
-                //f.Glosa = "Iva no coincide con calculos de Manager";
-                //f.CentroDeCostos = "209";
-                
+                //validar que si termina en .5 se redondee hacia arriba
+
+                if (valorIvaCalculado % 0.5f == 0){
+                    valorIvaCalculado = valorIvaCalculado + 1.0;
+                                             
+                }
+
+
 
             }
 
