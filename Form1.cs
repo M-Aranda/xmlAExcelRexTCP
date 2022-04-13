@@ -594,6 +594,11 @@ namespace FacturasXMLAExcelManager
                                 //se sube a documento con detalle (contabilizado)
                                 FacturaContabilizada fc = new FacturaContabilizada();
                                 fc = fc.convertirFacturaAIngresarAFacturaContabilizada(f);
+                                if (fc.CentroDeCostos=="204")
+                                {
+                                    fc.CodigoDeUnidadDeNegocio = "2";
+                                }
+
                                 facturasAIngresarContabilizadas.Add(fc);
                             }
                             else if (f.RutCliente != "91041000-8" && f.RutCliente != "96989120-4" && f.RutCliente != "99501760-1" && f.RutCliente != "99554560-8" && f.RutCliente != "99586280-8")
@@ -791,6 +796,11 @@ namespace FacturasXMLAExcelManager
 
 
                             FacturaContabilizada fcNCCE1 = new FacturaContabilizada();
+
+                            if (fcNCCE1.CentroDeCostos == "204")
+                            {
+                                fcNCCE1.CodigoDeUnidadDeNegocio = "2";
+                            }
                             facturasAIngresarContabilizadas.Add(fcNCCE1.convertirFacturaAIngresarAFacturaContabilizada(factuarNCCEADocumentoContable));
                         }
                         else
@@ -976,7 +986,11 @@ namespace FacturasXMLAExcelManager
                                 factuarNCCEADocumentoContable2.CodigoKitFlexible = facNCCE2.CodigoKitFlexible;
                                 factuarNCCEADocumentoContable2.AjusteIva = facNCCE2.AjusteIva;
 
-                                FacturaContabilizada fcNCCE2 = new FacturaContabilizada();  
+                                FacturaContabilizada fcNCCE2 = new FacturaContabilizada();
+                                if (fcNCCE2.CentroDeCostos == "204")
+                                {
+                                    fcNCCE2.CodigoDeUnidadDeNegocio = "2";
+                                }
                                 facturasAIngresarContabilizadas.Add(fcNCCE2.convertirFacturaAIngresarAFacturaContabilizada(factuarNCCEADocumentoContable2));
                             }
                             else
@@ -1227,6 +1241,12 @@ namespace FacturasXMLAExcelManager
                             //se sube a documento con detalle (contabilizado)
                             FacturaContabilizada fc = new FacturaContabilizada();
                             fc = fc.convertirFacturaAIngresarAFacturaContabilizada(f);
+                            if (fc.CentroDeCostos == "204")
+                            {
+                                fc.CodigoDeUnidadDeNegocio = "2";
+                            }
+
+                           
                             facturasAIngresarContabilizadas.Add(fc);
                         }
                         else if (f.RutCliente != "91041000-8" && f.RutCliente != "96989120-4" && f.RutCliente != "99501760-1" && f.RutCliente != "99554560-8" && f.RutCliente != "99586280-8")
