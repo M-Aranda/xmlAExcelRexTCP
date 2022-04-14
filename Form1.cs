@@ -1243,6 +1243,12 @@ namespace FacturasXMLAExcelManager
                             fc = fc.convertirFacturaAIngresarAFacturaContabilizada(f);
                             if (fc.CentroDeCostos == "204")
                             {
+                                //hay 4 unidades de negocio:
+                                //Porteo (1)
+                                //Acarreo (2)
+                                //Emprendedores (3)
+                                //Administración (4)
+
                                 fc.CodigoDeUnidadDeNegocio = "2";
                             }
 
