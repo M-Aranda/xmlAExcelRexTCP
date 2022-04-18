@@ -84,6 +84,79 @@ namespace FacturasXMLAExcelManager
          
         }
 
+        public Factura(FacturaContabilizada fcontab)
+        {
+            this.TipoDeDocumento = fcontab.TipoDeDocumento;
+            this.NumeroDelDocumento = fcontab.NumeroDelDocumento;
+            this.FechaDeDocumento = fcontab.FechaDeDocumento;
+            this.FechaContableDeDocumento = fcontab.FechaContableDeDocumento;
+            this.FechaDeVencimientoDeDocumento = fcontab.FechaDeVencimientoDeDocumento;
+            this.CodigoDeUnidadDeNegocio = fcontab.CodigoDeUnidadDeNegocio;
+            this.RutCliente = fcontab.RutCliente;
+            this.DireccionDelCliente = fcontab.DireccionDelCliente;
+            this.RutFacturador = fcontab.RutFacturador;
+            this.CodigoVendedor = fcontab.CodigoVendedor;
+            this.CodigoComisionista = fcontab.CodigoComisionista;
+            this.Probabilidad = fcontab.Probabilidad;
+            this.ListaPrecio = fcontab.ListaPrecio;
+            this.PlazoPago = fcontab.PlazoPago;
+            this.MonedaDelDocumento = fcontab.MonedaDelDocumento;
+            this.TasaDeCambio = fcontab.TasaDeCambio;
+            this.MontoAfecto = fcontab.MontoAfecto;
+            this.MontoExento = fcontab.MontoExento;
+            this.MontoIva = fcontab.MontoIva;
+            this.MontoImpuestosEspecificos = fcontab.MontoImpuestosEspecificos;
+            this.MontoIvaRetenido = fcontab.MontoIvaRetenido;
+            this.MontoImpuestosRetenidos = fcontab.MontoImpuestosRetenidos;
+            this.TipoDeDescuentoGlobal = fcontab.TipoDeDescuentoGlobal;
+            this.DescuentoGlobal = fcontab.DescuentoGlobal;
+            this.TotalDelDocumento = fcontab.TotalDelDocumento;
+            this.DeudaPendiente = fcontab.DeudaPendiente;
+            this.TipoDocReferencia = fcontab.TipoDocReferencia;
+            this.NumDocReferencia = fcontab.NumDocReferencia;
+            this.FechaDocReferencia = fcontab.FechaDocReferencia;
+            this.CodigoDelProducto = fcontab.CodigoDelProducto;
+            this.Cantidad = fcontab.Cantidad;
+            this.Unidad = fcontab.Unidad;
+            this.PrecioUnitario = fcontab.PrecioUnitario;
+            this.MonedaDelDetalle = fcontab.MonedaDelDetalle;
+            this.TasaDeCambio2 = fcontab.TasaDeCambio2;
+            this.NumeroDeSerie = fcontab.NumeroDeSerie;
+            this.NumeroDeLote = fcontab.NumeroDeLote;
+            this.FechaDeVencimiento = fcontab.FechaDeVencimiento;
+            this.CentroDeCostos = fcontab.CentroDeCostos;
+            this.TipoDeDescuento = fcontab.TipoDeDescuento;
+            this.Descuento = fcontab.Descuento;
+            this.Ubicacion = fcontab.Ubicacion;
+            this.Bodega = fcontab.Bodega;
+            this.Concepto1 = fcontab.Concepto1;
+            this.Concepto2 = fcontab.Concepto2;
+            this.Concepto3 = fcontab.Concepto3;
+            this.Concepto4 = fcontab.Concepto4;
+            this.Descripcion = fcontab.Descripcion;
+            this.DescripcionAdicional = fcontab.DescripcionAdicional;
+            this.Stock = fcontab.Stock;
+            Comentario11 = fcontab.Comentario11;
+            Comentario21 = fcontab.Comentario21;
+            Comentario31 = fcontab.Comentario31;
+            Comentario41 = fcontab.Comentario41;
+            Comentario51 = fcontab.Comentario51;
+            this.CodigoImpuestoEspecifico1 = fcontab.CodigoImpuestoEspecifico1;
+            this.MontoImpuestoEspecifico1 = fcontab.MontoImpuestoEspecifico1;
+            this.CodigoImpuestoEspecifico2 = fcontab.CodigoImpuestoEspecifico2;
+            this.MontoImpuestoEspecifico2 = fcontab.MontoImpuestoEspecifico2;
+            this.Modalidad = fcontab.Modalidad;
+            this.Glosa = fcontab.Glosa;
+            this.Referencia = fcontab.Referencia;
+            this.FechaDeComprometida = fcontab.FechaDeComprometida;
+            this.PorcentajeCEEC = fcontab.PorcentajeCEEC;
+            this.ImpuestoLey18211 = fcontab.ImpuestoLey18211;
+            this.IvaLey18211 = fcontab.IvaLey18211;
+            this.CodigoKitFlexible = fcontab.CodigoKitFlexible;
+            this.AjusteIva = fcontab.AjusteIva;
+
+        }
+
         public Factura(string tipoDeDocumento, string numeroDelDocumento, string fechaDeDocumento, string fechaContableDeDocumento, string fechaDeVencimientoDeDocumento, string codigoDeUnidadDeNegocio, string rutCliente, string direccionDelCliente, string rutFacturador, string codigoVendedor, string codigoComisionista, string probabilidad, string listaPrecio, string plazoPago, string monedaDelDocumento, string tasaDeCambio, string montoAfecto, string montoExento, string montoIva, string montoImpuestosEspecificos, string montoIvaRetenido, string montoImpuestosRetenidos, string tipoDeDescuentoGlobal, string descuentoGlobal, string totalDelDocumento, string deudaPendiente, string tipoDocReferencia, string numDocReferencia, string fechaDocReferencia, string codigoDelProducto, string cantidad, string unidad, string precioUnitario, string monedaDelDetalle, String tasaDeCambio2, string numeroDeSerie, string numeroDeLote, string fechaDeVencimiento, string centroDeCostos, string tipoDeDescuento, string descuento, string ubicacion, string bodega, string concepto1, string concepto2, string concepto3, string concepto4, string descripcion, string descripcionAdicional, string stock, string comentario1, string comentario2, string comentario3, string comentario4, string comentario5, string codigoImpuestoEspecifico1, string montoImpuestoEspecifico1, string codigoImpuestoEspecifico2, string montoImpuestoEspecifico2, string modalidad, string glosa, string referencia, String fechaDeComprometida, string porcentajeCEEC, string impuestoLey18211, string ivaLey18211, string codigoKitFlexible, string ajusteIva)
         {
             this.TipoDeDocumento = tipoDeDocumento;

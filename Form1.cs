@@ -1350,14 +1350,55 @@ namespace FacturasXMLAExcelManager
 
             MessageBox.Show("Se procesaron "+cantidadFACE.ToString()+" facturas afectas, "+cantidadFCEE.ToString()+" facturas exentas, "+cantidadNCCE.ToString()+" notas de crédito y "+cantidadDeGuiasDeDespacho.ToString()+" guías de despacho. El total fue de "+totalDeFacturas);
 
+            //14-04-2022: se agrega ciclo para tratar facturas de Eccusa y Cervecera
+
+            foreach (var item in facturasAIngresarContabilizadas)
+            {
+                //si factura a contabilizar es de cervecera o de eccusa, debe quedar como pendiente
+                if ((item.CentroDeCostos == "206 ECCUSA") || (item.CentroDeCostos == "306 ECCUSA") || (item.CentroDeCostos == "208 CERVECERA") || (item.CentroDeCostos == "308 CERVECERA"))
+                {
+                    //agregar comentario
+                    switch (item.CentroDeCostos)
+                    {
+                        case "206 ECCUSA":
+                            item.Glosa = "Factura de Eccusa";
+                            break;
+                        case "306 ECCUSA":
+                            item.Glosa = "Factura de Eccusa";
+                            break;
+                        case "208 CERVECERA":
+                            item.Glosa = "Factura de Cervecera";
+                            break;
+                        case "308 CERVECERA":
+                            item.Glosa = "Factura de Cervecera";
+                            break;
+                        default:
+                            break;
+                    }
+
+
+                    item.CentroDeCostos = "209";
+
+
+                    Factura f = new Factura(item);
+                    facturasAIngresar.Add(f);
+
+                    
+                }
+            }
+
+            //segun lo anterior, si la factura de CCU era de CERVECERA o de Talca, esta debe quedar pendiente, por lo que
+            //se quita de las contabilizadas
+            facturasAIngresarContabilizadas.RemoveAll(item => item.CentroDeCostos == "209");
+
 
             String pathDeDescargas = getCarpetaDeDescargas();
-            pathDeDescargas = pathDeDescargas + "" + @"\Archivo de facturas de CCU para subir a Documentos con detalle (contabilizado).xlsx";
+            pathDeDescargas = pathDeDescargas + "" + @"\CCU (Documentos con detalle (contabilizado)).xlsx";
             var archivo = new FileInfo(pathDeDescargas);
             SaveExcelFileFacturasCCU(facturasAIngresarContabilizadas, archivo);
 
             pathDeDescargas = getCarpetaDeDescargas();
-            pathDeDescargas = pathDeDescargas + "" + @"\Archivo de facturas (NO CCU) para subir a Documentos con detalle.xlsx";
+            pathDeDescargas = pathDeDescargas + "" + @"\NO CCU y CCU pendientes (documentos con detalle).xlsx";
             archivo = new FileInfo(pathDeDescargas);
             SaveExcelFile(facturasAIngresar, archivo);
 
@@ -2289,17 +2330,19 @@ namespace FacturasXMLAExcelManager
                     }
                     break;
                 case "STGO PN1500":
-                    centroDeCosto = "206";
+                    //es Eccusa
+                    centroDeCosto = "206 ECCUSA";
                     if (esPSCP)
                     {
-                        centroDeCosto = "306";
+                        centroDeCosto = "306 ECCUSA";
                     }
                     break;
                 case "STGO PN8000":
-                    centroDeCosto = "208";
+                    //es Cervecera
+                    centroDeCosto = "208 CERVECERA";
                     if (esPSCP)
                     {
-                        centroDeCosto = "308";
+                        centroDeCosto = "308 CERVECERA";
                     }
                     break;
                 case "SANTIAGO":
