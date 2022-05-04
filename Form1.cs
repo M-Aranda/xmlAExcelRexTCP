@@ -1511,6 +1511,18 @@ namespace FacturasXMLAExcelManager
             await package.SaveAsync();
         }
 
+        private static async Task SaveExcelFileCosteoFacturasCCU(List<RegistroCruzadoConInformacionDeCCU> facturasDeCCUCosteadas, FileInfo file)
+        {
+            var package = new ExcelPackage(file);
+            var ws = package.Workbook.Worksheets.Add("Facturas de CCU costeadas");
+
+            var range = ws.Cells["A1"].LoadFromCollection(facturasDeCCUCosteadas, true);
+
+            range.AutoFitColumns();
+
+            await package.SaveAsync();
+        }
+
 
 
         public string getValue(string _clave, String pathDelArchivo)
@@ -3071,11 +3083,200 @@ namespace FacturasXMLAExcelManager
             return dir;
         }
 
+        private void button6_Click(object sender, EventArgs e)
+        {
+            //aqui habria que tomar un excel que tenga 2 hojas, la primera con las facturas de CCU, y la segunda con el centro que les corresponde
+
+
+            string sFileName = "";
+
+            OpenFileDialog choofdlog = new OpenFileDialog();
+            choofdlog.Filter = "Archivos XLSX (*.xlsx)|*.xlsx";
+            choofdlog.FilterIndex = 1;
+            choofdlog.Multiselect = true;
+
+            string[] arrAllFiles = new string[] { };
+
+            MessageBox.Show("Seleccionar excel de facturas de manager");
+            if (choofdlog.ShowDialog() == DialogResult.OK)
+            {
+                sFileName = choofdlog.FileName;
+                arrAllFiles = choofdlog.FileNames; //used when Multiselect = true           
+            }
+
+
+            List<RegistroCruzadoConInformacionDeCCU> excelCruzadoConInfoDeCCU = leerExcelDeFacturasCCUACruzar(sFileName);
+
+            String pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Facturas de CCU costeadas.xlsx";
+            var archivo = new FileInfo(pathDeDescargas);
+            SaveExcelFileCosteoFacturasCCU(excelCruzadoConInfoDeCCU, archivo);
+            MessageBox.Show("Se creo archivo de facturas de CCU costeadas en carpeta de descargas");
+        }
+
+
+
+
+
+        private List<RegistroCruzadoConInformacionDeCCU> leerExcelDeFacturasCCUACruzar(String filePath)
+        {
+            List<RegistroCruzadoConInformacionDeCCU> listadoDeFacturasCruzadasConInfoDeCCU = new List<RegistroCruzadoConInformacionDeCCU>();
+            List<RegistroDeCCU> listadoDeRegistrosDeCCU = new List<RegistroDeCCU>();
+
+            FileInfo existingFile = new FileInfo(filePath);
+            using (ExcelPackage package = new ExcelPackage(existingFile))
+            {
+                //get the first worksheet in the workbook
+                ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+                int colCount = worksheet.Dimension.End.Column;  //get Column Count
+                int rowCount = worksheet.Dimension.End.Row;     //get row count
+          
+                for (int row = 1; row <= rowCount; row++)
+                {
+
+                    RegistroCruzadoConInformacionDeCCU rccic = new RegistroCruzadoConInformacionDeCCU();
+                    rccic.TipoDeDocumento = worksheet.Cells[row, 1].Value?.ToString().Trim();
+                    rccic.NumeroDelDocumento = worksheet.Cells[row, 2].Value?.ToString().Trim();
+                    rccic.FechaDeDocumento = worksheet.Cells[row, 3].Value?.ToString().Trim();
+                    rccic.FechaContableDeDocumento = worksheet.Cells[row, 4].Value?.ToString().Trim();
+                    rccic.FechaDeVencimientoDeDocumento = worksheet.Cells[row, 5].Value?.ToString().Trim();
+                    rccic.CodigoDeUnidadDeNegocio = worksheet.Cells[row, 6].Value?.ToString().Trim();
+                    rccic.RutCliente = worksheet.Cells[row, 7].Value?.ToString().Trim();
+                    rccic.DireccionDelCliente = worksheet.Cells[row, 8].Value?.ToString().Trim();
+                    rccic.RutFacturador = worksheet.Cells[row, 9].Value?.ToString().Trim();
+                    rccic.CodigoVendedor = worksheet.Cells[row, 10].Value?.ToString().Trim();
+                    rccic.CodigoComisionista = worksheet.Cells[row, 11].Value?.ToString().Trim();
+                    rccic.Probabilidad = worksheet.Cells[row, 12].Value?.ToString().Trim();
+                    rccic.ListaPrecio = worksheet.Cells[row, 13].Value?.ToString().Trim();
+                    rccic.PlazoPago = worksheet.Cells[row, 14].Value?.ToString().Trim();
+                    rccic.MonedaDelDocumento = worksheet.Cells[row, 15].Value?.ToString().Trim();
+                    rccic.TasaDeCambio = worksheet.Cells[row, 16].Value?.ToString().Trim();
+                    rccic.MontoAfecto = worksheet.Cells[row, 17].Value?.ToString().Trim();
+                    rccic.MontoExento = worksheet.Cells[row, 18].Value?.ToString().Trim();
+                    rccic.MontoIva = worksheet.Cells[row, 19].Value?.ToString().Trim();
+                    rccic.MontoImpuestosEspecificos = worksheet.Cells[row, 20].Value?.ToString().Trim();
+                    rccic.MontoIvaRetenido = worksheet.Cells[row, 21].Value?.ToString().Trim();
+                    rccic.MontoImpuestosRetenidos = worksheet.Cells[row, 22].Value?.ToString().Trim();
+                    rccic.TipoDeDescuentoGlobal = worksheet.Cells[row, 23].Value?.ToString().Trim();
+                    rccic.DescuentoGlobal = worksheet.Cells[row, 24].Value?.ToString().Trim();
+                    rccic.TotalDelDocumento = worksheet.Cells[row, 25].Value?.ToString().Trim();
+                    rccic.DeudaPendiente = worksheet.Cells[row, 26].Value?.ToString().Trim();
+                    rccic.TipoDocReferencia = worksheet.Cells[row, 27].Value?.ToString().Trim();
+                    rccic.NumDocReferencia = worksheet.Cells[row, 28].Value?.ToString().Trim();
+                    rccic.FechaDocReferencia = worksheet.Cells[row, 29].Value?.ToString().Trim();
+                    rccic.CodigoDelProducto = worksheet.Cells[row, 30].Value?.ToString().Trim();
+                    rccic.Cantidad = worksheet.Cells[row, 31].Value?.ToString().Trim();
+                    rccic.Unidad = worksheet.Cells[row, 32].Value?.ToString().Trim();
+                    rccic.PrecioUnitario = worksheet.Cells[row, 33].Value?.ToString().Trim();
+                    rccic.MonedaDelDetalle = worksheet.Cells[row, 34].Value?.ToString().Trim();
+                    rccic.TasaDeCambio2 = worksheet.Cells[row, 35].Value?.ToString().Trim();
+                    rccic.NumeroDeSerie = worksheet.Cells[row, 36].Value?.ToString().Trim();
+                    rccic.NumeroDeLote = worksheet.Cells[row, 37].Value?.ToString().Trim();
+                    rccic.FechaDeVencimiento = worksheet.Cells[row, 38].Value?.ToString().Trim();
+                    rccic.CentroDeCostos = worksheet.Cells[row, 39].Value?.ToString().Trim();
+                    rccic.TipoDeDescuento = worksheet.Cells[row, 40].Value?.ToString().Trim();
+                    rccic.Descuento = worksheet.Cells[row, 41].Value?.ToString().Trim();
+                    rccic.Ubicacion = worksheet.Cells[row, 42].Value?.ToString().Trim();
+                    rccic.Bodega = worksheet.Cells[row, 43].Value?.ToString().Trim();
+                    rccic.Concepto1 = worksheet.Cells[row, 44].Value?.ToString().Trim();
+                    rccic.Concepto2 = worksheet.Cells[row, 45].Value?.ToString().Trim();
+                    rccic.Concepto3 = worksheet.Cells[row, 46].Value?.ToString().Trim();
+                    rccic.Concepto4 = worksheet.Cells[row, 47].Value?.ToString().Trim();
+                    rccic.Descripcion = worksheet.Cells[row, 48].Value?.ToString().Trim();
+                    rccic.DescripcionAdicional = worksheet.Cells[row, 49].Value?.ToString().Trim();
+                    rccic.Stock = worksheet.Cells[row, 50].Value?.ToString().Trim();
+                    rccic.Comentario11 = worksheet.Cells[row, 51].Value?.ToString().Trim();
+                    rccic.Comentario21 = worksheet.Cells[row, 52].Value?.ToString().Trim();
+                    rccic.Comentario31 = worksheet.Cells[row, 53].Value?.ToString().Trim();
+                    rccic.Comentario41 = worksheet.Cells[row, 54].Value?.ToString().Trim();
+                    rccic.Comentario51 = worksheet.Cells[row, 55].Value?.ToString().Trim();
+                    rccic.CodigoImpuestoEspecifico1 = worksheet.Cells[row, 56].Value?.ToString().Trim();
+                    rccic.MontoImpuestoEspecifico1 = worksheet.Cells[row, 57].Value?.ToString().Trim();
+                    rccic.CodigoImpuestoEspecifico2 = worksheet.Cells[row, 58].Value?.ToString().Trim();
+                    rccic.MontoImpuestoEspecifico2 = worksheet.Cells[row, 59].Value?.ToString().Trim();
+                    rccic.Modalidad = worksheet.Cells[row, 60].Value?.ToString().Trim();
+                    rccic.Glosa = worksheet.Cells[row, 61].Value?.ToString().Trim();
+                    rccic.Referencia = worksheet.Cells[row, 62].Value?.ToString().Trim();
+                    rccic.FechaDeComprometida = worksheet.Cells[row, 63].Value?.ToString().Trim();
+                    rccic.PorcentajeCEEC = worksheet.Cells[row, 64].Value?.ToString().Trim();
+                    rccic.ImpuestoLey18211 = worksheet.Cells[row, 65].Value?.ToString().Trim();
+                    rccic.IvaLey18211 = worksheet.Cells[row, 66].Value?.ToString().Trim();
+                    rccic.CodigoKitFlexible = worksheet.Cells[row, 67].Value?.ToString().Trim();
+                    rccic.AjusteIva = worksheet.Cells[row, 68].Value?.ToString().Trim();
+
+                    listadoDeFacturasCruzadasConInfoDeCCU.Add(rccic);
+
+                }
+
+                ExcelWorksheet worksheet2 = package.Workbook.Worksheets[1];
+                int colCount2 = worksheet2.Dimension.End.Column;  //get Column Count
+                int rowCount2 = worksheet2.Dimension.End.Row;     //get row count
+
+
+                for (int row = 1; row <= rowCount2; row++)
+                {
+
+                    RegistroDeCCU rCCU = new RegistroDeCCU();
+                    rCCU.Rut = worksheet2.Cells[row, 1].Value?.ToString().Trim();
+                    rCCU.Folio = worksheet2.Cells[row, 2].Value?.ToString().Trim();
+                    rCCU.Centro = worksheet2.Cells[row, 3].Value?.ToString().Trim();
+
+                    listadoDeRegistrosDeCCU.Add(rCCU);
+
+                }
+
+
+
+                foreach (var item in listadoDeRegistrosDeCCU)
+                {
+                    foreach (var item2 in listadoDeFacturasCruzadasConInfoDeCCU)
+                    {
+
+                        if ( (item.Rut==item2.RutCliente) && (item.Folio == item2.NumeroDelDocumento))
+                        {
+                            //MessageBox.Show("Entro al ciclo");
+                            //MessageBox.Show("el rut es " + item.Rut);
+                            //MessageBox.Show("el folio es " + item.Folio);
+                            //MessageBox.Show("el Centro es " + item.Centro);
+                            
+
+                            //switch para determinar a que centro de costo va
+                            switch (item.Centro)
+                            {
+                                case "MELIPILLA":
+                                    item2.CentroDeCostos = "ESTO SE CAMBIO";
+                                    break;
+                                case "INTERPLANTA":
+                                    item2.CentroDeCostos = "204";
+                                    item2.CodigoDeUnidadDeNegocio = "2";
+                                    break;
+                                default:
+                                    item2.CentroDeCostos = "209";
+                                    break;
+
+                            }
+
+                           
+
+
+                            //MessageBox.Show("el centro de costos es " + item2.CentroDeCostos);
+                            
+
+
+
+                        }
+
+
+                    }
+
+                }
+
+            }
+            return listadoDeFacturasCruzadasConInfoDeCCU;
+
+        }
 
 
     }
-
-
 
 
 }

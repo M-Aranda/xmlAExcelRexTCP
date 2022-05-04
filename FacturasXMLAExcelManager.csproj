@@ -132,6 +132,8 @@
     <Compile Include="MatchFacturaManagerCTACTE.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegistroCruzadoConInformacionDeCCU.cs" />
+    <Compile Include="RegistroDeCCU.cs" />
     <Compile Include="Reporte.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
