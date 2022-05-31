@@ -3097,7 +3097,7 @@ namespace FacturasXMLAExcelManager
 
             string[] arrAllFiles = new string[] { };
 
-            MessageBox.Show("Seleccionar excel de facturas de manager");
+            MessageBox.Show("Seleccionar excel de facturas de manager (debe tener 2 hojas)");
             if (choofdlog.ShowDialog() == DialogResult.OK)
             {
                 sFileName = choofdlog.FileName;
@@ -3233,21 +3233,51 @@ namespace FacturasXMLAExcelManager
 
                         if ( (item.Rut==item2.RutCliente) && (item.Folio == item2.NumeroDelDocumento))
                         {
-                            //MessageBox.Show("Entro al ciclo");
-                            //MessageBox.Show("el rut es " + item.Rut);
-                            //MessageBox.Show("el folio es " + item.Folio);
-                            //MessageBox.Show("el Centro es " + item.Centro);
-                            
+
+
+
+                            item2.Glosa = "COSTEADO CON INFO DE CCU";
+
+                            //203 / 303   Administracion
+                            //204 / 304   Interplantas
+                            //208 / 308   Emprendedores
+                            //205 / 305   Illapel
+                            //207 / 307   San Antonio
+                            //200 / 300   Melipilla
+                            //206 / 306   Santiago
+                            //201 / 301   Rancagua
+                            //202 / 302   Curico
 
                             //switch para determinar a que centro de costo va
                             switch (item.Centro)
                             {
-                                case "MELIPILLA":
-                                    item2.CentroDeCostos = "ESTO SE CAMBIO";
+                                case "ADMINISTRACION":
+                                    item2.CentroDeCostos = "203";
                                     break;
                                 case "INTERPLANTA":
                                     item2.CentroDeCostos = "204";
                                     item2.CodigoDeUnidadDeNegocio = "2";
+                                    break;
+                                case "EMPRENDEDORES":
+                                    item2.CentroDeCostos = "308";
+                                    break;
+                                case "ILLAPEL":
+                                    item2.CentroDeCostos = "205";
+                                    break;
+                                case "SAN ANTONIO":
+                                    item2.CentroDeCostos = "207";
+                                    break;
+                                case "MELIPILLA":
+                                    item2.CentroDeCostos = "200";
+                                    break;
+                                case "SANTIAGO":
+                                    item2.CentroDeCostos = "206";
+                                    break;
+                                case "RANCAGUA":
+                                    item2.CentroDeCostos = "201";
+                                    break;
+                                case "CURICO":
+                                    item2.CentroDeCostos = "202";
                                     break;
                                 default:
                                     item2.CentroDeCostos = "209";
@@ -3256,12 +3286,7 @@ namespace FacturasXMLAExcelManager
                             }
 
                            
-
-
-                            //MessageBox.Show("el centro de costos es " + item2.CentroDeCostos);
-                            
-
-
+                           
 
                         }
 
