@@ -116,6 +116,7 @@
   <ItemGroup>
     <Compile Include="CdgItem.cs" />
     <Compile Include="CobroCTACTE.cs" />
+    <Compile Include="CosteoDeFacturaNOCCU.cs" />
     <Compile Include="DetalleDeFactura.cs" />
     <Compile Include="DireccionDeCCU.cs" />
     <Compile Include="Factura.cs" />
@@ -129,6 +130,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="GuiaDeDespacho.cs" />
+    <Compile Include="IdentificadorDeFactura.cs" />
     <Compile Include="MatchFacturaManagerCTACTE.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

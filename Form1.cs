@@ -2748,6 +2748,8 @@ namespace FacturasXMLAExcelManager
 
 
 
+
+
         private String calcularIvaComoManager(String afecto, String iva, Factura f)
         {
             String valorDeIvaARetornar = iva;
@@ -3234,8 +3236,6 @@ namespace FacturasXMLAExcelManager
                         if ( (item.Rut==item2.RutCliente) && (item.Folio == item2.NumeroDelDocumento))
                         {
 
-
-
                             item2.Glosa = "COSTEADO CON INFO DE CCU";
 
                             //203 / 303   Administracion
@@ -3285,8 +3285,6 @@ namespace FacturasXMLAExcelManager
 
                             }
 
-                           
-                           
 
                         }
 
@@ -3297,6 +3295,372 @@ namespace FacturasXMLAExcelManager
 
             }
             return listadoDeFacturasCruzadasConInfoDeCCU;
+
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            Console.WriteLine("Se llama a funcion para costear detalles de facturas");
+
+
+            //hay que tomar un Excel con 2 hojas; la primera con las facturas a costear, la segunda con el costeo de estas facturas
+
+            string sFileName = "";
+
+            OpenFileDialog choofdlog = new OpenFileDialog();
+            choofdlog.Filter = "Archivos XLSX (*.xlsx)|*.xlsx";
+            choofdlog.FilterIndex = 1;
+            choofdlog.Multiselect = true;
+
+            string[] arrAllFiles = new string[] { };
+
+            MessageBox.Show("Seleccionar excel de facturas de manager (debe tener 2 hojas)");
+            if (choofdlog.ShowDialog() == DialogResult.OK)
+            {
+                sFileName = choofdlog.FileName;
+                arrAllFiles = choofdlog.FileNames; //used when Multiselect = true           
+            }
+
+
+            List<Factura> listadoDeFacturasCosteadas = leerExcelDeFacturasNOCCUACostear(sFileName);
+
+            String pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Facturas NO CCU costeadas.xlsx";
+            var archivo = new FileInfo(pathDeDescargas);
+            
+            
+            SaveExcelFileCosteoFacturasNOCCU(listadoDeFacturasCosteadas, archivo);
+            MessageBox.Show("Se creo archivo de facturas NO CCU costeadas");
+
+
+
+        }
+
+        private static async Task SaveExcelFileCosteoFacturasNOCCU(List<Factura> facturasNOCCUCosteadas, FileInfo file)
+        {
+            var package = new ExcelPackage(file);
+            var ws = package.Workbook.Worksheets.Add("Facturas NO CCU costeadas");
+
+            var range = ws.Cells["A1"].LoadFromCollection(facturasNOCCUCosteadas, true);
+
+            range.AutoFitColumns();
+
+            await package.SaveAsync();
+        }
+
+
+
+        private List<Factura> leerExcelDeFacturasNOCCUACostear(String filePath)
+        {
+            List<Factura> facturasLeidasEnPrimeraHoja = new List<Factura>();
+            List<CosteoDeFacturaNOCCU> listadoDeCosteos = new List<CosteoDeFacturaNOCCU>();
+
+            List<Factura> listadoDeFacturasCosteadas = new List<Factura>();
+
+            FileInfo existingFile = new FileInfo(filePath);
+            using (ExcelPackage package = new ExcelPackage(existingFile))
+            {
+                //get the first worksheet in the workbook
+                //facturas
+                ExcelWorksheet hojaDeFacturas = package.Workbook.Worksheets[0];
+                int colCountFacturas = hojaDeFacturas.Dimension.End.Column;  //get Column Count
+                int rowCountFacturas = hojaDeFacturas.Dimension.End.Row;     //get row count
+
+
+                for (int row = 1; row <= rowCountFacturas; row++)
+                {
+
+                    Factura rccic = new Factura();
+                    rccic.TipoDeDocumento = hojaDeFacturas.Cells[row, 1].Value?.ToString().Trim();
+                    rccic.NumeroDelDocumento = hojaDeFacturas.Cells[row, 2].Value?.ToString().Trim();
+                    rccic.FechaDeDocumento = hojaDeFacturas.Cells[row, 3].Value?.ToString().Trim();
+                    rccic.FechaContableDeDocumento = hojaDeFacturas.Cells[row, 4].Value?.ToString().Trim();
+                    rccic.FechaDeVencimientoDeDocumento = hojaDeFacturas.Cells[row, 5].Value?.ToString().Trim();
+                    rccic.CodigoDeUnidadDeNegocio = hojaDeFacturas.Cells[row, 6].Value?.ToString().Trim();
+                    rccic.RutCliente = hojaDeFacturas.Cells[row, 7].Value?.ToString().Trim();
+                    rccic.DireccionDelCliente = hojaDeFacturas.Cells[row, 8].Value?.ToString().Trim();
+                    rccic.RutFacturador = hojaDeFacturas.Cells[row, 9].Value?.ToString().Trim();
+                    rccic.CodigoVendedor = hojaDeFacturas.Cells[row, 10].Value?.ToString().Trim();
+                    rccic.CodigoComisionista = hojaDeFacturas.Cells[row, 11].Value?.ToString().Trim();
+                    rccic.Probabilidad = hojaDeFacturas.Cells[row, 12].Value?.ToString().Trim();
+                    rccic.ListaPrecio = hojaDeFacturas.Cells[row, 13].Value?.ToString().Trim();
+                    rccic.PlazoPago = hojaDeFacturas.Cells[row, 14].Value?.ToString().Trim();
+                    rccic.MonedaDelDocumento = hojaDeFacturas.Cells[row, 15].Value?.ToString().Trim();
+                    rccic.TasaDeCambio = hojaDeFacturas.Cells[row, 16].Value?.ToString().Trim();
+                    rccic.MontoAfecto = hojaDeFacturas.Cells[row, 17].Value?.ToString().Trim();
+                    rccic.MontoExento = hojaDeFacturas.Cells[row, 18].Value?.ToString().Trim();
+                    rccic.MontoIva = hojaDeFacturas.Cells[row, 19].Value?.ToString().Trim();
+                    rccic.MontoImpuestosEspecificos = hojaDeFacturas.Cells[row, 20].Value?.ToString().Trim();
+                    rccic.MontoIvaRetenido = hojaDeFacturas.Cells[row, 21].Value?.ToString().Trim();
+                    rccic.MontoImpuestosRetenidos = hojaDeFacturas.Cells[row, 22].Value?.ToString().Trim();
+                    rccic.TipoDeDescuentoGlobal = hojaDeFacturas.Cells[row, 23].Value?.ToString().Trim();
+                    rccic.DescuentoGlobal = hojaDeFacturas.Cells[row, 24].Value?.ToString().Trim();
+                    rccic.TotalDelDocumento = hojaDeFacturas.Cells[row, 25].Value?.ToString().Trim();
+                    rccic.DeudaPendiente = hojaDeFacturas.Cells[row, 26].Value?.ToString().Trim();
+                    rccic.TipoDocReferencia = hojaDeFacturas.Cells[row, 27].Value?.ToString().Trim();
+                    rccic.NumDocReferencia = hojaDeFacturas.Cells[row, 28].Value?.ToString().Trim();
+                    rccic.FechaDocReferencia = hojaDeFacturas.Cells[row, 29].Value?.ToString().Trim();
+                    rccic.CodigoDelProducto = hojaDeFacturas.Cells[row, 30].Value?.ToString().Trim();
+                    rccic.Cantidad = hojaDeFacturas.Cells[row, 31].Value?.ToString().Trim();
+                    rccic.Unidad = hojaDeFacturas.Cells[row, 32].Value?.ToString().Trim();
+                    rccic.PrecioUnitario = hojaDeFacturas.Cells[row, 33].Value?.ToString().Trim();
+                    rccic.MonedaDelDetalle = hojaDeFacturas.Cells[row, 34].Value?.ToString().Trim();
+                    rccic.TasaDeCambio2 = hojaDeFacturas.Cells[row, 35].Value?.ToString().Trim();
+                    rccic.NumeroDeSerie = hojaDeFacturas.Cells[row, 36].Value?.ToString().Trim();
+                    rccic.NumeroDeLote = hojaDeFacturas.Cells[row, 37].Value?.ToString().Trim();
+                    rccic.FechaDeVencimiento = hojaDeFacturas.Cells[row, 38].Value?.ToString().Trim();
+                    rccic.CentroDeCostos = hojaDeFacturas.Cells[row, 39].Value?.ToString().Trim();
+                    rccic.TipoDeDescuento = hojaDeFacturas.Cells[row, 40].Value?.ToString().Trim();
+                    rccic.Descuento = hojaDeFacturas.Cells[row, 41].Value?.ToString().Trim();
+                    rccic.Ubicacion = hojaDeFacturas.Cells[row, 42].Value?.ToString().Trim();
+                    rccic.Bodega = hojaDeFacturas.Cells[row, 43].Value?.ToString().Trim();
+                    rccic.Concepto1 = hojaDeFacturas.Cells[row, 44].Value?.ToString().Trim();
+                    rccic.Concepto2 = hojaDeFacturas.Cells[row, 45].Value?.ToString().Trim();
+                    rccic.Concepto3 = hojaDeFacturas.Cells[row, 46].Value?.ToString().Trim();
+                    rccic.Concepto4 = hojaDeFacturas.Cells[row, 47].Value?.ToString().Trim();
+                    rccic.Descripcion = hojaDeFacturas.Cells[row, 48].Value?.ToString().Trim();
+                    rccic.DescripcionAdicional = hojaDeFacturas.Cells[row, 49].Value?.ToString().Trim();
+                    rccic.Stock = hojaDeFacturas.Cells[row, 50].Value?.ToString().Trim();
+                    rccic.Comentario11 = hojaDeFacturas.Cells[row, 51].Value?.ToString().Trim();
+                    rccic.Comentario21 = hojaDeFacturas.Cells[row, 52].Value?.ToString().Trim();
+                    rccic.Comentario31 = hojaDeFacturas.Cells[row, 53].Value?.ToString().Trim();
+                    rccic.Comentario41 = hojaDeFacturas.Cells[row, 54].Value?.ToString().Trim();
+                    rccic.Comentario51 = hojaDeFacturas.Cells[row, 55].Value?.ToString().Trim();
+                    rccic.CodigoImpuestoEspecifico1 = hojaDeFacturas.Cells[row, 56].Value?.ToString().Trim();
+                    rccic.MontoImpuestoEspecifico1 = hojaDeFacturas.Cells[row, 57].Value?.ToString().Trim();
+                    rccic.CodigoImpuestoEspecifico2 = hojaDeFacturas.Cells[row, 58].Value?.ToString().Trim();
+                    rccic.MontoImpuestoEspecifico2 = hojaDeFacturas.Cells[row, 59].Value?.ToString().Trim();
+                    rccic.Modalidad = hojaDeFacturas.Cells[row, 60].Value?.ToString().Trim();
+                    rccic.Glosa = hojaDeFacturas.Cells[row, 61].Value?.ToString().Trim();
+                    rccic.Referencia = hojaDeFacturas.Cells[row, 62].Value?.ToString().Trim();
+                    rccic.FechaDeComprometida = hojaDeFacturas.Cells[row, 63].Value?.ToString().Trim();
+                    rccic.PorcentajeCEEC = hojaDeFacturas.Cells[row, 64].Value?.ToString().Trim();
+                    rccic.ImpuestoLey18211 = hojaDeFacturas.Cells[row, 65].Value?.ToString().Trim();
+                    rccic.IvaLey18211 = hojaDeFacturas.Cells[row, 66].Value?.ToString().Trim();
+                    rccic.CodigoKitFlexible = hojaDeFacturas.Cells[row, 67].Value?.ToString().Trim();
+                    rccic.AjusteIva = hojaDeFacturas.Cells[row, 68].Value?.ToString().Trim();
+
+                    facturasLeidasEnPrimeraHoja.Add(rccic);
+
+                }
+
+
+
+
+                ExcelWorksheet hojaDeCosteos = package.Workbook.Worksheets[1];
+                int colCountCosteos = hojaDeCosteos.Dimension.End.Column;  //get Column Count
+                int rowCountCosteos = hojaDeCosteos.Dimension.End.Row;     //get row count
+
+                for (int row = 1; row <= rowCountCosteos; row++)
+                {
+                    CosteoDeFacturaNOCCU costeoDeFactura = new CosteoDeFacturaNOCCU();
+                    costeoDeFactura.Folio = hojaDeCosteos.Cells[row, 1].Value?.ToString().Trim();
+                    costeoDeFactura.Rut = hojaDeCosteos.Cells[row, 2].Value?.ToString().Trim();
+                    costeoDeFactura.Afecto = hojaDeCosteos.Cells[row, 3].Value?.ToString().Trim();
+                    costeoDeFactura.CentroDeCosto = hojaDeCosteos.Cells[row, 4].Value?.ToString().Trim();
+
+                    listadoDeCosteos.Add(costeoDeFactura);
+
+                }
+
+            }
+
+            List<IdentificadorDeFactura> identificadores = new List<IdentificadorDeFactura>();
+
+            Boolean existeRegistro = false;
+
+            foreach (var item in facturasLeidasEnPrimeraHoja)
+            {
+                foreach (var identi in identificadores)
+                {
+                    if (item.NumeroDelDocumento == identi.Folio && item.RutCliente == identi.Rut)
+                    {
+                        existeRegistro = true;
+                    }
+
+                }
+               
+
+                if (item.NumeroDelDocumento != "NumeroDelDocumento" && item.RutCliente != "RutCliente" && existeRegistro==false)
+                {
+
+                    IdentificadorDeFactura i = new IdentificadorDeFactura(item.NumeroDelDocumento, item.RutCliente);
+                    identificadores.Add(i);
+
+                }
+
+                existeRegistro = false;  
+
+
+            }
+
+           
+
+            foreach (var item in identificadores)
+            {
+                Console.WriteLine(item.Folio);
+            }
+
+            foreach (var identificador in identificadores)
+            {
+                foreach (var costeo in listadoDeCosteos)
+                {
+
+                    if(identificador.Folio==costeo.Folio && identificador.Rut == costeo.Rut)
+                    {
+                        Factura fc = new Factura();
+
+
+                        String tipoDeDocumento = "";
+                        String fechaDeDocumento = "";
+                        String fechaContableDelDocumento = "";
+                        String fechaDeVencimientoDelDocumento = "";
+                        String codigoDeUnidadDeNegocio = "";
+
+                        String direccionDelCliente = "";
+
+                     
+                        String codigoDelProducto = "0";
+                        String precioUnitario = "0";
+
+
+                        foreach (var facturaLeida in facturasLeidasEnPrimeraHoja)
+                        {
+                            if(identificador.Folio == facturaLeida.NumeroDelDocumento && identificador.Rut == facturaLeida.RutCliente)
+                            {
+                                tipoDeDocumento = facturaLeida.TipoDeDocumento;
+                                fechaDeDocumento = facturaLeida.FechaDeDocumento;
+                                fechaContableDelDocumento = facturaLeida.FechaContableDeDocumento;
+                                fechaDeVencimientoDelDocumento = facturaLeida.FechaDeVencimientoDeDocumento;
+                                codigoDeUnidadDeNegocio = facturaLeida.CodigoDeUnidadDeNegocio;
+                                direccionDelCliente = facturaLeida.DireccionDelCliente;
+                                codigoDelProducto = facturaLeida.CodigoDelProducto;
+                                precioUnitario = facturaLeida.PrecioUnitario;
+
+
+                            }
+                        }
+
+
+                        fc.TipoDeDocumento = tipoDeDocumento;
+                        fc.NumeroDelDocumento = costeo.Folio;
+                        fc.FechaDeDocumento = fechaDeDocumento;
+                        fc.FechaContableDeDocumento = fechaContableDelDocumento;
+                        fc.FechaDeVencimientoDeDocumento = fechaDeVencimientoDelDocumento;
+                        fc.CodigoDeUnidadDeNegocio = codigoDeUnidadDeNegocio;
+                        fc.RutCliente = costeo.Rut;
+                        fc.DireccionDelCliente = direccionDelCliente;
+                        fc.RutFacturador = "";
+                        fc.CodigoVendedor = "";
+                        fc.CodigoComisionista = "";
+                        fc.Probabilidad = "";
+                        fc.ListaPrecio = "";
+                        fc.PlazoPago = "P01";
+                        fc.MonedaDelDocumento = "CLP";
+                        fc.TasaDeCambio = "";
+                        fc.MontoAfecto = costeo.Afecto;
+                        fc.MontoExento = "0";
+                        fc.MontoIva = (int.Parse(fc.MontoAfecto) * 0.19).ToString();
+                        fc.MontoImpuestosEspecificos = "";
+                        fc.MontoIvaRetenido = "";
+                        fc.MontoImpuestosRetenidos = "";
+                        fc.TipoDeDescuentoGlobal = "";
+                        fc.DescuentoGlobal = "";
+                        fc.TotalDelDocumento = (int.Parse(fc.MontoAfecto) + int.Parse(fc.MontoIva)).ToString(); ;
+                        fc.DeudaPendiente = fc.TotalDelDocumento;
+                        fc.TipoDocReferencia = "";
+                        fc.NumDocReferencia = "";
+                        fc.FechaDocReferencia = "";
+                        fc.CodigoDelProducto = codigoDelProducto;
+                        fc.Cantidad = "1";
+                        fc.Unidad = "S.U.M";
+                        fc.PrecioUnitario = precioUnitario;
+                        fc.MonedaDelDetalle = "CLP";
+                        fc.TasaDeCambio2 = "1";
+                        fc.NumeroDeSerie = "";
+                        fc.NumeroDeLote = "";
+                        fc.FechaDeVencimiento = "";
+                        fc.CentroDeCostos = costeo.CentroDeCosto;
+
+
+                        switch (fc.CentroDeCostos)
+                        {
+                            case "ADMINISTRACION":
+                                fc.CentroDeCostos = "203";
+                                break;
+                            case "INTERPLANTA":
+                                fc.CentroDeCostos = "204";
+                                fc.CodigoDeUnidadDeNegocio = "2";
+                                break;
+                            case "EMPRENDEDORES":
+                                fc.CentroDeCostos = "308";
+                                break;
+                            case "ILLAPEL":
+                                fc.CentroDeCostos = "205";
+                                break;
+                            case "SAN ANTONIO":
+                                fc.CentroDeCostos = "207";
+                                break;
+                            case "MELIPILLA":
+                                fc.CentroDeCostos = "200";
+                                break;
+                            case "SANTIAGO":
+                                fc.CentroDeCostos = "206";
+                                break;
+                            case "RANCAGUA":
+                                fc.CentroDeCostos = "201";
+                                break;
+                            case "CURICO":
+                                fc.CentroDeCostos = "202";
+                                break;
+                            default:
+                                fc.CentroDeCostos = "209";
+                                break;
+
+                        }
+
+
+
+
+
+                        fc.TipoDeDescuento = "";
+                        fc.Descuento = "";
+                        fc.Ubicacion = "";
+                        fc.Bodega = "";
+                        fc.Concepto1 = "";
+                        fc.Concepto2 = "";
+                        fc.Concepto3 = "";
+                        fc.Concepto4 = "";
+                        fc.Descripcion = "";
+                        fc.DescripcionAdicional = "";
+                        fc.Stock = "0";
+                        fc.Comentario11 = "";
+                        fc.Comentario21 = "";
+                        fc.Comentario31 = "";
+                        fc.Comentario41 = "";
+                        fc.Comentario51 = "";
+                        fc.CodigoImpuestoEspecifico1 = "";
+                        fc.MontoImpuestoEspecifico1 = "";
+                        fc.CodigoImpuestoEspecifico2 = "";
+                        fc.MontoImpuestoEspecifico2 = "";
+                        fc.Modalidad = "";
+                        fc.Glosa = "Factura costeada con información proporcianda por Francisco Cornejo";
+                        fc.Referencia = "";
+                        fc.FechaDeComprometida = "";
+                        fc.PorcentajeCEEC = "";
+                        fc.ImpuestoLey18211 = "";
+                        fc.IvaLey18211 = "";
+                        fc.CodigoKitFlexible = "";
+                        fc.AjusteIva = "";
+
+
+                        listadoDeFacturasCosteadas.Add(fc);
+                    }
+
+                }
+            }
+
+
+            return listadoDeFacturasCosteadas;
 
         }
 
