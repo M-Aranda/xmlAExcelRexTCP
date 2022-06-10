@@ -3259,7 +3259,7 @@ namespace FacturasXMLAExcelManager
                                     item2.CodigoDeUnidadDeNegocio = "2";
                                     break;
                                 case "EMPRENDEDORES":
-                                    item2.CentroDeCostos = "308";
+                                    item2.CentroDeCostos = "208";
                                     break;
                                 case "ILLAPEL":
                                     item2.CentroDeCostos = "205";
@@ -3279,8 +3279,11 @@ namespace FacturasXMLAExcelManager
                                 case "CURICO":
                                     item2.CentroDeCostos = "202";
                                     break;
-                                default:
+                                case "#N/D":
                                     item2.CentroDeCostos = "209";
+                                    break;
+                                default:
+                                    item2.CentroDeCostos = item2.CentroDeCostos;
                                     break;
 
                             }
@@ -3453,10 +3456,14 @@ namespace FacturasXMLAExcelManager
                 for (int row = 1; row <= rowCountCosteos; row++)
                 {
                     CosteoDeFacturaNOCCU costeoDeFactura = new CosteoDeFacturaNOCCU();
-                    costeoDeFactura.Folio = hojaDeCosteos.Cells[row, 1].Value?.ToString().Trim();
-                    costeoDeFactura.Rut = hojaDeCosteos.Cells[row, 2].Value?.ToString().Trim();
+                    costeoDeFactura.Folio = hojaDeCosteos.Cells[row, 2].Value?.ToString().Trim();
+                    costeoDeFactura.Rut = hojaDeCosteos.Cells[row, 1].Value?.ToString().Trim();
                     costeoDeFactura.Afecto = hojaDeCosteos.Cells[row, 3].Value?.ToString().Trim();
-                    costeoDeFactura.CentroDeCosto = hojaDeCosteos.Cells[row, 4].Value?.ToString().Trim();
+                    costeoDeFactura.CentroDeCosto = hojaDeCosteos.Cells[row, 7].Value?.ToString().Trim();
+
+                    costeoDeFactura.MontoIva = hojaDeCosteos.Cells[row, 4].Value?.ToString().Trim();
+                    costeoDeFactura.AjusteIva = hojaDeCosteos.Cells[row, 5].Value?.ToString().Trim();
+                    costeoDeFactura.CodigoDelProducto = hojaDeCosteos.Cells[row, 6].Value?.ToString().Trim();
 
                     listadoDeCosteos.Add(costeoDeFactura);
 
@@ -3465,6 +3472,12 @@ namespace FacturasXMLAExcelManager
             }
 
             List<IdentificadorDeFactura> identificadores = new List<IdentificadorDeFactura>();
+
+            //con las facturas no CCU hay que hacer 2 cosas a la hora de hacer el Excel que las costea
+            //1.- Crear tantas filas identicas como costeos haya
+            //2.- Alterar valores de precio unitario (debe ser el monto afecto que aparece en el costeo)
+            //y centro de costos por cada costeo (debiese venir como letras, el excel se tiene que subir como codigo)
+            //3.- Subir a documentos con detalle (contabilizado)
 
             Boolean existeRegistro = false;
 
@@ -3478,9 +3491,9 @@ namespace FacturasXMLAExcelManager
                     }
 
                 }
-               
 
-                if (item.NumeroDelDocumento != "NumeroDelDocumento" && item.RutCliente != "RutCliente" && existeRegistro==false)
+
+                if (item.NumeroDelDocumento != "NumeroDelDocumento" && item.RutCliente != "RutCliente" && existeRegistro == false)
                 {
 
                     IdentificadorDeFactura i = new IdentificadorDeFactura(item.NumeroDelDocumento, item.RutCliente);
@@ -3488,17 +3501,14 @@ namespace FacturasXMLAExcelManager
 
                 }
 
-                existeRegistro = false;  
+                existeRegistro = false;
 
 
             }
 
-           
 
-            foreach (var item in identificadores)
-            {
-                Console.WriteLine(item.Folio);
-            }
+
+
 
             foreach (var identificador in identificadores)
             {
@@ -3522,6 +3532,11 @@ namespace FacturasXMLAExcelManager
                         String codigoDelProducto = "0";
                         String precioUnitario = "0";
 
+                        String montoAfecto = "0";
+                        String montoIva = "0";
+                        String montoExento = "0";    
+                        String montoTotal = "0";
+
 
                         foreach (var facturaLeida in facturasLeidasEnPrimeraHoja)
                         {
@@ -3533,8 +3548,17 @@ namespace FacturasXMLAExcelManager
                                 fechaDeVencimientoDelDocumento = facturaLeida.FechaDeVencimientoDeDocumento;
                                 codigoDeUnidadDeNegocio = facturaLeida.CodigoDeUnidadDeNegocio;
                                 direccionDelCliente = facturaLeida.DireccionDelCliente;
-                                codigoDelProducto = facturaLeida.CodigoDelProducto;
-                                precioUnitario = facturaLeida.PrecioUnitario;
+                                codigoDelProducto = costeo.CodigoDelProducto;
+
+                                precioUnitario = costeo.Afecto;
+                                montoAfecto = facturaLeida.MontoAfecto;
+                                montoIva = costeo.MontoIva;
+                                montoExento = facturaLeida.MontoExento;
+                                montoTotal = facturaLeida.TotalDelDocumento;
+                                facturaLeida.AjusteIva = costeo.AjusteIva;
+                                
+
+
 
 
                             }
@@ -3557,15 +3581,15 @@ namespace FacturasXMLAExcelManager
                         fc.PlazoPago = "P01";
                         fc.MonedaDelDocumento = "CLP";
                         fc.TasaDeCambio = "";
-                        fc.MontoAfecto = costeo.Afecto;
-                        fc.MontoExento = "0";
-                        fc.MontoIva = (int.Parse(fc.MontoAfecto) * 0.19).ToString();
+                        fc.MontoAfecto = montoAfecto;
+                        fc.MontoExento = montoExento;
+                        fc.MontoIva = montoIva;
                         fc.MontoImpuestosEspecificos = "";
                         fc.MontoIvaRetenido = "";
                         fc.MontoImpuestosRetenidos = "";
                         fc.TipoDeDescuentoGlobal = "";
                         fc.DescuentoGlobal = "";
-                        fc.TotalDelDocumento = (int.Parse(fc.MontoAfecto) + int.Parse(fc.MontoIva)).ToString(); ;
+                        fc.TotalDelDocumento = montoTotal;
                         fc.DeudaPendiente = fc.TotalDelDocumento;
                         fc.TipoDocReferencia = "";
                         fc.NumDocReferencia = "";
@@ -3592,7 +3616,7 @@ namespace FacturasXMLAExcelManager
                                 fc.CodigoDeUnidadDeNegocio = "2";
                                 break;
                             case "EMPRENDEDORES":
-                                fc.CentroDeCostos = "308";
+                                fc.CentroDeCostos = "208";
                                 break;
                             case "ILLAPEL":
                                 fc.CentroDeCostos = "205";
@@ -3617,8 +3641,6 @@ namespace FacturasXMLAExcelManager
                                 break;
 
                         }
-
-
 
 
 
