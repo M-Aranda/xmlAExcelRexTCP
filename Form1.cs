@@ -3303,7 +3303,7 @@ namespace FacturasXMLAExcelManager
 
         private void button7_Click(object sender, EventArgs e)
         {
-            Console.WriteLine("Se llama a funcion para costear detalles de facturas");
+            Console.WriteLine("Se llama a funcion para costear detalles de facturas NO CCU");
 
 
             //hay que tomar un Excel con 2 hojas; la primera con las facturas a costear, la segunda con el costeo de estas facturas
@@ -3317,7 +3317,7 @@ namespace FacturasXMLAExcelManager
 
             string[] arrAllFiles = new string[] { };
 
-            MessageBox.Show("Seleccionar excel de facturas de manager (debe tener 2 hojas)");
+            MessageBox.Show("Seleccionar excel de facturas NO CCU(debe tener 2 hojas)");
             if (choofdlog.ShowDialog() == DialogResult.OK)
             {
                 sFileName = choofdlog.FileName;
@@ -3536,6 +3536,7 @@ namespace FacturasXMLAExcelManager
                         String montoIva = "0";
                         String montoExento = "0";    
                         String montoTotal = "0";
+                        String ajusteIva = "0";
 
 
                         foreach (var facturaLeida in facturasLeidasEnPrimeraHoja)
@@ -3553,16 +3554,48 @@ namespace FacturasXMLAExcelManager
                                 precioUnitario = costeo.Afecto;
                                 montoAfecto = facturaLeida.MontoAfecto;
                                 montoIva = costeo.MontoIva;
+
+                                if (montoIva == "")
+                                {
+                                    montoIva = facturaLeida.MontoIva;
+                                }
+
                                 montoExento = facturaLeida.MontoExento;
                                 montoTotal = facturaLeida.TotalDelDocumento;
+                                ajusteIva = costeo.AjusteIva;
                                 facturaLeida.AjusteIva = costeo.AjusteIva;
-                                
 
-
+                                if (ajusteIva=="")
+                                {
+                                    ajusteIva = facturaLeida.AjusteIva;
+                                }
 
 
                             }
                         }
+
+                        // Hasta la columna FechaDocReferencia (AC) todo es totales, así que por cada costeo, 
+                        //tiene que haber una fila nueva (ej: 6 costeos, 6 filas).
+                        //La columna de código de producto varia según el código entregado por Pamela.
+                        //El precio unitario debiese ser el valor afecto de cada costeo
+                        //El centro de costo depende de la palabra que viene en el archivo de costeo
+                        //El ajuste de iva también depende del valor que viene en la factura
+                        //Lo anterior aplica a facturas afectas (FACE), sin impuestos adicionales.
+                        //El ajuste de IVA tiene que ser igual en todas las filas de la factura
+
+                        //Si llega a haber un valor Exento, eso tiene el mismo tratamiento que las partes afectas
+                        //(el exento va en el precio unitario y se costea al centro apropiado). Importante que el codigo
+                        //de producto sea la variacion de exento del producto sujeto al impuesto a ingresar
+
+                        if((fc.TipoDeDocumento=="FACE" || fc.TipoDeDocumento == "NCCE") && fc.MontoExento!="" && fc.MontoExento!="0")
+                        {
+                            //es una factura con impuestos especiales
+
+                        }else if (fc.TipoDeDocumento=="FCEE")
+                        {
+                            //es una factura exenta
+                        }
+
 
 
                         fc.TipoDeDocumento = tipoDeDocumento;
@@ -3672,7 +3705,7 @@ namespace FacturasXMLAExcelManager
                         fc.ImpuestoLey18211 = "";
                         fc.IvaLey18211 = "";
                         fc.CodigoKitFlexible = "";
-                        fc.AjusteIva = "";
+                        fc.AjusteIva = ajusteIva;
 
 
                         listadoDeFacturasCosteadas.Add(fc);

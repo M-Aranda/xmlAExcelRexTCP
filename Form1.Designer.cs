@@ -90,7 +90,7 @@
             // button6
             // 
             this.button6.Location = new System.Drawing.Point(488, 157);
-            this.button6.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button6.Margin = new System.Windows.Forms.Padding(2);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(134, 51);
             this.button6.TabIndex = 5;
@@ -104,7 +104,7 @@
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(134, 64);
             this.button7.TabIndex = 6;
-            this.button7.Text = "Costear detalles de facturas";
+            this.button7.Text = "Costear facturas NO CCU";
             this.button7.UseVisualStyleBackColor = true;
             this.button7.Click += new System.EventHandler(this.button7_Click);
             // 
