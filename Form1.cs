@@ -3553,12 +3553,9 @@ namespace FacturasXMLAExcelManager
 
                                 precioUnitario = costeo.Afecto;
                                 montoAfecto = facturaLeida.MontoAfecto;
-                                montoIva = costeo.MontoIva;
+                                montoIva = facturaLeida.MontoIva;
 
-                                if (montoIva == "")
-                                {
-                                    montoIva = facturaLeida.MontoIva;
-                                }
+                     
 
                                 montoExento = facturaLeida.MontoExento;
                                 montoTotal = facturaLeida.TotalDelDocumento;
