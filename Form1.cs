@@ -3317,7 +3317,7 @@ namespace FacturasXMLAExcelManager
 
             string[] arrAllFiles = new string[] { };
 
-            MessageBox.Show("Seleccionar excel de facturas NO CCU(debe tener 2 hojas)");
+            MessageBox.Show("Seleccionar excel de facturas NO CCU (debe tener 2 hojas)");
             if (choofdlog.ShowDialog() == DialogResult.OK)
             {
                 sFileName = choofdlog.FileName;
@@ -3592,6 +3592,10 @@ namespace FacturasXMLAExcelManager
                         {
                             //es una factura exenta
                         }
+
+                        // a la hora de subir una factura de Copec, se supone que el monto negativo debiese ir en el precio unitario
+                        //el afecto es el que dice la factura, iva y total tambien lo que dice en la factura, pero la
+                        //suma de los impuestos variables y fijos debiese ir en precio unitario
 
 
 
