@@ -457,6 +457,8 @@ namespace FacturasXMLAExcelManager
                     }
 
                     f.CentroDeCostos = determinarCentroDeCosto(f.CentroDeCostos, esPSCP);
+                    f.CodigoDelProducto = "420724";
+                
 
                     f.TipoDeDescuento = "";//getValue("TipoDTE", sFileName);
                     f.Descuento = "";//getValue("Folio", sFileName);
@@ -494,7 +496,7 @@ namespace FacturasXMLAExcelManager
                     f.AjusteIva = "";//getValue("Folio", sFileName);
 
 
-                    f.CodigoDelProducto = "420724";
+                    //f.CodigoDelProducto = "420724";
                     f.PrecioUnitario = getValue("MntNeto", sFileName);
                     if (String.IsNullOrEmpty(f.MontoExento) == true)
                     {
@@ -608,6 +610,52 @@ namespace FacturasXMLAExcelManager
                                 if (f.TipoDeDocumento == "FCEE")
                                 {
                                     f.CodigoDelProducto = "110804E";
+                                }
+
+                                //tratar facturas de Entel
+                                if (f.RutCliente == "92580000-7")
+                                {
+
+                                    String direccionReceptor = getValue("DirRecep", sFileName);
+                                   
+                                    switch (direccionReceptor)
+                                    {
+                                        case "ANTONIO MACEO (CALLE) 2693": // ES RENCA
+                                            f.CentroDeCostos = "206";
+                                            f.CodigoDelProducto = "420709";
+                                            f.Glosa = "Internet fija de Renca (Entel)";
+                                            break;
+                                        case "LONGITUDINAL SUR KM (CARR) 245": // ES TALCA
+                                            f.CentroDeCostos = "202";
+                                            f.CodigoDelProducto = "420709";
+                                            f.Glosa = "Internet fija de Talca (Entel)";
+                                            break;
+                                        case "RUTA H-30 (CALLE) 2333":// ES RANCAGUA (CCU)
+                                            f.CentroDeCostos = "201";
+                                            f.CodigoDelProducto = "420709";
+                                            f.Glosa = "Internet fija de Rancagua (CCU) (Entel)";
+                                            break;
+                                        case "CALLE CINCO SUR 85, RANCAGUA":// ES RANCAGUA (Central)
+                                            f.CentroDeCostos = "203";
+                                            f.CodigoDelProducto = "420709";
+                                            f.Glosa = "Internet fija de Rancagua (Central) (Entel)";
+                                            break;
+                                        default:
+                                            //no es ninguna de las direcciones anteriores
+                                            f.CentroDeCostos = "209";
+                                            f.CodigoDelProducto = "420709";
+                                            f.Glosa = "Factura de Entel";
+                                            break;
+
+                                    }
+                                }
+
+                                if (f.RutCliente== "76124890-1")
+                                {
+                                    f.CentroDeCostos = "203";
+                                    f.CodigoDelProducto = "420709";
+                                    f.Glosa = "Factura de Movistar";
+
                                 }
 
                                 facturasAIngresar.Add(f);
@@ -1402,22 +1450,22 @@ namespace FacturasXMLAExcelManager
             archivo = new FileInfo(pathDeDescargas);
             SaveExcelFile(facturasAIngresar, archivo);
 
-            pathDeDescargas = getCarpetaDeDescargas()+ "" + @"\Notas de credito con folio (subir a Documentos de Ciclo).xlsx";
-            archivo = new FileInfo(pathDeDescargas);
-            SaveExcelFileNCCE(facturasNCCE, archivo);
+            //pathDeDescargas = getCarpetaDeDescargas()+ "" + @"\Notas de credito con folio (subir a Documentos de Ciclo).xlsx";
+            //archivo = new FileInfo(pathDeDescargas);
+            //SaveExcelFileNCCE(facturasNCCE, archivo);
 
 
-            pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Guias de despacho (NO SUBIR).xlsx";
-            archivo = new FileInfo(pathDeDescargas);
-            SaveExcelFileGuiasDeDespacho(guiasDeDespacho, archivo);
+            //pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Guias de despacho (NO SUBIR).xlsx";
+            //archivo = new FileInfo(pathDeDescargas);
+            //SaveExcelFileGuiasDeDespacho(guiasDeDespacho, archivo);
 
-            pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Direcciones de CCU (NO SUBIR).xlsx";
-            archivo = new FileInfo(pathDeDescargas);
-            SaveExcelFileDireccionesDeCCU(direccionesDeCCU, archivo);
+            //pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Direcciones de CCU (NO SUBIR).xlsx";
+            //archivo = new FileInfo(pathDeDescargas);
+            //SaveExcelFileDireccionesDeCCU(direccionesDeCCU, archivo);
 
-            pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Reporte de totales (NO SUBIR).xlsx";
-            archivo = new FileInfo(pathDeDescargas);
-            SaveExcelFileReportes(listadoDeReportes, archivo);
+            //pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Reporte de totales (NO SUBIR).xlsx";
+            //archivo = new FileInfo(pathDeDescargas);
+            //SaveExcelFileReportes(listadoDeReportes, archivo);
 
             MessageBox.Show("Archivo de facturas, archivo de notas de credito con folio y archivo de guias de despacho creados en carpeta de descargas!");
 
@@ -2173,9 +2221,6 @@ namespace FacturasXMLAExcelManager
         private void button4_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Funcionalidad incompleta");
-
-
-
 
             
         }
@@ -3021,6 +3066,13 @@ namespace FacturasXMLAExcelManager
             //el rut de COPEC es:
             //99520000-7, y se supone que es el único que tiene que tener
             //tratamiento especial
+
+
+            //el rut de Entel es:
+            //92580000-7 y al 20 de Junio del 2022, solo debiese emitir 4 facturas; una por cada centro de costo donde hay internet fijo.
+            //Tenemos internet fijo en Renca en ANTONIO MACEO (CALLE) 2693, Rancagua (CCU)
+            //en RUTA H-30 (CALLE) 2333, Talca (no CCU) en LONGITUDINAL SUR KM (CARR) 245  y la central
+            //el campo DirRecep del XML indica la direccion
 
             String codigoDeProducto = "";
             if (rutCliente== "91041000-8" || rutCliente == "96989120-4" || rutCliente == "99501760-1" || rutCliente == "99554560-8" || rutCliente == "99586280-8")
