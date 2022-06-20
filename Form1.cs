@@ -26,10 +26,7 @@ namespace FacturasXMLAExcelManager
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             //El excel a subir es el del formato de importación de documentos contables con detalle
             //estos botones son para las otras funciones
-            button2.Visible = false;
-            button3.Visible = false;
-            button4.Visible = false;
-            button5.Visible = false;
+
 
 
 
@@ -50,59 +47,13 @@ namespace FacturasXMLAExcelManager
             List<FacturaContabilizada> facturasAIngresarContabilizadas = new List<FacturaContabilizada>();
             List<FacturaNCCE> facturasNCCE = new List<FacturaNCCE>();
             List<GuiaDeDespacho> guiasDeDespacho = new List<GuiaDeDespacho>();
-            List<DireccionDeCCU> direccionesDeCCU = new List<DireccionDeCCU>();
+           
 
             int cantidadFACE = 0;
             int cantidadFCEE = 0;
             int cantidadNCCE = 0;
             int cantidadDeGuiasDeDespacho = 0;
-            int cantidadNDCE = 0;
 
-
-            int totalAdministracion = 0;
-            int totalInterplantas = 0;
-            int totalEmprendedores = 0;
-            int totalIllapel = 0;
-            int totalSanAntonio = 0;
-            int totalMelipilla = 0;
-            int totalSantiago = 0;
-            int totalRancagua = 0;
-            int totalCurico = 0;
-            int totalPendientes = 0;
-
-
-            int cantidadDeFACEsAdministracion = 0;
-            int cantidadDeFACEsInterplantas = 0;
-            int cantidadDeFACEsEmprendedores = 0;
-            int cantidadDeFACEsIllapel = 0;
-            int cantidadDeFACEsSanAntonio = 0;
-            int cantidadDeFACEsMelipilla = 0;
-            int cantidadDeFACEsSantiago = 0;
-            int cantidadDeFACEsRancagua = 0;
-            int cantidadDeFACEsCurico = 0;
-            int cantidadDeFACEsPendientes = 0;
-
-            int cantidadDeFCEEsAdministracion = 0;
-            int cantidadDeFCEEsInterplantas = 0;
-            int cantidadDeFCEEsEmprendedores = 0;
-            int cantidadDeFCEEsIllapel = 0;
-            int cantidadDeFCEEsSanAntonio = 0;
-            int cantidadDeFCEEsMelipilla = 0;
-            int cantidadDeFCEEsSantiago = 0;
-            int cantidadDeFCEEsRancagua = 0;
-            int cantidadDeFCEEsCurico = 0;
-            int cantidadDeFCEEsPendientes = 0;
-
-            int cantidadDeNCCEsAdministracion = 0;
-            int cantidadDeNCCEsInterplantas = 0;
-            int cantidadDeNCCEsEmprendedores = 0;
-            int cantidadDeNCCEsIllapel = 0;
-            int cantidadDeNCCEsSanAntonio = 0;
-            int cantidadDeNCCEsMelipilla = 0;
-            int cantidadDeNCCEsSantiago = 0;
-            int cantidadDeNCCEsRancagua = 0;
-            int cantidadDeNCCEsCurico = 0;
-            int cantidadDeNCCEsPendientes = 0;
 
 
 
@@ -124,7 +75,7 @@ namespace FacturasXMLAExcelManager
             Boolean variasFacturas = true;
    
 
-            if (variasFacturas == false)
+            if (variasFacturas == false)//si es una sola factura, lo cual no debiese darse en el uso de este programa
             {
     
                 String URLString = sFileName; 
@@ -237,7 +188,7 @@ namespace FacturasXMLAExcelManager
                 foreach (var item in arrAllFiles)
                 {
 
-                    DireccionDeCCU dCCU = new DireccionDeCCU();
+                   
                     // los ruts de CCU son:
                     // 91041000-8
                     //96989120-4
@@ -319,7 +270,6 @@ namespace FacturasXMLAExcelManager
                         f.MontoExento = getValue("MntExe", sFileName);
 
                     }
-                    //ojo con el monto exento
 
                     //MontoImp?
                     //Si la factura es electronica  afecta, el MontoImp = MontoExento
@@ -424,14 +374,7 @@ namespace FacturasXMLAExcelManager
 
 
 
-                    dCCU.Rut = f.RutCliente;
-                    dCCU.Direccion = f.CentroDeCostos;
-                    dCCU.Folio = f.NumeroDelDocumento;
-                    if (determinarSiEsRutDeCCU(dCCU.Rut) == true)
-                    {
-                        direccionesDeCCU.Add(dCCU);
-                    }
-                
+       
 
                     //determinar a donde se costea
                     //los codigos de centros de costo son (numero de la izquierda: TCP, numero de la derecha: PSCP): 
@@ -658,7 +601,17 @@ namespace FacturasXMLAExcelManager
 
                                 }
 
-                                facturasAIngresar.Add(f);
+                                if(f.RutCliente== "92580000-7")
+                                {
+                                    FacturaContabilizada fc = new FacturaContabilizada();
+                                    fc = fc.convertirFacturaAIngresarAFacturaContabilizada(f);
+                                    facturasAIngresarContabilizadas.Add(fc);
+                                }
+                                else
+                                {
+                                    facturasAIngresar.Add(f);
+                                }
+                                
 
                             }
 
@@ -1316,49 +1269,6 @@ namespace FacturasXMLAExcelManager
 
                         }
 
-
-
-                    }
-
-
-
-                    switch (f.CentroDeCostos)
-                    {
-                        case "203":
-                            totalAdministracion = totalAdministracion + int.Parse(f.TotalDelDocumento);
-                            break;
-                        case "204":
-                            totalInterplantas = totalInterplantas + int.Parse(f.TotalDelDocumento);
-                            break;
-                        case "208":
-                            totalEmprendedores = totalEmprendedores + int.Parse(f.TotalDelDocumento);
-                            break;
-                        case "205":
-                            totalIllapel = totalIllapel + int.Parse(f.TotalDelDocumento);
-                            break;
-                        case "207":
-                            totalSanAntonio = totalSanAntonio + int.Parse(f.TotalDelDocumento);
-                            break;
-                        case "200":
-                            totalMelipilla = totalMelipilla + int.Parse(f.TotalDelDocumento);
-                            break;
-                        case "206":
-                            totalSantiago = totalSantiago + int.Parse(f.TotalDelDocumento);
-                            break;
-                        case "201":
-                            totalRancagua = totalRancagua + int.Parse(f.TotalDelDocumento);
-                            break;
-                        case "202":
-                            totalCurico = totalCurico + int.Parse(f.TotalDelDocumento);
-                            break;
-                        case "209":
-                            totalPendientes = totalPendientes + int.Parse(f.TotalDelDocumento);
-                            break;
-                        default:
-                            //no se suma nada
-                            break;
-
-
                     }
 
 
@@ -1369,28 +1279,7 @@ namespace FacturasXMLAExcelManager
 
             }
 
-            Reporte rAdministracion = new Reporte("203","Administracion",totalAdministracion.ToString());
-            Reporte rInterplantas = new Reporte("204", "Interplantas", totalInterplantas.ToString());
-            Reporte rEmprendedores = new Reporte("208", "Emprendedores", totalEmprendedores.ToString());
-            Reporte rIllapel = new Reporte("205", "Illapel", totalIllapel.ToString());
-            Reporte rSanAntonio = new Reporte("207", "San Antonio", totalSanAntonio.ToString());
-            Reporte rMelipilla = new Reporte("200", "Melipilla", totalMelipilla.ToString());
-            Reporte rSantiago = new Reporte("206", "Santiago", totalSantiago.ToString());
-            Reporte rRancagua = new Reporte("201", "Rancagua", totalRancagua.ToString());
-            Reporte rCurico = new Reporte("202", "Curico", totalCurico.ToString());
-            Reporte rPendientes = new Reporte("209", "Pendientes", totalPendientes.ToString());
 
-            List<Reporte> listadoDeReportes = new List<Reporte>();
-            listadoDeReportes.Add(rAdministracion);
-            listadoDeReportes.Add(rInterplantas);
-            listadoDeReportes.Add(rEmprendedores);
-            listadoDeReportes.Add(rIllapel);
-            listadoDeReportes.Add(rSanAntonio);
-            listadoDeReportes.Add(rMelipilla);
-            listadoDeReportes.Add(rSantiago);
-            listadoDeReportes.Add(rRancagua);
-            listadoDeReportes.Add(rCurico);
-            listadoDeReportes.Add(rPendientes);
 
 
 
@@ -1450,22 +1339,11 @@ namespace FacturasXMLAExcelManager
             archivo = new FileInfo(pathDeDescargas);
             SaveExcelFile(facturasAIngresar, archivo);
 
-            //pathDeDescargas = getCarpetaDeDescargas()+ "" + @"\Notas de credito con folio (subir a Documentos de Ciclo).xlsx";
-            //archivo = new FileInfo(pathDeDescargas);
-            //SaveExcelFileNCCE(facturasNCCE, archivo);
 
+            pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Guias de despacho (NO SUBIR).xlsx";
+            archivo = new FileInfo(pathDeDescargas);
+            SaveExcelFileGuiasDeDespacho(guiasDeDespacho, archivo);
 
-            //pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Guias de despacho (NO SUBIR).xlsx";
-            //archivo = new FileInfo(pathDeDescargas);
-            //SaveExcelFileGuiasDeDespacho(guiasDeDespacho, archivo);
-
-            //pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Direcciones de CCU (NO SUBIR).xlsx";
-            //archivo = new FileInfo(pathDeDescargas);
-            //SaveExcelFileDireccionesDeCCU(direccionesDeCCU, archivo);
-
-            //pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Reporte de totales (NO SUBIR).xlsx";
-            //archivo = new FileInfo(pathDeDescargas);
-            //SaveExcelFileReportes(listadoDeReportes, archivo);
 
             MessageBox.Show("Archivo de facturas, archivo de notas de credito con folio y archivo de guias de despacho creados en carpeta de descargas!");
 
@@ -1487,17 +1365,7 @@ namespace FacturasXMLAExcelManager
             await package.SaveAsync();
         }
 
-        private static async Task SaveExcelFileNCCE(List<FacturaNCCE> ncces, FileInfo file)
-        {
-            var package = new ExcelPackage(file);
-            var ws = package.Workbook.Worksheets.Add("Notas de credito con folio");
 
-            var range = ws.Cells["A1"].LoadFromCollection(ncces, true);
-
-            range.AutoFitColumns();
-
-            await package.SaveAsync();
-        }
 
         private static async Task SaveExcelFileGuiasDeDespacho(List<GuiaDeDespacho> guiasdeDespacho, FileInfo file)
         {
@@ -1523,41 +1391,6 @@ namespace FacturasXMLAExcelManager
             await package.SaveAsync();
         }
 
-        private static async Task SaveExcelFileMatches(List<MatchFacturaManagerCTACTE> coincidencias, FileInfo file)
-        {
-            var package = new ExcelPackage(file);
-            var ws = package.Workbook.Worksheets.Add("Match");
-
-            var range = ws.Cells["A1"].LoadFromCollection(coincidencias, true);
-
-            range.AutoFitColumns();
-
-            await package.SaveAsync();
-        }
-
-        private static async Task SaveExcelFileDireccionesDeCCU(List<DireccionDeCCU> direcciones, FileInfo file)
-        {
-            var package = new ExcelPackage(file);
-            var ws = package.Workbook.Worksheets.Add("Direcciones");
-
-            var range = ws.Cells["A1"].LoadFromCollection(direcciones, true);
-
-            range.AutoFitColumns();
-
-            await package.SaveAsync();
-        }
-
-        private static async Task SaveExcelFileReportes(List<Reporte> direcciones, FileInfo file)
-        {
-            var package = new ExcelPackage(file);
-            var ws = package.Workbook.Worksheets.Add("Reporte");
-
-            var range = ws.Cells["A1"].LoadFromCollection(direcciones, true);
-
-            range.AutoFitColumns();
-
-            await package.SaveAsync();
-        }
 
         private static async Task SaveExcelFileCosteoFacturasCCU(List<RegistroCruzadoConInformacionDeCCU> facturasDeCCUCosteadas, FileInfo file)
         {
@@ -1651,13 +1484,7 @@ namespace FacturasXMLAExcelManager
 
         }
 
-        public String validarRutQueVieneDeTranstecnia(String rutAValidar)
-        {
 
-            if (rutAValidar.Length > 0) { rutAValidar = rutAValidar.Insert(rutAValidar.Length - 1, "-"); }
-
-            return rutAValidar.Trim();
-        }
 
 
 
@@ -1668,665 +1495,20 @@ namespace FacturasXMLAExcelManager
 
         private void button2_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Funcionalidad incompleta");
-
-            //No estoy seguro de que se pueda manipular adecuadamente la información de un PDF
-
-            List<Factura> facturas = new List<Factura>();
+  
 
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Se generará un Excel a partir de la información presente en la base de datos de Transtecnia.");
-
-            List<Factura> facturas = new List<Factura>();
-            Factura f = new Factura();
-
-            int ano = 2022;
-            //el rut de Copec es 995200007
-
-
-            string str = @"Data Source=172.16.1.198\SQLEXPRESS;Initial Catalog=C001" + ano + ";User ID=sa;Password=Super123";
-            Console.WriteLine(str);
-            SqlConnection con = new SqlConnection(str);
-            SqlCommand cmd = new SqlCommand();
-            SqlDataReader r;
-            
-            //En transtecnia ImpCod = 3 es especifico no recuperable (69%) e ImpCod= 1 es iva (19%)
-            string sql = @"SELECT 
-              A.DocCod
-              ,A.ECVNumDoc
-              ,A.CpRut
-              ,B.CtaCod
-              ,B.CtroCod
-              ,B.DCVGlosa
-              ,C.ECVFecha
-              ,C.ECVVence
-              ,C.ECVExento
-              ,C.ECVNeto
-              ,A.ICVMonto
-              ,A.ICVBase
-              ,A.ImpCod
-               FROM [C0012022].[dbo].[ImpCpaVta]AS A
-               JOIN [C0012022].[dbo].[DetCpaVta] AS B
-               ON A.ECVNumDoc=B.ECVNumDoc AND A.CpRut=B.CpRut
-               JOIN [C0012022].[dbo].[EncCpaVta] AS C
-               ON A.ECVNumDoc=C.ECVNumDoc AND A.CpRut=C.CpRut
-                AND A.CpRut= ' 995200007'
-                ";
-
-
-
-
-            //string sql = @"SELECT 
-            //  A.DocCod
-            //  ,A.ECVNumDoc
-            //  ,A.CpRut
-            //  ,B.CtaCod
-            //  ,B.CtroCod
-            //  ,B.DCVGlosa
-            //  ,C.ECVFecha
-            //  ,C.ECVVence
-            //  ,C.ECVExento
-            //  ,C.ECVNeto
-            //  ,A.ICVMonto
-            //   FROM [C0012022].[dbo].[ImpCpaVta]AS A
-            //   JOIN [C0012022].[dbo].[DetCpaVta] AS B
-            //   ON A.ECVNumDoc=B.ECVNumDoc AND A.CpRut=B.CpRut
-            //   JOIN [C0012022].[dbo].[EncCpaVta] AS C
-            //   ON A.ECVNumDoc=C.ECVNumDoc AND A.CpRut=C.CpRut
-            //    AND A.CpRut= ' 995200007'
-            //    ";
-
-            string sql2 = @"SELECT 
-       A.DocCod
-      ,A.ECVNumDoc
-      ,A.CpRut
-      ,A.CtaCod
-      ,A.DCVMonto
-      ,A.CtroCod
-      ,A.DCVTri
-      ,A.DCVActF
-      ,A.DCVGlosa
-      ,B.ECVFecha
-      ,B.ECVExento
-      ,B.ECVNeto
-
-  FROM [C0012022].[dbo].[DetCpaVta] AS A
-   JOIN [C0012022].[dbo].[EncCpaVta] AS B
-   ON  A.ECVNumDoc=B.ECVNumDoc AND A.CpRut=B.CpRut
-   WHERE A.DocCod=12
-    AND A.CpRut= ' 995200007'";
-
-            //    A.DocCod=12        AND(A.ECVNumDoc = 156 OR
-
-            //A.ECVNumDoc = 268 OR
-
-            //A.ECVNumDoc = 265 OR
-
-            //A.ECVNumDoc = 9555467 OR
-
-            //A.ECVNumDoc = 9561089 OR
-
-            //A.ECVNumDoc = 9561250 OR
-
-            //A.ECVNumDoc = 7363614 OR
-
-            //A.ECVNumDoc = 7366342 OR
-
-            //A.ECVNumDoc = 4324925 OR
-
-            //A.ECVNumDoc = 104401 OR
-
-            //A.ECVNumDoc = 173 OR
-
-            //A.ECVNumDoc = 1171
-            // )
-
-
-
-            Console.WriteLine("[" + sql + "]");
-            Console.WriteLine("[" + sql2 + "]");
-
-            cmd.CommandText = sql;
-            cmd.CommandType = CommandType.Text;
-            cmd.Connection = con;
-            try
-            {
-                con.Open();
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Problema de comunicacion con el Servidor.  Por favor revise su conexion a Internet o VPN.");
-            }
-
-            r = cmd.ExecuteReader();
-            while (r.Read())
-            {
-                f = new Factura();
-
-                f.MontoAfecto = "0";
-                f.MontoExento = "0";
-                f.MontoIva = "0";
-                f.TotalDelDocumento = "0";
-
-
-
-                f.TipoDeDocumento = Convert.ToString(r.GetValue(0));//depende del numero  DocCod
-                f.TipoDeDocumento=f.TipoDeDocumento.Trim();
-
-
-                f.TipoDeDocumento = determinarTipoDeDocumentoProvenienteDeTranstecnia(f.TipoDeDocumento);
-
-                f.NumeroDelDocumento = Convert.ToString(r.GetValue(1));
-
-                //Ojo con estas fechas
-
-                f.FechaDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(r.GetValue(6)));
-                DateTime now = DateTime.Now;
-                f.FechaContableDeDocumento =   convertirAFechaValidaDesdeTranstecnia(Convert.ToString(now.Date));//"dia actual"
-                f.FechaDeVencimientoDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(r.GetValue(7)));
-
-                f.FechaDeDocumento = f.FechaContableDeDocumento;
-                f.FechaDeVencimientoDeDocumento = f.FechaContableDeDocumento;
-
-                //que es la unidad de negocio?
-                f.CodigoDeUnidadDeNegocio = "1";
-                f.RutCliente = validarRutQueVieneDeTranstecnia(Convert.ToString(r.GetValue(2)));
-                f.DireccionDelCliente = "Casa Matriz"; 
-                f.RutFacturador = "";
-                f.CodigoVendedor = "";
-                f.CodigoComisionista = "";
-                f.Probabilidad = "";
-                f.ListaPrecio = "";
-                f.PlazoPago = "P01";
-                f.MonedaDelDocumento = "CLP";
-                f.TasaDeCambio = "";
-                //hay que alterar cosas aqui
-                f.MontoAfecto = Convert.ToString(r.GetValue(9));//ECVNeto
-
-                f.MontoExento = Convert.ToString(r.GetValue(8));//ECVExento
-                f.MontoImpuestosEspecificos = "";
-
-                String codigoDeImpuesto = Convert.ToString(r.GetValue(12)); // ImpCod
-
-
-                //410104   Petroleo Gasto
-
-                //110904  Impuesto Específico Generico
-                //110804 Pendiente
-                //110804E Pendiente Exento
-
-                if (codigoDeImpuesto == "1")
-                {
-                    f.MontoIva = Convert.ToString(r.GetValue(10));//ICVMonto
-                    f.CodigoDelProducto = "410104";
-                }
-                else if(codigoDeImpuesto=="3")
-                {
-                    f.MontoIva = "0";
-                    f.MontoImpuestosEspecificos = Convert.ToString(r.GetValue(10));
-                    f.CodigoDelProducto = "110904";
-                }
-
-                //parece que el codigo de producto especifico no esta asociado al producto???
-
-                // Convert.ToString(r.GetValue(11)); // ICVBase
-
-
-
-                f.MontoIvaRetenido = "";
-                f.MontoImpuestosRetenidos = "";
-                f.TipoDeDescuentoGlobal = "";
-                f.DescuentoGlobal = "";
-                f.TotalDelDocumento = Convert.ToString(Convert.ToInt32(f.MontoAfecto) + Convert.ToInt32(f.MontoExento) + Convert.ToInt32(f.MontoIva));  //afecto (o neto) + exento + iva
-                f.DeudaPendiente = f.TotalDelDocumento; //esto es el monto total
-                f.TipoDocReferencia = "";
-                f.NumDocReferencia = "";
-                f.FechaDocReferencia = "";
-
-                f.CodigoDelProducto = "420724";
-
-                //if (f.TipoDeDocumento == "FACE" ^ f.TipoDeDocumento == "NCCE")
-                //{
-                //    f.CodigoDelProducto = "420710";           
-
-                //}else if (f.TipoDeDocumento == "FCEE")
-                //{
-                //    f.CodigoDelProducto = "420724E";
-                //}
-                
-                
-                f.Cantidad = "1"; 
-                f.Unidad = "S.U.M"; 
-                f.PrecioUnitario = f.MontoAfecto;
-                f.MonedaDelDetalle = "CLP";
-                f.TasaDeCambio2 = "1";
-                f.NumeroDeSerie = "";
-                f.NumeroDeLote = "";
-                f.FechaDeVencimiento = "";
-                f.CentroDeCostos = Convert.ToString(r.GetValue(4));//sacar de transtecnia, es un numero CtroCod
-
-
-                String rutDeReceptor = "78462150-2";
-                Boolean esPSCP = false;
-                if (rutDeReceptor == "78877610-1")
-                {
-                    esPSCP = true;
-                }
-
-                f.CentroDeCostos = determinarCentroDeCostoProvenienteDeTranstecnia(f.CentroDeCostos, esPSCP);
-
-                f.TipoDeDescuento = "";
-                f.Descuento = "";
-                f.Ubicacion = "";
-                f.Bodega = "";
-                f.Concepto1 = "";
-                f.Concepto2 = "";
-                f.Concepto3 = "";
-                f.Concepto4 = "";
-                f.Descripcion = "";
-                f.DescripcionAdicional = "";
-                f.Stock = "0";
-                f.Comentario11 = "";
-                f.Comentario21 = "";
-                f.Comentario31 = "";
-                f.Comentario41 = "";
-                f.Comentario51 = "";
-                f.CodigoImpuestoEspecifico1 = "";
-                f.MontoImpuestoEspecifico1 = "";
-                f.CodigoImpuestoEspecifico2 = "";
-                f.MontoImpuestoEspecifico2 = "";
-
-                //Modalidad es necesaria solo para las notas de credito
-                f.Modalidad = "";
-
-
-                f.Glosa = Convert.ToString(r.GetValue(5));//sacar de transtecnia
-                f.Referencia = "";
-                f.FechaDeComprometida = "";
-                f.PorcentajeCEEC = "";
-                f.ImpuestoLey18211 = "";
-                f.IvaLey18211 = "";
-                f.CodigoKitFlexible = "";
-                f.AjusteIva = "";
-
-
-                if (Convert.ToInt32(f.MontoExento) > 0 && f.TipoDeDocumento == "FACE")
-                {
-                    Factura f2 = new Factura();
-
-
-                    f2.TipoDeDocumento = f.TipoDeDocumento;
-                    f2.NumeroDelDocumento = f.NumeroDelDocumento;
-                    f2.FechaContableDeDocumento = f.FechaContableDeDocumento;       
-
-                    f2.FechaDeDocumento = f2.FechaContableDeDocumento;
-                    f2.FechaDeVencimientoDeDocumento = f2.FechaContableDeDocumento;
-
-                    f2.CodigoDeUnidadDeNegocio = "1";
-                    f2.RutCliente = f.RutCliente;
-                    f2.DireccionDelCliente = "Casa Matriz";
-                    f2.RutFacturador = "";
-                    f2.CodigoVendedor = "";
-                    f2.CodigoComisionista = "";
-                    f2.Probabilidad = "";
-                    f2.ListaPrecio = "";
-                    f2.PlazoPago = "P01";
-                    f2.MonedaDelDocumento = "CLP";
-                    f2.TasaDeCambio = "";
-                    f2.MontoAfecto = f.MontoAfecto;
-                    f2.MontoExento = f.MontoExento;
-                    f2.MontoIva = f.MontoIva;
-                    f2.MontoImpuestosEspecificos = "";
-                    f2.MontoIvaRetenido = "";
-                    f2.MontoImpuestosRetenidos = "";
-                    f2.TipoDeDescuentoGlobal = "";
-                    f2.DescuentoGlobal = "";
-                    f2.TotalDelDocumento = Convert.ToString(Convert.ToInt32(f2.MontoAfecto) + Convert.ToInt32(f2.MontoExento) + Convert.ToInt32(f2.MontoIva));  //afecto (o neto) + exento + iva
-                    f2.DeudaPendiente = f.TotalDelDocumento;
-                    f2.TipoDocReferencia = "";
-                    f2.NumDocReferencia = "";
-                    f2.FechaDocReferencia = "";
-                    f2.Cantidad = "1";
-                    f2.Unidad = "S.U.M";
-                    f2.MonedaDelDetalle = "CLP";
-                    f2.TasaDeCambio2 = "1";
-                    f2.NumeroDeSerie = "";
-                    f2.NumeroDeLote = "";
-                    f2.FechaDeVencimiento = "";
-                    f2.CentroDeCostos = "";
-                    f2.TipoDeDescuento = "";
-                    f2.Descuento = "";
-                    f2.Ubicacion = "";
-                    f2.Bodega = "";
-                    f2.Concepto1 = "";
-                    f2.Concepto2 = "";
-                    f2.Concepto3 = "";
-                    f2.Concepto4 = "";
-                    f2.Descripcion = "";
-                    f2.DescripcionAdicional = "";
-                    f2.Stock = "0";
-                    f2.Comentario11 = "";
-                    f2.Comentario21 = "";
-                    f2.Comentario31 = "";
-                    f2.Comentario41 = "";
-                    f2.Comentario51 = "";
-                    f2.CodigoImpuestoEspecifico1 = "";
-                    f2.MontoImpuestoEspecifico1 = "";
-                    f2.CodigoImpuestoEspecifico2 = "";
-                    f2.MontoImpuestoEspecifico2 = "";
-                    f2.Modalidad = "";
-                    f2.Glosa = f.Glosa;
-                    f2.Referencia = "";
-                    f2.FechaDeComprometida = "";
-                    f2.PorcentajeCEEC = "";
-                    f2.ImpuestoLey18211 = "";
-                    f2.IvaLey18211 = "";
-                    f2.CodigoKitFlexible = "";
-                    f2.AjusteIva = "";
-                    f2.CentroDeCostos = f.CentroDeCostos;
-                    
-
-                    f2.PrecioUnitario = f.MontoExento;
-                    f2.CodigoDelProducto = "420724E";
-
-                    
-                    facturas.Add(f2);
-
-                }
-
-
-                facturas.Add(f);
-
-            }
-            con.Close();
-
-            //esto es para facturas exentas
-
-            cmd.CommandText = sql2;
-            cmd.CommandType = CommandType.Text;
-            cmd.Connection = con;
-            try
-            {
-                con.Open();
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Problema de comunicacion con el Servidor.  Por favor revise su conexion a Internet o VPN.");
-            }
-
-            r = cmd.ExecuteReader();
-            while (r.Read())
-            {
-                f = new Factura();
-
-                f.MontoAfecto = "0";
-                f.MontoExento = "0";
-                f.MontoIva = "0";
-                f.TotalDelDocumento = "0";
-
-
-
-                f.TipoDeDocumento = Convert.ToString(r.GetValue(0));//depende del numero  DocCod
-                f.TipoDeDocumento = f.TipoDeDocumento.Trim();
-
-
-                f.TipoDeDocumento = determinarTipoDeDocumentoProvenienteDeTranstecnia(f.TipoDeDocumento);
-        
-
-                f.NumeroDelDocumento = Convert.ToString(r.GetValue(1));
-
-                //Ojo con estas fechas
-
-                f.FechaDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(r.GetValue(9)));
-                DateTime now = DateTime.Now;
-                f.FechaContableDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(now.Date));//"dia actual"
-                f.FechaDeVencimientoDeDocumento = convertirAFechaValidaDesdeTranstecnia(Convert.ToString(r.GetValue(9)));
-
-                f.FechaDeDocumento =f.FechaContableDeDocumento;
-                f.FechaDeVencimientoDeDocumento =f.FechaContableDeDocumento;
-
-                //que es la unidad de negocio?
-                f.CodigoDeUnidadDeNegocio = "1";
-                f.RutCliente = validarRutQueVieneDeTranstecnia(Convert.ToString(r.GetValue(2)));
-                f.DireccionDelCliente = "Casa Matriz";
-                f.RutFacturador = "";
-                f.CodigoVendedor = "";
-                f.CodigoComisionista = "";
-                f.Probabilidad = "";
-                f.ListaPrecio = "";
-                f.PlazoPago = "P01";
-                f.MonedaDelDocumento = "CLP";
-                f.TasaDeCambio = "";
-                f.MontoAfecto = Convert.ToString(r.GetValue(11));//ECVNeto
-
-                f.MontoExento = Convert.ToString(r.GetValue(10));//ECVExento
-
-
-                f.MontoIva ="0";//ICVMonto
-
-                f.MontoImpuestosEspecificos = "";
-                f.MontoIvaRetenido = "";
-                f.MontoImpuestosRetenidos = "";
-                f.TipoDeDescuentoGlobal = "";
-                f.DescuentoGlobal = "";
-                f.TotalDelDocumento = Convert.ToString(Convert.ToInt32(f.MontoAfecto) + Convert.ToInt32(f.MontoExento) + Convert.ToInt32(f.MontoIva));  //afecto (o neto) + exento + iva
-                f.DeudaPendiente = f.TotalDelDocumento; //esto es el monto total
-                f.TipoDocReferencia = "";
-                f.NumDocReferencia = "";
-                f.FechaDocReferencia = "";
-
-
-                if (f.TipoDeDocumento == "FACE" ^ f.TipoDeDocumento == "NCCE")
-                {
-                    f.CodigoDelProducto = "420724";
-
-                }
-                else if (f.TipoDeDocumento == "FCEE")
-                {
-                    f.CodigoDelProducto = "420724E";
-                }
-
-
-                f.Cantidad = "1";
-                f.Unidad = "S.U.M";
-                f.PrecioUnitario = f.MontoAfecto;
-                f.MonedaDelDetalle = "CLP";
-                f.TasaDeCambio2 = "1";
-                f.NumeroDeSerie = "";
-                f.NumeroDeLote = "";
-                f.FechaDeVencimiento = "";
-                f.CentroDeCostos = Convert.ToString(r.GetValue(5));//sacar de transtecnia, es un numero CtroCod
-
-
-                String rutDeReceptor = "78462150-2";
-                Boolean esPSCP = false;
-                if (rutDeReceptor == "78877610-1")
-                {
-                    esPSCP = true;
-                }
-
-                f.CentroDeCostos =determinarCentroDeCostoProvenienteDeTranstecnia(f.CentroDeCostos,esPSCP);
-
-                f.TipoDeDescuento = "";
-                f.Descuento = "";
-                f.Ubicacion = "";
-                f.Bodega = "";
-                f.Concepto1 = "";
-                f.Concepto2 = "";
-                f.Concepto3 = "";
-                f.Concepto4 = "";
-                f.Descripcion = "";
-                f.DescripcionAdicional = "";
-                f.Stock = "0";
-                f.Comentario11 = "";
-                f.Comentario21 = "";
-                f.Comentario31 = "";
-                f.Comentario41 = "";
-                f.Comentario51 = "";
-                f.CodigoImpuestoEspecifico1 = "";
-                f.MontoImpuestoEspecifico1 = "";
-                f.CodigoImpuestoEspecifico2 = "";
-                f.MontoImpuestoEspecifico2 = "";
-
-                //Modalidad es necesaria para la nota de credito
-                f.Modalidad = "";
-
-
-                f.Glosa = Convert.ToString(r.GetValue(8));//sacar de transtecnia
-                f.Referencia = "";
-                f.FechaDeComprometida = "";
-                f.PorcentajeCEEC = "";
-                f.ImpuestoLey18211 = "";
-                f.IvaLey18211 = "";
-                f.CodigoKitFlexible = "";
-                f.AjusteIva = "";
-
-                
-
-                //if (Convert.ToInt32(f.MontoExento) > 0)
-                //{
-                //    Factura f2 = new Factura();
-                //    f2 = f;
-                //    f2.PrecioUnitario = f.MontoExento;
-                //    f.CodigoDelProducto = "420710";
-
-                //    f2.CodigoDelProducto = "420724E";
-                //    facturas.Add(f2);
-
-                //}
-
-                facturas.Add(f);
-
-
-            }
-            con.Close();
-
-
-            //termino de seccion para facturas exentas
-
-
-
-            String pathDeDescargas = getCarpetaDeDescargas();
-            pathDeDescargas = pathDeDescargas + "" + @"\FacturasEnExcelAPartirDeTranstecnia.xlsx";
-            var archivo = new FileInfo(pathDeDescargas);
-            SaveExcelFile(facturas, archivo);
-            MessageBox.Show("Archivo FacturasEnExcelAPartirDeTranstecnia creado en carpeta de descargas!");
-
-
+          
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Funcionalidad incompleta");
+           
 
             
-        }
-
-
-
-        private String determinarCentroDeCostoProvenienteDeTranstecnia(String centroDeCostoComoNumeroQueEsString, Boolean esPSCP)
-        {
-            String centroDeCosto = "";
-
-
-            switch (centroDeCostoComoNumeroQueEsString)
-            {
-                case "5":
-                    centroDeCosto = "202";
-                    if (esPSCP)
-                    {
-                        centroDeCosto = "302";
-                    }
-                    break;
-                case "3":
-                    centroDeCosto = "201";
-                    if (esPSCP)
-                    {
-                        centroDeCosto = "302";
-                    }
-                    break;
-                case "11":
-                    centroDeCosto = "200";
-                    if (esPSCP)
-                    {
-                        centroDeCosto = "300";
-                    }
-                    break;
-                case "10":
-                    centroDeCosto = "207";
-                    if (esPSCP)
-                    {
-                        centroDeCosto = "302";
-                    }
-                    break;
-                case "16"://santiago sur es eccusa?
-                    centroDeCosto = "206";
-                    if (esPSCP)
-                    {
-                        centroDeCosto = "302";
-                    }
-                    break;
-                case "9":
-                    //Santiago es emprendedor?
-                    centroDeCosto = "206";
-                    if (esPSCP)
-                    {
-                        centroDeCosto = "306";
-                    }
-                    break;
-                case "7":
-                    centroDeCosto = "205";
-                    if (esPSCP)
-                    {
-                        centroDeCosto = "305";
-                    }
-                    break;
-                case "1":
-                    centroDeCosto = "204";
-                    if (esPSCP)
-                    {
-                        centroDeCosto = "304";
-                    }
-                    break;
-                case "12":
-                    centroDeCosto = "204";
-                    if (esPSCP)
-                    {
-                        centroDeCosto = "304";
-                    }
-                    break;
-                case "13":
-                    centroDeCosto = "204";
-                    if (esPSCP)
-                    {
-                        centroDeCosto = "304";
-                    }
-                    break;
-                case "6":
-                    centroDeCosto = "204";
-                    if (esPSCP)
-                    {
-                        centroDeCosto = "304";
-                    }
-                    break;
-                default:
-                    centroDeCosto = "204";
-                    if (esPSCP)
-                    {
-                        centroDeCosto = "304";
-                    }
-                    break;
-
-            }
-
-
-
-            return centroDeCosto;
-
-
         }
 
 
@@ -2485,31 +1667,7 @@ namespace FacturasXMLAExcelManager
 
 
 
-        private String determinarTipoDeDocumentoProvenienteDeTranstecnia(String codigoDeDocumento)
-        {
-            String tipoDeFactura = "";
-
-
-            switch (codigoDeDocumento)
-            {
-                case "4":
-                    tipoDeFactura = "FACE";
-                    break;
-                case "12":
-                    tipoDeFactura = "FCEE";
-                    break;
-                case "18":
-                    tipoDeFactura = "NCCE";
-                    break;
-                default:
-                    break;
-            }
-
-
-            return tipoDeFactura;
-
-
-        }
+        
 
 
         private String getCarpetaDeDescargas()
@@ -2603,195 +1761,12 @@ namespace FacturasXMLAExcelManager
         private void button5_Click(object sender, EventArgs e)
         {
 
-            List<FacturaManager> facturasDeManager = new List<FacturaManager>();
-            List<CobroCTACTE> cobrosCTACTE = new List<CobroCTACTE>();
-
-            List<MatchFacturaManagerCTACTE> listadoDeFacturasParaElTercerExcel = new List<MatchFacturaManagerCTACTE>();
-
-            string sFileName = "";
-
-            OpenFileDialog choofdlog = new OpenFileDialog();
-            choofdlog.Filter = "Archivos XLSX (*.xlsx)|*.xlsx";
-            choofdlog.FilterIndex = 1;
-            choofdlog.Multiselect = true;
-
-            string[] arrAllFiles = new string[] { };
-
-            MessageBox.Show("Seleccionar excel de facturas de manager");
-            if (choofdlog.ShowDialog() == DialogResult.OK)
-            {
-                sFileName = choofdlog.FileName;
-                arrAllFiles = choofdlog.FileNames; //used when Multiselect = true           
-            }
-
-
-            facturasDeManager = leerExcelDeFacturasDeManager(sFileName);
-
-            MessageBox.Show("Seleccionar excel de cobros");
-            if (choofdlog.ShowDialog() == DialogResult.OK)
-            {
-                sFileName = choofdlog.FileName;
-                arrAllFiles = choofdlog.FileNames; //used when Multiselect = true           
-            }
-            cobrosCTACTE = leerExcelDeCobrosCTACTE(sFileName);
-
             
-            foreach (var item in facturasDeManager)
-            {
-
-                foreach (var i in cobrosCTACTE)
-                {
-                    if((item.Total==i.Monto) && (item.FechaDoc1==i.Fecha))
-                    {
-                        MatchFacturaManagerCTACTE matchFacturaManagerCTACTE = new MatchFacturaManagerCTACTE();
-
-                        matchFacturaManagerCTACTE.Fecha = i.Fecha;
-                        matchFacturaManagerCTACTE.Monto = i.Monto;
-                        matchFacturaManagerCTACTE.Centro = i.CtoCosto;
-
-                        switch (matchFacturaManagerCTACTE.Centro)
-                        {
-                            case "CURICO":
-                                matchFacturaManagerCTACTE.Centro ="202";
-                                break;
-                            case "RANCAGUA":
-                                matchFacturaManagerCTACTE.Centro = "201";
-                                break;
-                            case "MELIPILLA":
-                                matchFacturaManagerCTACTE.Centro = "200";
-                                break;
-                            case "SAN ANTONIO":
-                                matchFacturaManagerCTACTE.Centro = "207";
-                                break;
-                            case "SANTIAGO":
-                                matchFacturaManagerCTACTE.Centro = "206";
-                                break;
-                            case "SANTIAGO-SUR":
-                                matchFacturaManagerCTACTE.Centro = "206";
-                                break;
-                            case "ILLAPEL":
-                                matchFacturaManagerCTACTE.Centro = "205";
-                                break;
-                            default:
-                                //administracion
-                                matchFacturaManagerCTACTE.Centro = "204";
-                                break;
-      
-                        }
-
-                        listadoDeFacturasParaElTercerExcel.Add(matchFacturaManagerCTACTE);
-                    }
-                }
-
-
-            }
-
-
-            //aqui habria que guardar el Excel
-
-            String pathDeDescargas = getCarpetaDeDescargas();
-            pathDeDescargas = pathDeDescargas + "" + @"\Match de facturas.xlsx";
-            var archivo = new FileInfo(pathDeDescargas);
-            SaveExcelFileMatches(listadoDeFacturasParaElTercerExcel, archivo);
-            MessageBox.Show("Archivo Match de facturas entre Manager y CTA cte creado en carpeta de descargas!");
-
-
 
         }
 
 
-        private List<CobroCTACTE> leerExcelDeCobrosCTACTE(String filePath)
-        {
-            List<CobroCTACTE>listadoDeCobros=new List<CobroCTACTE>();
-
-            FileInfo existingFile = new FileInfo(filePath);
-            using (ExcelPackage package = new ExcelPackage(existingFile))
-            {
-                //get the first worksheet in the workbook
-                ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
-                int colCount = worksheet.Dimension.End.Column;  //get Column Count
-                int rowCount = worksheet.Dimension.End.Row;     //get row count
-                CobroCTACTE  encabezado = new CobroCTACTE();
-                encabezado.Fecha = "Fecha";
-                encabezado.CtoCosto = "CtoCosto";
-                encabezado.Monto = "Monto";
-
-                listadoDeCobros.Add(encabezado);
-
-
-                for (int row = 1; row <= rowCount; row++)
-                {
-
-                    CobroCTACTE c = new CobroCTACTE();
-                    c.Fecha = worksheet.Cells[row, 1].Value?.ToString().Trim();
-                    c.CtoCosto = worksheet.Cells[row, 2].Value?.ToString().Trim();
-                    c.Monto = worksheet.Cells[row, 3].Value?.ToString().Trim();
-               
-                    if (c.Monto != "Monto")
-                    {
-                        listadoDeCobros.Add(c);
-                    }
-
-                }
-            }
-
-
-
-            return listadoDeCobros;
-
-        }
-
-
-        private List<FacturaManager> leerExcelDeFacturasDeManager(String filePath)
-        {
-            List<FacturaManager> listadoDeFacturasDeManager = new List<FacturaManager>();
-
-            FileInfo existingFile = new FileInfo(filePath);
-            using (ExcelPackage package = new ExcelPackage(existingFile))
-            {
-                //get the first worksheet in the workbook
-                ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
-                int colCount = worksheet.Dimension.End.Column;  //get Column Count
-                int rowCount = worksheet.Dimension.End.Row;     //get row count
-                FacturaManager encabezado = new FacturaManager();
-                encabezado.Numero = "Numero";
-                encabezado.Rut = "Rut";
-                encabezado.Proveedor = "Proveedor";
-                encabezado.Moneda = "Moneda";
-                encabezado.TipoCambio = "TipoCambio";
-                encabezado.FechaDoc1 = "Fecha";
-                encabezado.Total = "Total";
-                encabezado.Estado = "Estado";
-                encabezado.Glosa = "Glosa";
-
-
-
-                listadoDeFacturasDeManager.Add(encabezado);
-
-
-                for (int row = 1; row <= rowCount; row++)
-                {
-
-                    FacturaManager fm = new FacturaManager();
-                    fm.Numero = worksheet.Cells[row, 1].Value?.ToString().Trim();
-                    fm.FechaDoc1 = worksheet.Cells[row, 6].Value?.ToString().Trim();
-                    fm.Total = worksheet.Cells[row, 7].Value?.ToString().Trim();
-
-                    if (fm.Total != "Total")
-                    {
-                        listadoDeFacturasDeManager.Add(fm);
-                    }
-
-                }
-            }
-
-
-
-            return listadoDeFacturasDeManager;
-
-        }
-
-
+       
 
 
 
@@ -2907,59 +1882,7 @@ namespace FacturasXMLAExcelManager
         }
 
 
-
  
-
-        private String determinarNumeroDeMesAPartirDePalabra(String mes)
-        {
-            String mesComoNumero = "";
-
-            switch (mes)
-            {
-                case "ENERO":
-                    mesComoNumero = "01";
-                    break;
-                case "FEBRERO":
-                    mesComoNumero = "02";
-                    break;
-                case "MARZO":
-                    mesComoNumero = "03";
-                    break;
-                case "ABRIL":
-                    mesComoNumero = "04";
-                    break;
-                case "MAYO":
-                    mesComoNumero = "05";
-                    break;
-                case "JUNIO":
-                    mesComoNumero = "06";
-                    break;
-                case "JULIO":
-                    mesComoNumero = "07";
-                    break;
-                case "AGOSTO":
-                    mesComoNumero = "08";
-                    break;
-                case "SEPTIEMBRE":
-                    mesComoNumero = "09";
-                    break;
-                case "OCTUBRE":
-                    mesComoNumero = "10";
-                    break;
-                case "NOVIEMBRE":
-                    mesComoNumero = "11";
-                    break;
-                case "DICIEMBRE":
-                    mesComoNumero = "12";
-                    break;
-                default:
-                    break;
-            }
-
-
-            return mesComoNumero;   
-
-        }
 
         public String convertirAFechaValida3(String fechaAConvertir)
         {
