@@ -560,7 +560,10 @@ namespace FacturasXMLAExcelManager
                                 {
 
                                     String direccionReceptor = getValue("DirRecep", sFileName);
-                                   
+
+                                    //Tenemos 4 cuentas/contratos de itnernet fija con entel:
+                                    //322068 (Talca), 328985 (Rancagua CCU), 350011 (Renca) y 60167627 (Rancagua, oficina central)
+
                                     switch (direccionReceptor)
                                     {
                                         case "ANTONIO MACEO (CALLE) 2693": // ES RENCA
@@ -581,7 +584,7 @@ namespace FacturasXMLAExcelManager
                                         case "CALLE CINCO SUR 85, RANCAGUA":// ES RANCAGUA (Central)
                                             f.CentroDeCostos = "203";
                                             f.CodigoDelProducto = "420709";
-                                            f.Glosa = "Internet fija de Rancagua (Central) (Entel)";
+                                            f.Glosa = "Internet fija de oficina central en Rancagua (Entel)";
                                             break;
                                         default:
                                             //no es ninguna de las direcciones anteriores
@@ -593,6 +596,7 @@ namespace FacturasXMLAExcelManager
                                     }
                                 }
 
+                                //tratar facturas de Movistar
                                 if (f.RutCliente== "76124890-1")
                                 {
                                     f.CentroDeCostos = "203";
@@ -2439,6 +2443,7 @@ namespace FacturasXMLAExcelManager
                     costeoDeFactura.MontoIva = hojaDeCosteos.Cells[row, 4].Value?.ToString().Trim();
                     costeoDeFactura.AjusteIva = hojaDeCosteos.Cells[row, 5].Value?.ToString().Trim();
                     costeoDeFactura.CodigoDelProducto = hojaDeCosteos.Cells[row, 6].Value?.ToString().Trim();
+                    costeoDeFactura.Glosa = hojaDeCosteos.Cells[row, 8].Value?.ToString().Trim();// para las observaciones
 
                     listadoDeCosteos.Add(costeoDeFactura);
 
@@ -2512,6 +2517,7 @@ namespace FacturasXMLAExcelManager
                         String montoExento = "0";    
                         String montoTotal = "0";
                         String ajusteIva = "0";
+                        String glosa = "";
 
 
                         foreach (var facturaLeida in facturasLeidasEnPrimeraHoja)
@@ -2526,16 +2532,20 @@ namespace FacturasXMLAExcelManager
                                 direccionDelCliente = facturaLeida.DireccionDelCliente;
                                 codigoDelProducto = costeo.CodigoDelProducto;
 
+                                //en lo que respecta a precios, solo el precio unitario cambia.
                                 precioUnitario = costeo.Afecto;
+
+                                
                                 montoAfecto = facturaLeida.MontoAfecto;
                                 montoIva = facturaLeida.MontoIva;
 
-                     
 
                                 montoExento = facturaLeida.MontoExento;
                                 montoTotal = facturaLeida.TotalDelDocumento;
                                 ajusteIva = costeo.AjusteIva;
                                 facturaLeida.AjusteIva = costeo.AjusteIva;
+
+                                facturaLeida.Glosa= costeo.Glosa;
 
                                 if (ajusteIva=="")
                                 {
@@ -2643,6 +2653,34 @@ namespace FacturasXMLAExcelManager
                                 fc.CentroDeCostos = "201";
                                 break;
                             case "CURICO":
+                                fc.CentroDeCostos = "202";
+                                break;
+                            case "203":
+                                fc.CentroDeCostos = "203";
+                                break;
+                            case "204":
+                                fc.CentroDeCostos = "204";
+                                fc.CodigoDeUnidadDeNegocio = "2";
+                                break;
+                            case "208":
+                                fc.CentroDeCostos = "208";
+                                break;
+                            case "205":
+                                fc.CentroDeCostos = "205";
+                                break;
+                            case "207":
+                                fc.CentroDeCostos = "207";
+                                break;
+                            case "200":
+                                fc.CentroDeCostos = "200";
+                                break;
+                            case "206":
+                                fc.CentroDeCostos = "206";
+                                break;
+                            case "201":
+                                fc.CentroDeCostos = "201";
+                                break;
+                            case "202":
                                 fc.CentroDeCostos = "202";
                                 break;
                             default:
