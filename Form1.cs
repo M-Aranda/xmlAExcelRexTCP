@@ -2443,7 +2443,7 @@ namespace FacturasXMLAExcelManager
                     costeoDeFactura.MontoIva = hojaDeCosteos.Cells[row, 4].Value?.ToString().Trim();
                     costeoDeFactura.AjusteIva = hojaDeCosteos.Cells[row, 5].Value?.ToString().Trim();
                     costeoDeFactura.CodigoDelProducto = hojaDeCosteos.Cells[row, 6].Value?.ToString().Trim();
-                    costeoDeFactura.Glosa = hojaDeCosteos.Cells[row, 8].Value?.ToString().Trim();// para las observaciones
+                    costeoDeFactura.Glosa = hojaDeCosteos.Cells[row, 9].Value?.ToString().Trim();// para las observaciones
 
                     listadoDeCosteos.Add(costeoDeFactura);
 
@@ -2489,6 +2489,8 @@ namespace FacturasXMLAExcelManager
 
 
 
+            //Actualizacion 21/07/2022, habría que modificar el programa para que automáticamente genere un registro de factura
+            //por cada factura que si este presente en el costeo, pero no en el listado de todas las facturas.
 
             foreach (var identificador in identificadores)
             {
@@ -2712,7 +2714,7 @@ namespace FacturasXMLAExcelManager
                         fc.CodigoImpuestoEspecifico2 = "";
                         fc.MontoImpuestoEspecifico2 = "";
                         fc.Modalidad = "";
-                        fc.Glosa = "Factura costeada con información proporcianda por Francisco Cornejo";
+                        fc.Glosa = costeo.Glosa;
                         fc.Referencia = "";
                         fc.FechaDeComprometida = "";
                         fc.PorcentajeCEEC = "";
