@@ -42,6 +42,8 @@ namespace FacturasXMLAExcelManager
         private void button1_Click(object sender, EventArgs e)
         {
 
+
+
             //excelAPartirDeXML
             List<Factura> facturasAIngresar = new List<Factura>();
             List<FacturaContabilizada> facturasAIngresarContabilizadas = new List<FacturaContabilizada>();
@@ -66,15 +68,24 @@ namespace FacturasXMLAExcelManager
 
             string[] arrAllFiles= new string[] {};
 
-            if (choofdlog.ShowDialog() == DialogResult.OK)
+
+            while (true)
             {
-                sFileName = choofdlog.FileName;
-                arrAllFiles = choofdlog.FileNames; //used when Multiselect = true           
+                if (choofdlog.ShowDialog() == DialogResult.OK)
+                {
+                    sFileName = choofdlog.FileName;
+                    arrAllFiles = choofdlog.FileNames; //used when Multiselect = true
+                    break;
+                }
+                else
+                {
+                    MessageBox.Show("Debe seleccionar archivos XML");
+                    System.Environment.Exit(0);
+                }
             }
 
             Boolean variasFacturas = true;
    
-
             if (variasFacturas == false)//si es una sola factura, lo cual no debiese darse en el uso de este programa
             {
     
@@ -88,7 +99,6 @@ namespace FacturasXMLAExcelManager
 
                 //fijarse con el SII
                 f.TipoDeDocumento = determinarTipoDeDocumento(f.TipoDeDocumento);
-
 
                 //Las fechas son en formato dd/mm/yyyy
                 f.NumeroDelDocumento = getValue("Folio", sFileName);
@@ -916,7 +926,6 @@ namespace FacturasXMLAExcelManager
                             }
 
 
-
                             //si nota de credito hace referencia a un folio que es 0, la factura tiene que subirse a documento contable
                             if (facNCCE2.RutCliente == "91041000-8" || facNCCE2.RutCliente == "96989120-4" || facNCCE2.RutCliente == "99501760-1" || facNCCE2.RutCliente == "99554560-8" || facNCCE2.RutCliente == "99586280-8")
                             {
@@ -1081,18 +1090,12 @@ namespace FacturasXMLAExcelManager
 
                             }
 
-
-
                         }
 
-
                     }
-                    
-
-               
+                                   
                     //f.MontoExento = exentoAntes;
                     
-
                     if (f.MontoExento !="0" && String.IsNullOrEmpty(f.MontoExento)==false && f.TipoDeDocumento == "FACE"  && esFacturaDeEnvases==false)
                     {
                         f = new Factura();
@@ -1107,7 +1110,6 @@ namespace FacturasXMLAExcelManager
 
                         f.TipoDeDocumento = determinarTipoDeDocumento(f.TipoDeDocumento);
                         
-
                         f.NumeroDelDocumento = getValue("Folio", sFileName);
                         f.FechaDeDocumento = convertirAFechaValida3(getValue("FchEmis", sFileName));
                         f.FechaContableDeDocumento = f.FechaDeDocumento;
@@ -1141,14 +1143,10 @@ namespace FacturasXMLAExcelManager
 
                         f.MontoExento = getValue("MontoImp", sFileName);
 
-
-
                         if (f.TipoDeDocumento == "FCEE")
                         {
                             f.MontoExento = getValue("MntExe", sFileName);
-
                         }
-
 
                         f.MontoIva = getValue("IVA", sFileName);
                         f.MontoImpuestosEspecificos = "";//getValue("Folio", sFileName);
@@ -1279,12 +1277,7 @@ namespace FacturasXMLAExcelManager
                 }
 
 
-
-
             }
-
-
-
 
 
             int totalDeFacturas = cantidadFACE+cantidadFCEE+cantidadNCCE+cantidadDeGuiasDeDespacho;
@@ -1332,6 +1325,13 @@ namespace FacturasXMLAExcelManager
             //se quita de las contabilizadas
             facturasAIngresarContabilizadas.RemoveAll(item => item.CentroDeCostos == "209");
 
+            //A veces vienen facturas con mas de un impuesto, que dan problemas porque 
+            //la suma del afecto, exento e iva no calza con el monto total. Casi siempre eso es porque al exento le falta
+            //considerar un impuesto. Asi que lo sigueinte debiese ser un fragmento de codigo que itere sobre
+            //todas las facturas y revise esos valores.
+
+
+            //28/07/2022, se agrega estructura para manejar facturas afectas y notas de crédito cuyo exento está incompleto
 
             String pathDeDescargas = getCarpetaDeDescargas();
             pathDeDescargas = pathDeDescargas + "" + @"\CCU (Documentos con detalle (contabilizado)).xlsx";
@@ -1636,7 +1636,6 @@ namespace FacturasXMLAExcelManager
         {
             String tipoDeFactura= "";
 
-
             switch (codigoDeDocumento)
             {
                 case "33":
@@ -1668,10 +1667,6 @@ namespace FacturasXMLAExcelManager
 
 
         }
-
-
-
-        
 
 
         private String getCarpetaDeDescargas()
@@ -1799,20 +1794,13 @@ namespace FacturasXMLAExcelManager
                                              
                 }
 
-
-
             }
-
-
             
             return valorDeIvaARetornar;
 
         }
 
     
-
-
-
         private String determinarNuevoValorDeExentoAPartirDeMultiplesImpuestos(String sFileName)
         {
             XmlTextReader reader = new XmlTextReader(sFileName);
@@ -2062,6 +2050,105 @@ namespace FacturasXMLAExcelManager
             }
 
             return dir;
+        }   
+
+        private FacturaContabilizada validarMontoExentoDeFactura(FacturaContabilizada fc)
+        {
+            FacturaContabilizada fcActualizada = new FacturaContabilizada();
+
+            int totalDocumento = int.Parse(fc.TotalDelDocumento);
+
+            int afecto = int.Parse(fc.MontoAfecto);
+            int exento = int.Parse(fc.MontoExento);
+            int iva = int.Parse(fc.MontoIva);
+
+            int posibleTotalDelDocumento = afecto + exento + iva;
+
+            //si es una factura afecta o una nota de credito y además el total del documento no cuadra con la suma de afecto, exento e iva
+            //entonces a la factura le falta algún valor exento
+            if ( (fc.TipoDeDocumento=="FACE" || fc.TipoDeDocumento == "NCCE") && (totalDocumento != posibleTotalDelDocumento) )
+            {            
+                int exentoFaltante=totalDocumento - posibleTotalDelDocumento;
+                exento = exento + exentoFaltante;
+
+
+                fcActualizada.TipoDeDocumento = fc.TipoDeDocumento;
+                fcActualizada.NumeroDelDocumento = fc.NumeroDelDocumento;
+                fcActualizada.FechaDeDocumento = fc.FechaDeDocumento;
+                fcActualizada.FechaContableDeDocumento = fc.FechaContableDeDocumento;
+                fcActualizada.FechaDeVencimientoDeDocumento = fc.FechaDeVencimientoDeDocumento;
+                fcActualizada.CodigoDeUnidadDeNegocio = fc.CodigoDeUnidadDeNegocio;
+                fcActualizada.RutCliente = fc.RutCliente;
+                fcActualizada.DireccionDelCliente = fc.DireccionDelCliente;
+                fcActualizada.RutFacturador = fc.RutFacturador;
+                fcActualizada.CodigoVendedor = fc.CodigoVendedor;
+                fcActualizada.CodigoComisionista = fc.CodigoComisionista;
+                fcActualizada.Probabilidad = fc.Probabilidad;
+                fcActualizada.ListaPrecio = fc.ListaPrecio;
+                fcActualizada.PlazoPago = fc.PlazoPago;
+                fcActualizada.MonedaDelDocumento = fc.MonedaDelDocumento;
+                fcActualizada.TasaDeCambio = fc.TasaDeCambio;
+                fcActualizada.MontoAfecto = fc.MontoAfecto;
+                fcActualizada.MontoExento = exento.ToString();
+                fcActualizada.MontoIva = fc.MontoIva;
+                fcActualizada.MontoImpuestosEspecificos = fc.MontoImpuestosEspecificos;
+                fcActualizada.MontoIvaRetenido = fc.MontoIvaRetenido;
+                fcActualizada.MontoImpuestosRetenidos = fc.MontoImpuestosRetenidos;
+                fcActualizada.TipoDeDescuentoGlobal = fc.TipoDeDescuentoGlobal;
+                fcActualizada.DescuentoGlobal = fc.DescuentoGlobal;
+                fcActualizada.TotalDelDocumento = fc.TotalDelDocumento;
+                fcActualizada.DeudaPendiente = fc.DeudaPendiente;
+                fcActualizada.TipoDocReferencia = fc.TipoDocReferencia;
+                fcActualizada.NumDocReferencia = fc.NumDocReferencia;
+                fcActualizada.FechaDocReferencia = fc.FechaDocReferencia;
+                fcActualizada.CodigoDelProducto = fc.CodigoDelProducto;
+                fcActualizada.Cantidad = fc.Cantidad;
+                fcActualizada.Unidad = fc.Unidad;
+                fcActualizada.PrecioUnitario = fc.PrecioUnitario;
+                fcActualizada.MonedaDelDetalle = fc.MonedaDelDetalle;
+                fcActualizada.TasaDeCambio2 = fc.TasaDeCambio2;
+                fcActualizada.NumeroDeSerie = fc.NumeroDeSerie;
+                fcActualizada.NumeroDeLote = fc.NumeroDeLote;
+                fcActualizada.FechaDeVencimiento = fc.FechaDeVencimiento;
+                fcActualizada.CentroDeCostos = fc.CentroDeCostos;
+                fcActualizada.TipoDeDescuento = fc.TipoDeDescuento;
+                fcActualizada.Descuento = fc.Descuento;
+                fcActualizada.Ubicacion = fc.Ubicacion;
+                fcActualizada.Bodega = fc.Bodega;
+                fcActualizada.Concepto1 = fc.Concepto1;
+                fcActualizada.Concepto2 = fc.Concepto2;
+                fcActualizada.Concepto3 = fc.Concepto3;
+                fcActualizada.Concepto4 = fc.Concepto4;
+                fcActualizada.Descripcion = fc.Descripcion;
+                fcActualizada.DescripcionAdicional = fc.DescripcionAdicional;
+                fcActualizada.Stock = fc.Stock;
+                fcActualizada.Comentario11 = fc.Comentario11;
+                fcActualizada.Comentario21 = fc.Comentario21;
+                fcActualizada.Comentario31 = fc.Comentario31;
+                fcActualizada.Comentario41 = fc.Comentario41;
+                fcActualizada.Comentario51 = fc.Comentario51;
+                fcActualizada.CodigoImpuestoEspecifico1 = fc.CodigoImpuestoEspecifico1;
+                fcActualizada.MontoImpuestoEspecifico1 = fc.MontoImpuestoEspecifico1;
+                fcActualizada.CodigoImpuestoEspecifico2 = fc.CodigoImpuestoEspecifico2;
+                fcActualizada.MontoImpuestoEspecifico2 = fc.MontoImpuestoEspecifico2;
+                fcActualizada.Modalidad = fc.Modalidad;
+                fcActualizada.Glosa = fc.Glosa;
+                fcActualizada.Referencia = fc.Referencia;
+                fcActualizada.FechaDeComprometida = fc.FechaDeComprometida;
+                fcActualizada.PorcentajeCEEC = "";
+                fcActualizada.ImpuestoLey18211 = "";
+                fcActualizada.IvaLey18211 = "";
+                fcActualizada.CodigoKitFlexible = fc.CodigoKitFlexible;
+                fcActualizada.AjusteIva = fc.AjusteIva;
+
+                return fcActualizada;
+            }
+            else
+            {
+                return fc;
+            }
+
+
         }
 
         private void button6_Click(object sender, EventArgs e)
@@ -2079,11 +2166,23 @@ namespace FacturasXMLAExcelManager
             string[] arrAllFiles = new string[] { };
 
             MessageBox.Show("Seleccionar excel de facturas de manager (debe tener 2 hojas)");
-            if (choofdlog.ShowDialog() == DialogResult.OK)
+
+            while (true)
             {
-                sFileName = choofdlog.FileName;
-                arrAllFiles = choofdlog.FileNames; //used when Multiselect = true           
+                if (choofdlog.ShowDialog() == DialogResult.OK)
+                {
+                    sFileName = choofdlog.FileName;
+                    arrAllFiles = choofdlog.FileNames; //used when Multiselect = true           
+                    break;
+                }
+                else
+                {
+                    MessageBox.Show("Debe seleccionar un Excel válido. Cerrando programa");
+                    System.Environment.Exit(0);
+                }
+
             }
+
 
 
             List<RegistroCruzadoConInformacionDeCCU> excelCruzadoConInfoDeCCU = leerExcelDeFacturasCCUACruzar(sFileName);
@@ -2297,10 +2396,23 @@ namespace FacturasXMLAExcelManager
             string[] arrAllFiles = new string[] { };
 
             MessageBox.Show("Seleccionar excel de facturas NO CCU (debe tener 2 hojas)");
-            if (choofdlog.ShowDialog() == DialogResult.OK)
+            while (true)
             {
-                sFileName = choofdlog.FileName;
-                arrAllFiles = choofdlog.FileNames; //used when Multiselect = true           
+
+
+                if (choofdlog.ShowDialog() == DialogResult.OK)
+                {
+                    sFileName = choofdlog.FileName;
+                    arrAllFiles = choofdlog.FileNames; //used when Multiselect = true
+                    break;
+                }
+                else
+                {
+                    MessageBox.Show("Debe seleccionar un Excel válido. Cerrando programa");
+                    System.Environment.Exit(0);
+                }
+
+
             }
 
 
