@@ -1255,7 +1255,10 @@ namespace FacturasXMLAExcelManager
                                 fc.CodigoDeUnidadDeNegocio = "2";
                             }
 
-                           
+                            //agregado el 02/08/2022
+                            fc = validarMontoExentoDeFacturaContabilizada(fc);
+
+
                             facturasAIngresarContabilizadas.Add(fc);
                         }
                         else if (f.RutCliente != "91041000-8" && f.RutCliente != "96989120-4" && f.RutCliente != "99501760-1" && f.RutCliente != "99554560-8" && f.RutCliente != "99586280-8")
@@ -1267,9 +1270,12 @@ namespace FacturasXMLAExcelManager
                             {
                                 f.CodigoDelProducto = "110804E";
                             }
+
+                            //agregado el 02/08/2022
+                            f = validarMontoExentoDeFacturaNoContabilizada(f);
                             facturasAIngresar.Add(f);
 
-                        }
+                        } 
 
                     }
 
@@ -2052,7 +2058,112 @@ namespace FacturasXMLAExcelManager
             return dir;
         }   
 
-        private FacturaContabilizada validarMontoExentoDeFactura(FacturaContabilizada fc)
+       
+
+
+        private Factura validarMontoExentoDeFacturaNoContabilizada(Factura fc)
+        {
+            Factura fcActualizada = new Factura();
+
+            int totalDocumento = int.Parse(fc.TotalDelDocumento);
+
+            int afecto = int.Parse(fc.MontoAfecto);
+            int exento = int.Parse(fc.MontoExento);
+            int iva = int.Parse(fc.MontoIva);
+
+            int posibleTotalDelDocumento = afecto + exento + iva;
+
+            //si es una factura afecta o una nota de credito y además el total del documento no cuadra con la suma de afecto, exento e iva
+            //entonces a la factura le falta algún valor exento
+            if ((fc.TipoDeDocumento == "FACE" || fc.TipoDeDocumento == "NCCE") && (totalDocumento != posibleTotalDelDocumento))
+            {
+                int exentoFaltante = totalDocumento - posibleTotalDelDocumento;
+                exento = exento + exentoFaltante;
+
+
+                fcActualizada.TipoDeDocumento = fc.TipoDeDocumento;
+                fcActualizada.NumeroDelDocumento = fc.NumeroDelDocumento;
+                fcActualizada.FechaDeDocumento = fc.FechaDeDocumento;
+                fcActualizada.FechaContableDeDocumento = fc.FechaContableDeDocumento;
+                fcActualizada.FechaDeVencimientoDeDocumento = fc.FechaDeVencimientoDeDocumento;
+                fcActualizada.CodigoDeUnidadDeNegocio = fc.CodigoDeUnidadDeNegocio;
+                fcActualizada.RutCliente = fc.RutCliente;
+                fcActualizada.DireccionDelCliente = fc.DireccionDelCliente;
+                fcActualizada.RutFacturador = fc.RutFacturador;
+                fcActualizada.CodigoVendedor = fc.CodigoVendedor;
+                fcActualizada.CodigoComisionista = fc.CodigoComisionista;
+                fcActualizada.Probabilidad = fc.Probabilidad;
+                fcActualizada.ListaPrecio = fc.ListaPrecio;
+                fcActualizada.PlazoPago = fc.PlazoPago;
+                fcActualizada.MonedaDelDocumento = fc.MonedaDelDocumento;
+                fcActualizada.TasaDeCambio = fc.TasaDeCambio;
+                fcActualizada.MontoAfecto = fc.MontoAfecto;
+                fcActualizada.MontoExento = exento.ToString();
+                fcActualizada.MontoIva = fc.MontoIva;
+                fcActualizada.MontoImpuestosEspecificos = fc.MontoImpuestosEspecificos;
+                fcActualizada.MontoIvaRetenido = fc.MontoIvaRetenido;
+                fcActualizada.MontoImpuestosRetenidos = fc.MontoImpuestosRetenidos;
+                fcActualizada.TipoDeDescuentoGlobal = fc.TipoDeDescuentoGlobal;
+                fcActualizada.DescuentoGlobal = fc.DescuentoGlobal;
+                fcActualizada.TotalDelDocumento = fc.TotalDelDocumento;
+                fcActualizada.DeudaPendiente = fc.DeudaPendiente;
+                fcActualizada.TipoDocReferencia = fc.TipoDocReferencia;
+                fcActualizada.NumDocReferencia = fc.NumDocReferencia;
+                fcActualizada.FechaDocReferencia = fc.FechaDocReferencia;
+                fcActualizada.CodigoDelProducto = fc.CodigoDelProducto;
+                fcActualizada.Cantidad = fc.Cantidad;
+                fcActualizada.Unidad = fc.Unidad;
+                fcActualizada.PrecioUnitario = fc.PrecioUnitario;
+                fcActualizada.MonedaDelDetalle = fc.MonedaDelDetalle;
+                fcActualizada.TasaDeCambio2 = fc.TasaDeCambio2;
+                fcActualizada.NumeroDeSerie = fc.NumeroDeSerie;
+                fcActualizada.NumeroDeLote = fc.NumeroDeLote;
+                fcActualizada.FechaDeVencimiento = fc.FechaDeVencimiento;
+                fcActualizada.CentroDeCostos = fc.CentroDeCostos;
+                fcActualizada.TipoDeDescuento = fc.TipoDeDescuento;
+                fcActualizada.Descuento = fc.Descuento;
+                fcActualizada.Ubicacion = fc.Ubicacion;
+                fcActualizada.Bodega = fc.Bodega;
+                fcActualizada.Concepto1 = fc.Concepto1;
+                fcActualizada.Concepto2 = fc.Concepto2;
+                fcActualizada.Concepto3 = fc.Concepto3;
+                fcActualizada.Concepto4 = fc.Concepto4;
+                fcActualizada.Descripcion = fc.Descripcion;
+                fcActualizada.DescripcionAdicional = fc.DescripcionAdicional;
+                fcActualizada.Stock = fc.Stock;
+                fcActualizada.Comentario11 = fc.Comentario11;
+                fcActualizada.Comentario21 = fc.Comentario21;
+                fcActualizada.Comentario31 = fc.Comentario31;
+                fcActualizada.Comentario41 = fc.Comentario41;
+                fcActualizada.Comentario51 = fc.Comentario51;
+                fcActualizada.CodigoImpuestoEspecifico1 = fc.CodigoImpuestoEspecifico1;
+                fcActualizada.MontoImpuestoEspecifico1 = fc.MontoImpuestoEspecifico1;
+                fcActualizada.CodigoImpuestoEspecifico2 = fc.CodigoImpuestoEspecifico2;
+                fcActualizada.MontoImpuestoEspecifico2 = fc.MontoImpuestoEspecifico2;
+                fcActualizada.Modalidad = fc.Modalidad;
+                fcActualizada.Glosa = fc.Glosa;
+                fcActualizada.Referencia = fc.Referencia;
+                fcActualizada.FechaDeComprometida = fc.FechaDeComprometida;
+                fcActualizada.PorcentajeCEEC = "";
+                fcActualizada.ImpuestoLey18211 = "";
+                fcActualizada.IvaLey18211 = "";
+                fcActualizada.CodigoKitFlexible = fc.CodigoKitFlexible;
+                fcActualizada.AjusteIva = fc.AjusteIva;
+
+                return fcActualizada;
+            }
+            else
+            {
+                return fc;
+            }
+
+
+        }
+
+
+
+
+        private FacturaContabilizada validarMontoExentoDeFacturaContabilizada(FacturaContabilizada fc)
         {
             FacturaContabilizada fcActualizada = new FacturaContabilizada();
 
@@ -2066,9 +2177,9 @@ namespace FacturasXMLAExcelManager
 
             //si es una factura afecta o una nota de credito y además el total del documento no cuadra con la suma de afecto, exento e iva
             //entonces a la factura le falta algún valor exento
-            if ( (fc.TipoDeDocumento=="FACE" || fc.TipoDeDocumento == "NCCE") && (totalDocumento != posibleTotalDelDocumento) )
-            {            
-                int exentoFaltante=totalDocumento - posibleTotalDelDocumento;
+            if ((fc.TipoDeDocumento == "FACE" || fc.TipoDeDocumento == "NCCE") && (totalDocumento != posibleTotalDelDocumento))
+            {
+                int exentoFaltante = totalDocumento - posibleTotalDelDocumento;
                 exento = exento + exentoFaltante;
 
 
