@@ -2658,15 +2658,15 @@ namespace FacturasXMLAExcelManager
                 for (int row = 1; row <= rowCountCosteos; row++)
                 {
                     CosteoDeFacturaNOCCU costeoDeFactura = new CosteoDeFacturaNOCCU();
-                    costeoDeFactura.Folio = hojaDeCosteos.Cells[row, 2].Value?.ToString().Trim();
+                    costeoDeFactura.Folio = hojaDeCosteos.Cells[row, 3].Value?.ToString().Trim();
                     costeoDeFactura.Rut = hojaDeCosteos.Cells[row, 1].Value?.ToString().Trim();
-                    costeoDeFactura.Afecto = hojaDeCosteos.Cells[row, 3].Value?.ToString().Trim();
-                    costeoDeFactura.CentroDeCosto = hojaDeCosteos.Cells[row, 7].Value?.ToString().Trim();
+                    costeoDeFactura.Afecto = hojaDeCosteos.Cells[row, 4].Value?.ToString().Trim();
+                    costeoDeFactura.CentroDeCosto = hojaDeCosteos.Cells[row, 11].Value?.ToString().Trim();
 
-                    costeoDeFactura.MontoIva = hojaDeCosteos.Cells[row, 4].Value?.ToString().Trim();
-                    costeoDeFactura.AjusteIva = hojaDeCosteos.Cells[row, 5].Value?.ToString().Trim();
-                    costeoDeFactura.CodigoDelProducto = hojaDeCosteos.Cells[row, 6].Value?.ToString().Trim();
-                    costeoDeFactura.Glosa = hojaDeCosteos.Cells[row, 9].Value?.ToString().Trim();// para las observaciones
+                    costeoDeFactura.MontoIva = hojaDeCosteos.Cells[row, 5].Value?.ToString().Trim();
+                    costeoDeFactura.AjusteIva = hojaDeCosteos.Cells[row, 6].Value?.ToString().Trim();
+                    costeoDeFactura.CodigoDelProducto = hojaDeCosteos.Cells[row, 8].Value?.ToString().Trim();
+                    costeoDeFactura.Glosa = hojaDeCosteos.Cells[row, 14].Value?.ToString().Trim();// para las observaciones
 
                     listadoDeCosteos.Add(costeoDeFactura);
 
