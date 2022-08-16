@@ -16,13 +16,17 @@ namespace FacturasXMLAExcelManager
         private String ajusteIva;
         private String codigoDelProducto;
         private String glosa;//la glosa son las observaciones
- 
+
+        private String fechaDeDocumento;
+        private String fechaContableDocumento;
+        private String fechaDeVencimientoDeDocumento;
+
 
         public CosteoDeFacturaNOCCU()
         {
         }
 
-        public CosteoDeFacturaNOCCU(string folio, string rut, string afecto, string centroDeCosto, string montoIva, string ajusteIva, string codigoDelProducto, string glosa)
+        public CosteoDeFacturaNOCCU(string folio, string rut, string afecto, string centroDeCosto, string montoIva, string ajusteIva, string codigoDelProducto, string glosa, string fechaDeDocumento, string fechaContableDocumento, string fechaDeVencimientoDeDocumento)
         {
             this.Folio = folio;
             this.Rut = rut;
@@ -32,6 +36,9 @@ namespace FacturasXMLAExcelManager
             this.AjusteIva = ajusteIva;
             this.CodigoDelProducto = codigoDelProducto;
             this.Glosa = glosa;
+            this.FechaDeDocumento = fechaDeDocumento;
+            this.FechaContableDocumento = fechaContableDocumento;
+            this.FechaDeVencimientoDeDocumento = fechaDeVencimientoDeDocumento;
         }
 
         public string Folio { get => folio; set => folio = value; }
@@ -42,5 +49,8 @@ namespace FacturasXMLAExcelManager
         public string AjusteIva { get => ajusteIva; set => ajusteIva = value; }
         public string CodigoDelProducto { get => codigoDelProducto; set => codigoDelProducto = value; }
         public string Glosa { get => glosa; set => glosa = value; }
+        public string FechaDeDocumento { get => fechaDeDocumento; set => fechaDeDocumento = value; }
+        public string FechaContableDocumento { get => fechaContableDocumento; set => fechaContableDocumento = value; }
+        public string FechaDeVencimientoDeDocumento { get => fechaDeVencimientoDeDocumento; set => fechaDeVencimientoDeDocumento = value; }
     }
 }

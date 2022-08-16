@@ -1771,9 +1771,7 @@ namespace FacturasXMLAExcelManager
         }
 
 
-       
-
-
+     
 
         private String calcularIvaComoManager(String afecto, String iva, Factura f)
         {
@@ -2657,6 +2655,7 @@ namespace FacturasXMLAExcelManager
 
                 for (int row = 1; row <= rowCountCosteos; row++)
                 {
+
                     CosteoDeFacturaNOCCU costeoDeFactura = new CosteoDeFacturaNOCCU();
                     costeoDeFactura.Folio = hojaDeCosteos.Cells[row, 3].Value?.ToString().Trim();
                     costeoDeFactura.Rut = hojaDeCosteos.Cells[row, 1].Value?.ToString().Trim();
@@ -2667,6 +2666,9 @@ namespace FacturasXMLAExcelManager
                     costeoDeFactura.AjusteIva = hojaDeCosteos.Cells[row, 6].Value?.ToString().Trim();
                     costeoDeFactura.CodigoDelProducto = hojaDeCosteos.Cells[row, 8].Value?.ToString().Trim();
                     costeoDeFactura.Glosa = hojaDeCosteos.Cells[row, 14].Value?.ToString().Trim();// para las observaciones
+
+                    costeoDeFactura.FechaDeDocumento = convertirFechaDePamelaAFechaParaExcelDeManager(hojaDeCosteos.Cells[row, 13].Value?.ToString().Trim());
+
 
                     listadoDeCosteos.Add(costeoDeFactura);
 
@@ -2776,6 +2778,12 @@ namespace FacturasXMLAExcelManager
                                 {
                                     ajusteIva = facturaLeida.AjusteIva;
                                 }
+
+                                fechaDeDocumento = costeo.FechaDeDocumento;
+                                fechaContableDelDocumento = costeo.FechaDeDocumento;
+                                fechaDeVencimientoDelDocumento = costeo.FechaDeDocumento;
+                                
+
 
 
                             }
@@ -2956,6 +2964,44 @@ namespace FacturasXMLAExcelManager
 
             return listadoDeFacturasCosteadas;
 
+        }
+
+        private String convertirFechaDePamelaAFechaParaExcelDeManager(String fechaDePamela)
+        {
+
+            String fechaConvertida = "";
+
+            Char espacio = ' ';
+
+            try
+            {
+                if (fechaDePamela.Contains(espacio))
+                {
+                    //viene como fecha
+
+                    string[] partes = fechaDePamela.Split(' ');
+
+                    string[] partesDeFecha = partes[0].Split('/');
+
+                    String fechaQueDebieseSer = partesDeFecha[1] + "/" + partesDeFecha[0] + "/20" + partesDeFecha[2];
+
+                    fechaConvertida = fechaQueDebieseSer;
+
+                }
+                else
+                {
+                    //no viene como fecha
+                    fechaConvertida = fechaDePamela;
+                }
+            }
+            catch (Exception)
+            {
+
+              
+            }
+
+
+            return fechaConvertida;
         }
 
 
