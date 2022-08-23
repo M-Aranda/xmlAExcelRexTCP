@@ -21,12 +21,14 @@ namespace FacturasXMLAExcelManager
         private String fechaContableDocumento;
         private String fechaDeVencimientoDeDocumento;
 
+        private String exento;
+
 
         public CosteoDeFacturaNOCCU()
         {
         }
 
-        public CosteoDeFacturaNOCCU(string folio, string rut, string afecto, string centroDeCosto, string montoIva, string ajusteIva, string codigoDelProducto, string glosa, string fechaDeDocumento, string fechaContableDocumento, string fechaDeVencimientoDeDocumento)
+        public CosteoDeFacturaNOCCU(string folio, string rut, string afecto, string centroDeCosto, string montoIva, string ajusteIva, string codigoDelProducto, string glosa, string fechaDeDocumento, string fechaContableDocumento, string fechaDeVencimientoDeDocumento, string exento)
         {
             this.Folio = folio;
             this.Rut = rut;
@@ -39,6 +41,7 @@ namespace FacturasXMLAExcelManager
             this.FechaDeDocumento = fechaDeDocumento;
             this.FechaContableDocumento = fechaContableDocumento;
             this.FechaDeVencimientoDeDocumento = fechaDeVencimientoDeDocumento;
+            this.Exento = exento;
         }
 
         public string Folio { get => folio; set => folio = value; }
@@ -52,5 +55,6 @@ namespace FacturasXMLAExcelManager
         public string FechaDeDocumento { get => fechaDeDocumento; set => fechaDeDocumento = value; }
         public string FechaContableDocumento { get => fechaContableDocumento; set => fechaContableDocumento = value; }
         public string FechaDeVencimientoDeDocumento { get => fechaDeVencimientoDeDocumento; set => fechaDeVencimientoDeDocumento = value; }
+        public string Exento { get => exento; set => exento = value; }
     }
 }

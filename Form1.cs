@@ -1,20 +1,13 @@
-﻿using System;
+﻿using OfficeOpenXml;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
-using System.Xml.Linq;
-using OfficeOpenXml;
-using LicenseContext = OfficeOpenXml.LicenseContext;
-using System.Data;
-using System.Data.SqlClient;
 using Windows.Storage;
+using LicenseContext = OfficeOpenXml.LicenseContext;
 
 namespace FacturasXMLAExcelManager
 {
@@ -2573,6 +2566,7 @@ namespace FacturasXMLAExcelManager
                 {
 
                     Factura rccic = new Factura();
+
                     rccic.TipoDeDocumento = hojaDeFacturas.Cells[row, 1].Value?.ToString().Trim();
                     rccic.NumeroDelDocumento = hojaDeFacturas.Cells[row, 2].Value?.ToString().Trim();
                     rccic.FechaDeDocumento = hojaDeFacturas.Cells[row, 3].Value?.ToString().Trim();
@@ -2641,8 +2635,10 @@ namespace FacturasXMLAExcelManager
                     rccic.IvaLey18211 = hojaDeFacturas.Cells[row, 66].Value?.ToString().Trim();
                     rccic.CodigoKitFlexible = hojaDeFacturas.Cells[row, 67].Value?.ToString().Trim();
                     rccic.AjusteIva = hojaDeFacturas.Cells[row, 68].Value?.ToString().Trim();
-
+           
                     facturasLeidasEnPrimeraHoja.Add(rccic);
+                    
+                                                      
 
                 }
 
@@ -2660,14 +2656,15 @@ namespace FacturasXMLAExcelManager
                     costeoDeFactura.Folio = hojaDeCosteos.Cells[row, 3].Value?.ToString().Trim();
                     costeoDeFactura.Rut = hojaDeCosteos.Cells[row, 1].Value?.ToString().Trim();
                     costeoDeFactura.Afecto = hojaDeCosteos.Cells[row, 4].Value?.ToString().Trim();
-                    costeoDeFactura.CentroDeCosto = hojaDeCosteos.Cells[row, 11].Value?.ToString().Trim();
+                    costeoDeFactura.Exento= hojaDeCosteos.Cells[row,5].Value?.ToString().Trim();    
+                    costeoDeFactura.CentroDeCosto = hojaDeCosteos.Cells[row, 12].Value?.ToString().Trim();
 
-                    costeoDeFactura.MontoIva = hojaDeCosteos.Cells[row, 5].Value?.ToString().Trim();
-                    costeoDeFactura.AjusteIva = hojaDeCosteos.Cells[row, 6].Value?.ToString().Trim();
-                    costeoDeFactura.CodigoDelProducto = hojaDeCosteos.Cells[row, 8].Value?.ToString().Trim();
-                    costeoDeFactura.Glosa = hojaDeCosteos.Cells[row, 14].Value?.ToString().Trim();// para las observaciones
+                    costeoDeFactura.MontoIva = hojaDeCosteos.Cells[row, 6].Value?.ToString().Trim();
+                    costeoDeFactura.AjusteIva = hojaDeCosteos.Cells[row, 7].Value?.ToString().Trim();
+                    costeoDeFactura.CodigoDelProducto = hojaDeCosteos.Cells[row, 9].Value?.ToString().Trim();
+                    costeoDeFactura.Glosa = hojaDeCosteos.Cells[row, 15].Value?.ToString().Trim();// para las observaciones
 
-                    costeoDeFactura.FechaDeDocumento = convertirFechaDePamelaAFechaParaExcelDeManager(hojaDeCosteos.Cells[row, 13].Value?.ToString().Trim());
+                    costeoDeFactura.FechaDeDocumento = convertirFechaDePamelaAFechaParaExcelDeManager(hojaDeCosteos.Cells[row, 14].Value?.ToString().Trim());
 
 
                     listadoDeCosteos.Add(costeoDeFactura);
@@ -2704,14 +2701,11 @@ namespace FacturasXMLAExcelManager
                     IdentificadorDeFactura i = new IdentificadorDeFactura(item.NumeroDelDocumento, item.RutCliente);
                     identificadores.Add(i);
 
-                }
+                }  
 
                 existeRegistro = false;
 
-
             }
-
-
 
 
             //Actualizacion 21/07/2022, habría que modificar el programa para que automáticamente genere un registro de factura
@@ -2719,10 +2713,12 @@ namespace FacturasXMLAExcelManager
 
             foreach (var identificador in identificadores)
             {
+
                 foreach (var costeo in listadoDeCosteos)
                 {
 
-                    if(identificador.Folio==costeo.Folio && identificador.Rut == costeo.Rut)
+                    //factura esta presente en ambas hojas
+                    if(identificador.Folio==costeo.Folio && identificador.Rut == costeo.Rut && costeo.CodigoDelProducto!="410104")
                     {
                         Factura fc = new Factura();
 
@@ -2749,6 +2745,7 @@ namespace FacturasXMLAExcelManager
 
                         foreach (var facturaLeida in facturasLeidasEnPrimeraHoja)
                         {
+                            
                             if(identificador.Folio == facturaLeida.NumeroDelDocumento && identificador.Rut == facturaLeida.RutCliente)
                             {
                                 tipoDeDocumento = facturaLeida.TipoDeDocumento;
@@ -2782,11 +2779,10 @@ namespace FacturasXMLAExcelManager
                                 fechaDeDocumento = costeo.FechaDeDocumento;
                                 fechaContableDelDocumento = costeo.FechaDeDocumento;
                                 fechaDeVencimientoDelDocumento = costeo.FechaDeDocumento;
-                                
-
 
 
                             }
+                         
                         }
 
                         // Hasta la columna FechaDocReferencia (AC) todo es totales, así que por cada costeo, 
@@ -2954,10 +2950,635 @@ namespace FacturasXMLAExcelManager
                         fc.CodigoKitFlexible = "";
                         fc.AjusteIva = ajusteIva;
 
+                        if (!String.IsNullOrEmpty(fc.RutCliente) && fc.RutCliente!="rut")
+                        {
+                            listadoDeFacturasCosteadas.Add(fc);
+                        }
+                    }
+                    else if (identificador.Folio == costeo.Folio && identificador.Rut == costeo.Rut && costeo.CodigoDelProducto == "410104")
+                    {
+                        //esto significa que la factura es de petróleo y que debería aparecer 2 veces
+                        Factura facturaSinG = new Factura();
+                        Factura facturaConG = new Factura();
 
-                        listadoDeFacturasCosteadas.Add(fc);
+
+                        String tipoDeDocumento = "";
+                        String fechaDeDocumento = "";
+                        String fechaContableDelDocumento = "";
+                        String fechaDeVencimientoDelDocumento = "";
+                        String codigoDeUnidadDeNegocio = "";
+
+                        String direccionDelCliente = "";
+
+
+                        String codigoDelProducto = "0";
+                        String precioUnitario = "0";
+
+                        String montoAfecto = "0";
+                        String montoIva = "0";
+                        String montoExento = "0";
+                        String montoTotal = "0";
+                        String ajusteIva = "0";
+                        String glosa = "";
+
+
+                        foreach (var facturaLeida in facturasLeidasEnPrimeraHoja)
+                        {
+
+                            if (identificador.Folio == facturaLeida.NumeroDelDocumento && identificador.Rut == facturaLeida.RutCliente)
+                            {
+                                tipoDeDocumento = facturaLeida.TipoDeDocumento;
+                                fechaDeDocumento = facturaLeida.FechaDeDocumento;
+                                fechaContableDelDocumento = facturaLeida.FechaContableDeDocumento;
+                                fechaDeVencimientoDelDocumento = facturaLeida.FechaDeVencimientoDeDocumento;
+                                codigoDeUnidadDeNegocio = facturaLeida.CodigoDeUnidadDeNegocio;
+                                direccionDelCliente = facturaLeida.DireccionDelCliente;
+                                codigoDelProducto = costeo.CodigoDelProducto;
+
+                                //en lo que respecta a precios, solo el precio unitario cambia.
+                                precioUnitario = costeo.Afecto;
+
+
+                                montoAfecto = costeo.Afecto;
+                                montoIva = costeo.MontoIva;
+
+
+                                montoExento = costeo.Exento;
+                                montoTotal = (int.Parse(costeo.Afecto) + int.Parse(costeo.Exento)+int.Parse(costeo.MontoIva)).ToString();
+                                ajusteIva = costeo.AjusteIva;
+                                facturaLeida.AjusteIva = costeo.AjusteIva;
+
+                                facturaLeida.Glosa = costeo.Glosa;
+
+                                if (ajusteIva == "")
+                                {
+                                    ajusteIva = facturaLeida.AjusteIva;
+                                }
+
+                                fechaDeDocumento = costeo.FechaDeDocumento;
+                                fechaContableDelDocumento = costeo.FechaDeDocumento;
+                                fechaDeVencimientoDelDocumento = costeo.FechaDeDocumento;
+
+
+                            }
+
+                        }
+
+                     
+                        if ((facturaSinG.TipoDeDocumento == "FACE" || facturaSinG.TipoDeDocumento == "NCCE") && facturaSinG.MontoExento != "" && facturaSinG.MontoExento != "0")
+                        {
+                            //es una factura con impuestos especiales
+
+                        }
+                        else if (facturaSinG.TipoDeDocumento == "FCEE")
+                        {
+                            //es una factura exenta
+                        }
+
+                        facturaSinG.TipoDeDocumento = tipoDeDocumento;
+                        facturaSinG.NumeroDelDocumento = costeo.Folio;
+                        facturaSinG.FechaDeDocumento = fechaDeDocumento;
+                        facturaSinG.FechaContableDeDocumento = fechaContableDelDocumento;
+                        facturaSinG.FechaDeVencimientoDeDocumento = fechaDeVencimientoDelDocumento;
+                        facturaSinG.CodigoDeUnidadDeNegocio = codigoDeUnidadDeNegocio;
+                        facturaSinG.RutCliente = costeo.Rut;
+                        facturaSinG.DireccionDelCliente = direccionDelCliente;
+                        facturaSinG.RutFacturador = "";
+                        facturaSinG.CodigoVendedor = "";
+                        facturaSinG.CodigoComisionista = "";
+                        facturaSinG.Probabilidad = "";
+                        facturaSinG.ListaPrecio = "";
+                        facturaSinG.PlazoPago = "P01";
+                        facturaSinG.MonedaDelDocumento = "CLP";
+                        facturaSinG.TasaDeCambio = "";
+                        facturaSinG.MontoAfecto = montoAfecto;
+                        facturaSinG.MontoExento = montoExento;
+                        facturaSinG.MontoIva = montoIva;
+                        facturaSinG.MontoImpuestosEspecificos = "";
+                        facturaSinG.MontoIvaRetenido = "";
+                        facturaSinG.MontoImpuestosRetenidos = "";
+                        facturaSinG.TipoDeDescuentoGlobal = "";
+                        facturaSinG.DescuentoGlobal = "";
+                        facturaSinG.TotalDelDocumento = montoTotal;
+                        facturaSinG.DeudaPendiente = facturaSinG.TotalDelDocumento;
+                        facturaSinG.TipoDocReferencia = "";
+                        facturaSinG.NumDocReferencia = "";
+                        facturaSinG.FechaDocReferencia = "";
+                        facturaSinG.CodigoDelProducto = codigoDelProducto;
+                        facturaSinG.Cantidad = "1";
+                        facturaSinG.Unidad = "S.U.M";
+                        facturaSinG.PrecioUnitario = precioUnitario;
+                        facturaSinG.MonedaDelDetalle = "CLP";
+                        facturaSinG.TasaDeCambio2 = "1";
+                        facturaSinG.NumeroDeSerie = "";
+                        facturaSinG.NumeroDeLote = "";
+                        facturaSinG.FechaDeVencimiento = "";
+                        facturaSinG.CentroDeCostos = costeo.CentroDeCosto;
+
+
+                        switch (facturaSinG.CentroDeCostos)
+                        {
+                            case "ADMINISTRACION":
+                                facturaSinG.CentroDeCostos = "203";
+                                break;
+                            case "INTERPLANTA":
+                                facturaSinG.CentroDeCostos = "204";
+                                facturaSinG.CodigoDeUnidadDeNegocio = "2";
+                                break;
+                            case "EMPRENDEDORES":
+                                facturaSinG.CentroDeCostos = "208";
+                                break;
+                            case "ILLAPEL":
+                                facturaSinG.CentroDeCostos = "205";
+                                break;
+                            case "SAN ANTONIO":
+                                facturaSinG.CentroDeCostos = "207";
+                                break;
+                            case "MELIPILLA":
+                                facturaSinG.CentroDeCostos = "200";
+                                break;
+                            case "SANTIAGO":
+                                facturaSinG.CentroDeCostos = "206";
+                                break;
+                            case "RANCAGUA":
+                                facturaSinG.CentroDeCostos = "201";
+                                break;
+                            case "CURICO":
+                                facturaSinG.CentroDeCostos = "202";
+                                break;
+                            case "203":
+                                facturaSinG.CentroDeCostos = "203";
+                                break;
+                            case "204":
+                                facturaSinG.CentroDeCostos = "204";
+                                facturaSinG.CodigoDeUnidadDeNegocio = "2";
+                                break;
+                            case "208":
+                                facturaSinG.CentroDeCostos = "208";
+                                break;
+                            case "205":
+                                facturaSinG.CentroDeCostos = "205";
+                                break;
+                            case "207":
+                                facturaSinG.CentroDeCostos = "207";
+                                break;
+                            case "200":
+                                facturaSinG.CentroDeCostos = "200";
+                                break;
+                            case "206":
+                                facturaSinG.CentroDeCostos = "206";
+                                break;
+                            case "201":
+                                facturaSinG.CentroDeCostos = "201";
+                                break;
+                            case "202":
+                                facturaSinG.CentroDeCostos = "202";
+                                break;
+                            default:
+                                facturaSinG.CentroDeCostos = "209";
+                                break;
+
+                        }
+
+                        facturaSinG.TipoDeDescuento = "";
+                        facturaSinG.Descuento = "";
+                        facturaSinG.Ubicacion = "";
+                        facturaSinG.Bodega = "";
+                        facturaSinG.Concepto1 = "";
+                        facturaSinG.Concepto2 = "";
+                        facturaSinG.Concepto3 = "";
+                        facturaSinG.Concepto4 = "";
+                        facturaSinG.Descripcion = "";
+                        facturaSinG.DescripcionAdicional = "";
+                        facturaSinG.Stock = "0";
+                        facturaSinG.Comentario11 = "";
+                        facturaSinG.Comentario21 = "";
+                        facturaSinG.Comentario31 = "";
+                        facturaSinG.Comentario41 = "";
+                        facturaSinG.Comentario51 = "";
+                        facturaSinG.CodigoImpuestoEspecifico1 = "";
+                        facturaSinG.MontoImpuestoEspecifico1 = "";
+                        facturaSinG.CodigoImpuestoEspecifico2 = "";
+                        facturaSinG.MontoImpuestoEspecifico2 = "";
+                        facturaSinG.Modalidad = "";
+                        facturaSinG.Glosa = costeo.Glosa;
+                        facturaSinG.Referencia = "";
+                        facturaSinG.FechaDeComprometida = "";
+                        facturaSinG.PorcentajeCEEC = "";
+                        facturaSinG.ImpuestoLey18211 = "";
+                        facturaSinG.IvaLey18211 = "";
+                        facturaSinG.CodigoKitFlexible = "";
+                        facturaSinG.AjusteIva = ajusteIva;
+
+                        if (!String.IsNullOrEmpty(facturaSinG.RutCliente) && facturaSinG.RutCliente != "rut")
+                        {
+                            listadoDeFacturasCosteadas.Add(facturaSinG);
+                        }
+
+
+
+                        facturaConG.TipoDeDocumento = tipoDeDocumento;
+                        facturaConG.NumeroDelDocumento = costeo.Folio;
+                        facturaConG.FechaDeDocumento = fechaDeDocumento;
+                        facturaConG.FechaContableDeDocumento = fechaContableDelDocumento;
+                        facturaConG.FechaDeVencimientoDeDocumento = fechaDeVencimientoDelDocumento;
+                        facturaConG.CodigoDeUnidadDeNegocio = codigoDeUnidadDeNegocio;
+                        facturaConG.RutCliente = costeo.Rut;
+                        facturaConG.DireccionDelCliente = direccionDelCliente;
+                        facturaConG.RutFacturador = "";
+                        facturaConG.CodigoVendedor = "";
+                        facturaConG.CodigoComisionista = "";
+                        facturaConG.Probabilidad = "";
+                        facturaConG.ListaPrecio = "";
+                        facturaConG.PlazoPago = "P01";
+                        facturaConG.MonedaDelDocumento = "CLP";
+                        facturaConG.TasaDeCambio = "";
+                        facturaConG.MontoAfecto = montoAfecto;
+                        facturaConG.MontoExento = montoExento;
+                        facturaConG.MontoIva = montoIva;
+                        facturaConG.MontoImpuestosEspecificos = "";
+                        facturaConG.MontoIvaRetenido = "";
+                        facturaConG.MontoImpuestosRetenidos = "";
+                        facturaConG.TipoDeDescuentoGlobal = "";
+                        facturaConG.DescuentoGlobal = "";
+                        facturaConG.TotalDelDocumento = montoTotal;
+                        facturaConG.DeudaPendiente = facturaConG.TotalDelDocumento;
+                        facturaConG.TipoDocReferencia = "";
+                        facturaConG.NumDocReferencia = "";
+                        facturaConG.FechaDocReferencia = "";
+                        facturaConG.CodigoDelProducto = "410104G";
+                        facturaConG.Cantidad = "1";
+                        facturaConG.Unidad = "S.U.M";
+                        facturaConG.PrecioUnitario = facturaConG.MontoExento;
+                        facturaConG.MonedaDelDetalle = "CLP";
+                        facturaConG.TasaDeCambio2 = "1";
+                        facturaConG.NumeroDeSerie = "";
+                        facturaConG.NumeroDeLote = "";
+                        facturaConG.FechaDeVencimiento = "";
+                        facturaConG.CentroDeCostos = costeo.CentroDeCosto;
+
+
+                        switch (facturaConG.CentroDeCostos)
+                        {
+                            case "ADMINISTRACION":
+                                facturaConG.CentroDeCostos = "203";
+                                break;
+                            case "INTERPLANTA":
+                                facturaConG.CentroDeCostos = "204";
+                                facturaConG.CodigoDeUnidadDeNegocio = "2";
+                                break;
+                            case "EMPRENDEDORES":
+                                facturaConG.CentroDeCostos = "208";
+                                break;
+                            case "ILLAPEL":
+                                facturaConG.CentroDeCostos = "205";
+                                break;
+                            case "SAN ANTONIO":
+                                facturaConG.CentroDeCostos = "207";
+                                break;
+                            case "MELIPILLA":
+                                facturaConG.CentroDeCostos = "200";
+                                break;
+                            case "SANTIAGO":
+                                facturaConG.CentroDeCostos = "206";
+                                break;
+                            case "RANCAGUA":
+                                facturaConG.CentroDeCostos = "201";
+                                break;
+                            case "CURICO":
+                                facturaConG.CentroDeCostos = "202";
+                                break;
+                            case "203":
+                                facturaConG.CentroDeCostos = "203";
+                                break;
+                            case "204":
+                                facturaConG.CentroDeCostos = "204";
+                                facturaConG.CodigoDeUnidadDeNegocio = "2";
+                                break;
+                            case "208":
+                                facturaConG.CentroDeCostos = "208";
+                                break;
+                            case "205":
+                                facturaConG.CentroDeCostos = "205";
+                                break;
+                            case "207":
+                                facturaConG.CentroDeCostos = "207";
+                                break;
+                            case "200":
+                                facturaConG.CentroDeCostos = "200";
+                                break;
+                            case "206":
+                                facturaConG.CentroDeCostos = "206";
+                                break;
+                            case "201":
+                                facturaConG.CentroDeCostos = "201";
+                                break;
+                            case "202":
+                                facturaConG.CentroDeCostos = "202";
+                                break;
+                            default:
+                                facturaConG.CentroDeCostos = "209";
+                                break;
+
+                        }
+
+                        facturaConG.TipoDeDescuento = "";
+                        facturaConG.Descuento = "";
+                        facturaConG.Ubicacion = "";
+                        facturaConG.Bodega = "";
+                        facturaConG.Concepto1 = "";
+                        facturaConG.Concepto2 = "";
+                        facturaConG.Concepto3 = "";
+                        facturaConG.Concepto4 = "";
+                        facturaConG.Descripcion = "";
+                        facturaConG.DescripcionAdicional = "";
+                        facturaConG.Stock = "0";
+                        facturaConG.Comentario11 = "";
+                        facturaConG.Comentario21 = "";
+                        facturaConG.Comentario31 = "";
+                        facturaConG.Comentario41 = "";
+                        facturaConG.Comentario51 = "";
+                        facturaConG.CodigoImpuestoEspecifico1 = "";
+                        facturaConG.MontoImpuestoEspecifico1 = "";
+                        facturaConG.CodigoImpuestoEspecifico2 = "";
+                        facturaConG.MontoImpuestoEspecifico2 = "";
+                        facturaConG.Modalidad = "";
+                        facturaConG.Glosa = costeo.Glosa;
+                        facturaConG.Referencia = "";
+                        facturaConG.FechaDeComprometida = "";
+                        facturaConG.PorcentajeCEEC = "";
+                        facturaConG.ImpuestoLey18211 = "";
+                        facturaConG.IvaLey18211 = "";
+                        facturaConG.CodigoKitFlexible = "";
+                        facturaConG.AjusteIva = ajusteIva;
+
+                        if (!String.IsNullOrEmpty(facturaConG.RutCliente) && facturaConG.RutCliente != "rut")
+                        {
+                            listadoDeFacturasCosteadas.Add(facturaConG);
+                           
+                        }
+
                     }
 
+                }
+
+            }
+
+            //verificar coincidencias para agregar facturas que están costeadas, pero no presentes en Acepta
+            foreach (var item in listadoDeCosteos)
+            {
+                Boolean coincidencia = false;
+                foreach (var item2 in facturasLeidasEnPrimeraHoja)
+                {
+                    if (item.Folio==item2.NumeroDelDocumento && item.Rut==item2.RutCliente)
+                    {
+                        coincidencia = true;
+                    }
+                    
+                }
+
+                if (!coincidencia)
+                {
+                    //agregado el 22 de agosto del  2022, facturas ausentes en el listado de XML ahora pueden
+                    //aparecer como costeadas si es que están en el listado de costeos.
+                    //factura presente en costeo, pero no en listado de facturas xml
+                    //crear nueva factura y agregarla a listado de costeadas
+
+                    Factura fc = new Factura();
+
+                    fc.TipoDeDocumento = "FACE";
+                    fc.NumeroDelDocumento = item.Folio;
+                    fc.FechaDeDocumento = item.FechaDeDocumento;
+                    fc.FechaContableDeDocumento = item.FechaDeDocumento;
+                    fc.FechaDeVencimientoDeDocumento = item.FechaDeDocumento;
+                    fc.CodigoDeUnidadDeNegocio = "1";
+                    fc.RutCliente = item.Rut;
+                    fc.DireccionDelCliente = "Casa Matriz";
+                    fc.RutFacturador = "";
+                    fc.CodigoVendedor = "";
+                    fc.CodigoComisionista = "";
+                    fc.Probabilidad = "";
+                    fc.ListaPrecio = "";
+                    fc.PlazoPago = "P01";
+                    fc.MonedaDelDocumento = "CLP";
+                    fc.TasaDeCambio = "";
+                    fc.MontoAfecto = item.Afecto;
+                    fc.MontoExento = item.Exento;
+                    fc.MontoIva = item.MontoIva;
+                    fc.MontoImpuestosEspecificos = "";
+                    fc.MontoIvaRetenido = "";
+                    fc.MontoImpuestosRetenidos = "";
+                    fc.TipoDeDescuentoGlobal = "";
+                    fc.DescuentoGlobal = "";
+                    try
+                    {
+                        if (!String.IsNullOrEmpty(item.Afecto) && item.Afecto!="monto afecto")
+                        {
+                            fc.TotalDelDocumento = (int.Parse(item.Afecto) +int.Parse(item.Exento)+ int.Parse(item.MontoIva)).ToString();
+                        }
+                       
+                    }
+                    catch (Exception)
+                    {
+
+                        fc.TotalDelDocumento = "0";
+                    }
+                    
+                    fc.DeudaPendiente = fc.TotalDelDocumento;
+                    fc.TipoDocReferencia = "";
+                    fc.NumDocReferencia = "";
+                    fc.FechaDocReferencia = "";
+                    fc.CodigoDelProducto = item.CodigoDelProducto;
+                    fc.Cantidad = "1";
+                    fc.Unidad = "S.U.M";
+                    fc.PrecioUnitario = item.Afecto;
+
+                    fc.MonedaDelDetalle = "CLP";
+                    fc.TasaDeCambio2 = "1";
+                    fc.NumeroDeSerie = "";
+                    fc.NumeroDeLote = "";
+                    fc.FechaDeVencimiento = "";
+                    fc.CentroDeCostos = item.CentroDeCosto;
+
+
+                    switch (fc.CentroDeCostos)
+                    {
+                        case "ADMINISTRACION":
+                            fc.CentroDeCostos = "203";
+                            break;
+                        case "INTERPLANTA":
+                            fc.CentroDeCostos = "204";
+                            fc.CodigoDeUnidadDeNegocio = "2";
+                            break;
+                        case "EMPRENDEDORES":
+                            fc.CentroDeCostos = "208";
+                            break;
+                        case "ILLAPEL":
+                            fc.CentroDeCostos = "205";
+                            break;
+                        case "SAN ANTONIO":
+                            fc.CentroDeCostos = "207";
+                            break;
+                        case "MELIPILLA":
+                            fc.CentroDeCostos = "200";
+                            break;
+                        case "SANTIAGO":
+                            fc.CentroDeCostos = "206";
+                            break;
+                        case "RANCAGUA":
+                            fc.CentroDeCostos = "201";
+                            break;
+                        case "CURICO":
+                            fc.CentroDeCostos = "202";
+                            break;
+                        case "203":
+                            fc.CentroDeCostos = "203";
+                            break;
+                        case "204":
+                            fc.CentroDeCostos = "204";
+                            fc.CodigoDeUnidadDeNegocio = "2";
+                            break;
+                        case "208":
+                            fc.CentroDeCostos = "208";
+                            break;
+                        case "205":
+                            fc.CentroDeCostos = "205";
+                            break;
+                        case "207":
+                            fc.CentroDeCostos = "207";
+                            break;
+                        case "200":
+                            fc.CentroDeCostos = "200";
+                            break;
+                        case "206":
+                            fc.CentroDeCostos = "206";
+                            break;
+                        case "201":
+                            fc.CentroDeCostos = "201";
+                            break;
+                        case "202":
+                            fc.CentroDeCostos = "202";
+                            break;
+                        default:
+                            fc.CentroDeCostos = "209";
+                            break;
+                    }
+
+
+                    fc.TipoDeDescuento = "";
+                    fc.Descuento = "";
+                    fc.Ubicacion = "";
+                    fc.Bodega = "";
+                    fc.Concepto1 = "";
+                    fc.Concepto2 = "";
+                    fc.Concepto3 = "";
+                    fc.Concepto4 = "";
+                    fc.Descripcion = "";
+                    fc.DescripcionAdicional = "";
+                    fc.Stock = "0";
+                    fc.Comentario11 = "";
+                    fc.Comentario21 = "";
+                    fc.Comentario31 = "";
+                    fc.Comentario41 = "";
+                    fc.Comentario51 = "";
+                    fc.CodigoImpuestoEspecifico1 = "";
+                    fc.MontoImpuestoEspecifico1 = "";
+                    fc.CodigoImpuestoEspecifico2 = "";
+                    fc.MontoImpuestoEspecifico2 = "";
+                    fc.Modalidad = "";
+                    fc.Glosa = "Factura ausente en Acepta";
+                    fc.Referencia = "";
+                    fc.FechaDeComprometida = "";
+                    fc.PorcentajeCEEC = "";
+                    fc.ImpuestoLey18211 = "";
+                    fc.IvaLey18211 = "";
+                    fc.CodigoKitFlexible = "";
+                    fc.AjusteIva = item.AjusteIva;
+
+                    if (!String.IsNullOrEmpty(fc.RutCliente) && fc.RutCliente != "rut")
+                    {
+                        listadoDeFacturasCosteadas.Add(fc);
+
+                        if(fc.CodigoDelProducto == "410104")
+                        {
+                            Factura facturaPetroleo = new Factura();
+
+
+                            facturaPetroleo.TipoDeDocumento = fc.TipoDeDocumento;
+                            facturaPetroleo.NumeroDelDocumento = fc.NumeroDelDocumento;
+                            facturaPetroleo.FechaDeDocumento = fc.FechaDeDocumento;
+                            facturaPetroleo.FechaContableDeDocumento = fc.FechaContableDeDocumento;
+                            facturaPetroleo.FechaDeVencimientoDeDocumento = fc.FechaDeVencimientoDeDocumento;
+                            facturaPetroleo.CodigoDeUnidadDeNegocio = fc.CodigoDeUnidadDeNegocio;
+                            facturaPetroleo.RutCliente = fc.RutCliente;
+                            facturaPetroleo.DireccionDelCliente = fc.DireccionDelCliente;
+                            facturaPetroleo.RutFacturador = fc.RutFacturador;
+                            facturaPetroleo.CodigoVendedor = fc.CodigoVendedor;
+                            facturaPetroleo.CodigoComisionista = fc.CodigoComisionista;
+                            facturaPetroleo.Probabilidad = fc.Probabilidad;
+                            facturaPetroleo.ListaPrecio = fc.ListaPrecio;
+                            facturaPetroleo.PlazoPago = fc.PlazoPago;
+                            facturaPetroleo.MonedaDelDocumento = fc.MonedaDelDocumento;
+                            facturaPetroleo.TasaDeCambio = fc.TasaDeCambio;
+                            facturaPetroleo.MontoAfecto = fc.MontoAfecto;
+                            facturaPetroleo.MontoExento = fc.MontoExento;
+                            facturaPetroleo.MontoIva = fc.MontoIva;
+                            facturaPetroleo.MontoImpuestosEspecificos = fc.MontoImpuestosEspecificos;
+                            facturaPetroleo.MontoIvaRetenido = fc.MontoIvaRetenido;
+                            facturaPetroleo.MontoImpuestosRetenidos = fc.MontoImpuestosRetenidos;
+                            facturaPetroleo.TipoDeDescuentoGlobal = fc.TipoDeDescuentoGlobal;
+                            facturaPetroleo.DescuentoGlobal = fc.DescuentoGlobal;
+                            facturaPetroleo.TotalDelDocumento = fc.TotalDelDocumento;
+                            facturaPetroleo.DeudaPendiente = fc.DeudaPendiente;
+                            facturaPetroleo.TipoDocReferencia = fc.TipoDocReferencia;
+                            facturaPetroleo.NumDocReferencia = fc.NumDocReferencia;
+                            facturaPetroleo.FechaDocReferencia = fc.FechaDocReferencia;
+                            facturaPetroleo.CodigoDelProducto = fc.CodigoDelProducto;
+                            facturaPetroleo.Cantidad = fc.Cantidad;
+                            facturaPetroleo.Unidad = fc.Unidad;
+                            facturaPetroleo.PrecioUnitario = fc.PrecioUnitario;
+                            facturaPetroleo.MonedaDelDetalle = fc.MonedaDelDetalle;
+                            facturaPetroleo.TasaDeCambio2 = fc.TasaDeCambio2;
+                            facturaPetroleo.NumeroDeSerie = fc.NumeroDeSerie;
+                            facturaPetroleo.NumeroDeLote = fc.NumeroDeLote;
+                            facturaPetroleo.FechaDeVencimiento = fc.FechaDeVencimiento;
+                            facturaPetroleo.CentroDeCostos = fc.CentroDeCostos;
+                            facturaPetroleo.TipoDeDescuento = fc.TipoDeDescuento;
+                            facturaPetroleo.Descuento = fc.Descuento;
+                            facturaPetroleo.Ubicacion = fc.Ubicacion;
+                            facturaPetroleo.Bodega = fc.Bodega;
+                            facturaPetroleo.Concepto1 = fc.Concepto1;
+                            facturaPetroleo.Concepto2 = fc.Concepto2;
+                            facturaPetroleo.Concepto3 = fc.Concepto3;
+                            facturaPetroleo.Concepto4 = fc.Concepto4;
+                            facturaPetroleo.Descripcion = fc.Descripcion;
+                            facturaPetroleo.DescripcionAdicional = fc.DescripcionAdicional;
+                            facturaPetroleo.Stock = fc.Stock;
+                            facturaPetroleo.Comentario11 = fc.Comentario11;
+                            facturaPetroleo.Comentario21 = fc.Comentario21;
+                            facturaPetroleo.Comentario31 = fc.Comentario31;
+                            facturaPetroleo.Comentario41 = fc.Comentario41;
+                            facturaPetroleo.Comentario51 = fc.Comentario51;
+                            facturaPetroleo.CodigoImpuestoEspecifico1 = fc.CodigoImpuestoEspecifico1;
+                            facturaPetroleo.MontoImpuestoEspecifico1 = fc.MontoImpuestoEspecifico1;
+                            facturaPetroleo.CodigoImpuestoEspecifico2 = fc.CodigoImpuestoEspecifico2;
+                            facturaPetroleo.MontoImpuestoEspecifico2 = fc.MontoImpuestoEspecifico2;
+                            facturaPetroleo.Modalidad = fc.Modalidad;
+                            facturaPetroleo.Glosa = fc.Glosa;
+                            facturaPetroleo.Referencia = fc.Referencia;
+                            facturaPetroleo.FechaDeComprometida = fc.FechaDeComprometida;
+                            facturaPetroleo.PorcentajeCEEC = fc.PorcentajeCEEC;
+                            facturaPetroleo.ImpuestoLey18211 = fc.ImpuestoLey18211;
+                            facturaPetroleo.IvaLey18211 = fc.IvaLey18211;
+                            facturaPetroleo.CodigoKitFlexible = fc.CodigoKitFlexible;
+                            facturaPetroleo.AjusteIva = fc.AjusteIva;
+                            facturaPetroleo.CodigoDelProducto = "410104G";
+                            facturaPetroleo.PrecioUnitario = fc.MontoExento;
+
+                            listadoDeFacturasCosteadas.Add(facturaPetroleo);
+                        }
+                    }
+                    
                 }
             }
 
