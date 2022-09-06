@@ -2957,7 +2957,7 @@ namespace FacturasXMLAExcelManager
                     }
                     else if (identificador.Folio == costeo.Folio && identificador.Rut == costeo.Rut && costeo.CodigoDelProducto == "410104")
                     {
-                        //esto significa que la factura es de petróleo y que debería aparecer 2 veces
+                        //esto significa que la factura es de petróleo y que debería aparecer 2 veces, si es que el exento es negativo
                         Factura facturaSinG = new Factura();
                         Factura facturaConG = new Factura();
 
@@ -3004,7 +3004,12 @@ namespace FacturasXMLAExcelManager
 
 
                                 montoExento = costeo.Exento;
-                                montoTotal = (int.Parse(costeo.Afecto) + int.Parse(costeo.Exento)+int.Parse(costeo.MontoIva)).ToString();
+                                
+                                if (String.IsNullOrEmpty(montoExento))
+                                {
+                                    montoExento = "0";
+                                }
+                                montoTotal = (int.Parse(costeo.Afecto) + int.Parse(montoExento)+int.Parse(costeo.MontoIva)).ToString();
                                 ajusteIva = costeo.AjusteIva;
                                 facturaLeida.AjusteIva = costeo.AjusteIva;
 
@@ -3170,10 +3175,22 @@ namespace FacturasXMLAExcelManager
                         facturaSinG.CodigoKitFlexible = "";
                         facturaSinG.AjusteIva = ajusteIva;
 
-                        if (!String.IsNullOrEmpty(facturaSinG.RutCliente) && facturaSinG.RutCliente != "rut")
-                        {
-                            listadoDeFacturasCosteadas.Add(facturaSinG);
-                        }
+                        //if (!String.IsNullOrEmpty(facturaSinG.RutCliente) && facturaSinG.RutCliente != "rut")
+                        //{
+
+                        //    if (int.Parse(facturaSinG.MontoExento)<0)
+                        //    {
+                        //        //Exento negativo,  se agrega fila extra
+                        //        listadoDeFacturasCosteadas.Add(facturaConG);
+                        //        listadoDeFacturasCosteadas.Add(facturaSinG);
+                        //    }
+                        //    else
+                        //    {
+                        //        //Exento positivo,  NO se agrega fila extra
+                        //        listadoDeFacturasCosteadas.Add(facturaConG);
+                        //    }
+
+                        //}
 
 
 
@@ -3312,10 +3329,32 @@ namespace FacturasXMLAExcelManager
                         facturaConG.CodigoKitFlexible = "";
                         facturaConG.AjusteIva = ajusteIva;
 
-                        if (!String.IsNullOrEmpty(facturaConG.RutCliente) && facturaConG.RutCliente != "rut")
+                        //if (!String.IsNullOrEmpty(facturaConG.RutCliente) && facturaConG.RutCliente != "rut")
+                        //{
+                        //    listadoDeFacturasCosteadas.Add(facturaConG);
+
+                        //}
+
+
+                        if (!String.IsNullOrEmpty(facturaSinG.RutCliente) && facturaSinG.RutCliente != "rut")
                         {
-                            listadoDeFacturasCosteadas.Add(facturaConG);
-                           
+
+                            if (int.Parse(facturaSinG.MontoExento) < 0)
+                            {
+                                //Exento negativo,  se agrega fila extra
+                                listadoDeFacturasCosteadas.Add(facturaSinG);
+                                listadoDeFacturasCosteadas.Add(facturaConG);
+                                
+
+                                Console.WriteLine("Factura tiene exento negativo");
+                            }
+                            else
+                            {
+                                //Exento positivo,  NO se agrega fila extra
+                                listadoDeFacturasCosteadas.Add(facturaSinG);
+                                Console.WriteLine("Factura NO tiene exento negativo");
+                            }
+
                         }
 
                     }
@@ -3363,7 +3402,7 @@ namespace FacturasXMLAExcelManager
                     fc.MonedaDelDocumento = "CLP";
                     fc.TasaDeCambio = "";
                     fc.MontoAfecto = item.Afecto;
-                    fc.MontoExento = item.Exento;
+                    fc.MontoExento = "0";
                     fc.MontoIva = item.MontoIva;
                     fc.MontoImpuestosEspecificos = "";
                     fc.MontoIvaRetenido = "";
@@ -3373,14 +3412,14 @@ namespace FacturasXMLAExcelManager
                     try
                     {
                         if (!String.IsNullOrEmpty(item.Afecto) && item.Afecto!="monto afecto")
-                        {
-                            fc.TotalDelDocumento = (int.Parse(item.Afecto) +int.Parse(item.Exento)+ int.Parse(item.MontoIva)).ToString();
+                        {                         
+                            fc.TotalDelDocumento = (int.Parse(fc.MontoAfecto) +int.Parse(fc.MontoExento)+ int.Parse(fc.MontoIva)).ToString();
                         }
                        
                     }
                     catch (Exception)
                     {
-
+                        Console.WriteLine("hubo un error");
                         fc.TotalDelDocumento = "0";
                     }
                     
@@ -3575,6 +3614,7 @@ namespace FacturasXMLAExcelManager
                             facturaPetroleo.CodigoDelProducto = "410104G";
                             facturaPetroleo.PrecioUnitario = fc.MontoExento;
 
+                           
                             listadoDeFacturasCosteadas.Add(facturaPetroleo);
                         }
                     }
