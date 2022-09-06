@@ -2520,7 +2520,9 @@ namespace FacturasXMLAExcelManager
 
             List<Factura> listadoDeFacturasCosteadas = leerExcelDeFacturasNOCCUACostear(sFileName);
 
-            String pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Facturas NO CCU costeadas.xlsx";
+            int cantidadDeFacturasACostear = contarFacturasPresentesEnCosteo(sFileName);
+
+            String pathDeDescargas = getCarpetaDeDescargas() + "" + @"\Facturas NO CCU costeadas ("+ cantidadDeFacturasACostear + " facturas costeadas).xlsx";
             var archivo = new FileInfo(pathDeDescargas);
             
             
@@ -2544,11 +2546,54 @@ namespace FacturasXMLAExcelManager
         }
 
 
+        private int contarFacturasPresentesEnCosteo(String filePath)
+        {
+            int cantidadDeFacturas = 0;
+
+            List<String> listadoDeFacturasACostear = new List<String>();
+
+            FileInfo existingFile = new FileInfo(filePath);
+            using (ExcelPackage package = new ExcelPackage(existingFile))
+            {
+
+                ExcelWorksheet hojaDeCosteos = package.Workbook.Worksheets[1];
+                int colCountCosteos = hojaDeCosteos.Dimension.End.Column; 
+                int rowCountCosteos = hojaDeCosteos.Dimension.End.Row;
+
+                for (int row = 1; row <= rowCountCosteos; row++)
+                {
+
+                    CosteoDeFacturaNOCCU costeoDeFactura = new CosteoDeFacturaNOCCU();
+                    costeoDeFactura.Folio = hojaDeCosteos.Cells[row, 3].Value?.ToString().Trim();
+                    costeoDeFactura.Rut = hojaDeCosteos.Cells[row, 1].Value?.ToString().Trim();
+            
+
+                    if (costeoDeFactura.Rut != "rut")
+                    {
+                        listadoDeFacturasACostear.Add(costeoDeFactura.Rut + costeoDeFactura.Folio);
+                    }
+
+
+                }
+
+            }
+
+
+            listadoDeFacturasACostear = listadoDeFacturasACostear.Distinct().ToList();
+
+            cantidadDeFacturas = listadoDeFacturasACostear.Count;
+
+
+            return cantidadDeFacturas;
+
+        }
 
         private List<Factura> leerExcelDeFacturasNOCCUACostear(String filePath)
         {
             List<Factura> facturasLeidasEnPrimeraHoja = new List<Factura>();
             List<CosteoDeFacturaNOCCU> listadoDeCosteos = new List<CosteoDeFacturaNOCCU>();
+
+           
 
             List<Factura> listadoDeFacturasCosteadas = new List<Factura>();
 
@@ -2668,10 +2713,16 @@ namespace FacturasXMLAExcelManager
 
 
                     listadoDeCosteos.Add(costeoDeFactura);
+           
 
                 }
 
             }
+
+
+
+
+
 
             List<IdentificadorDeFactura> identificadores = new List<IdentificadorDeFactura>();
 
@@ -2701,7 +2752,8 @@ namespace FacturasXMLAExcelManager
                     IdentificadorDeFactura i = new IdentificadorDeFactura(item.NumeroDelDocumento, item.RutCliente);
                     identificadores.Add(i);
 
-                }  
+                }
+
 
                 existeRegistro = false;
 
@@ -3345,14 +3397,13 @@ namespace FacturasXMLAExcelManager
                                 listadoDeFacturasCosteadas.Add(facturaSinG);
                                 listadoDeFacturasCosteadas.Add(facturaConG);
                                 
-
-                                Console.WriteLine("Factura tiene exento negativo");
+                               
                             }
                             else
                             {
                                 //Exento positivo,  NO se agrega fila extra
                                 listadoDeFacturasCosteadas.Add(facturaSinG);
-                                Console.WriteLine("Factura NO tiene exento negativo");
+                               
                             }
 
                         }
