@@ -377,7 +377,7 @@ namespace FacturasXMLAExcelManager
 
 
 
-       
+
 
                     //determinar a donde se costea
                     //los codigos de centros de costo son (numero de la izquierda: TCP, numero de la derecha: PSCP): 
@@ -391,11 +391,13 @@ namespace FacturasXMLAExcelManager
                     //206 / 306   Santiago
                     //201 / 301   Rancagua
                     //202 / 302   Curico
+                    //210 / 310   Movilizadores
+                    //202 / 302   Curico
 
 
                     //si el rut del receptor es 78462150-2, el costeo es para TCP, si
                     //es 78877610-1, es para PSCP
-                    String rutDeReceptor= getValue("RutReceptor", sFileName);
+                    String rutDeReceptor = getValue("RutReceptor", sFileName);
                     Boolean esPSCP = false;
                     if (rutDeReceptor== "78877610-1")
                     {
@@ -584,7 +586,8 @@ namespace FacturasXMLAExcelManager
                                             f.CodigoDelProducto = "420709";
                                             f.Glosa = "Internet fija de Rancagua (CCU) (Entel)";
                                             break;
-                                        case "CALLE CINCO SUR 85, RANCAGUA":// ES RANCAGUA (Central)
+                                        //case "CALLE CINCO SUR 85, RANCAGUA":// ES RANCAGUA (Central)//esta direccion esta desactualizada
+                                        case "RUTA 5 SUR 245":// ES RANCAGUA (Central)
                                             f.CentroDeCostos = "203";
                                             f.CodigoDelProducto = "420709";
                                             f.Glosa = "Internet fija de oficina central en Rancagua (Entel)";
@@ -2427,6 +2430,7 @@ namespace FacturasXMLAExcelManager
                             //206 / 306   Santiago
                             //201 / 301   Rancagua
                             //202 / 302   Curico
+                            //210 / 310   Movilizadores
 
                             //switch para determinar a que centro de costo va
                             switch (item.Centro)
@@ -2458,6 +2462,9 @@ namespace FacturasXMLAExcelManager
                                     break;
                                 case "CURICO":
                                     item2.CentroDeCostos = "202";
+                                    break;
+                                case "MOVILIZADORES":
+                                    item2.CentroDeCostos = "210";
                                     break;
                                 case "#N/D":
                                     item2.CentroDeCostos = "209";
@@ -2915,6 +2922,9 @@ namespace FacturasXMLAExcelManager
                                 fc.CentroDeCostos = "204";
                                 fc.CodigoDeUnidadDeNegocio = "2";
                                 break;
+                            case "MOVILIZADORES":
+                                fc.CentroDeCostos = "210";                         
+                                break;
                             case "EMPRENDEDORES":
                                 fc.CentroDeCostos = "208";
                                 break;
@@ -2963,6 +2973,9 @@ namespace FacturasXMLAExcelManager
                                 break;
                             case "202":
                                 fc.CentroDeCostos = "202";
+                                break;
+                            case "210":
+                                fc.CentroDeCostos = "210";
                                 break;
                             default:
                                 fc.CentroDeCostos = "209";
