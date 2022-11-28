@@ -116,6 +116,7 @@
   <ItemGroup>
     <Compile Include="CdgItem.cs" />
     <Compile Include="CosteoDeFacturaNOCCU.cs" />
+    <Compile Include="CosteoDeFacturaTelefonica.cs" />
     <Compile Include="DetalleDeFactura.cs" />
     <Compile Include="Factura.cs" />
     <Compile Include="FacturaContabilizada.cs" />
@@ -132,6 +133,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegistroCruzadoConInformacionDeCCU.cs" />
     <Compile Include="RegistroDeCCU.cs" />
+    <Compile Include="SubCosteoTelefonico.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

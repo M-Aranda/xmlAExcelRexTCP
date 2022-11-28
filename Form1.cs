@@ -605,6 +605,8 @@ namespace FacturasXMLAExcelManager
                                 //tratar facturas de Movistar
                                 if (f.RutCliente== "76124890-1")
                                 {
+                                    //si es una factura de movistar, ha que subcostearla con la informacion entregada en el excel de telefonos
+                                    //poruqe es ese Excel el que dice donde esta cada linea
                                     f.CentroDeCostos = "203";
                                     f.CodigoDelProducto = "420709";
                                     f.Glosa = "Factura de Movistar";
@@ -2494,6 +2496,8 @@ namespace FacturasXMLAExcelManager
 
 
             //hay que tomar un Excel con 2 hojas; la primera con las facturas a costear, la segunda con el costeo de estas facturas
+            //28 /11/2022 se realiza modificaciones para que costeo de facturas NO CCU incluya subcosteo de lineas telefonicas de movistar.
+            //Cantidad de hojas requeridas en Excel aumenta a 3
 
             string sFileName = "";
 
@@ -2504,7 +2508,7 @@ namespace FacturasXMLAExcelManager
 
             string[] arrAllFiles = new string[] { };
 
-            MessageBox.Show("Seleccionar excel de facturas NO CCU (debe tener 2 hojas)");
+            MessageBox.Show("Seleccionar excel de facturas NO CCU (debe tener 3 hojas)");
             while (true)
             {
 
@@ -2599,8 +2603,10 @@ namespace FacturasXMLAExcelManager
         {
             List<Factura> facturasLeidasEnPrimeraHoja = new List<Factura>();
             List<CosteoDeFacturaNOCCU> listadoDeCosteos = new List<CosteoDeFacturaNOCCU>();
+            List<CosteoDeFacturaTelefonica> listadoDeCosteosTelefonicos = new List<CosteoDeFacturaTelefonica>();
 
-           
+
+
 
             List<Factura> listadoDeFacturasCosteadas = new List<Factura>();
 
@@ -2724,6 +2730,30 @@ namespace FacturasXMLAExcelManager
 
                 }
 
+
+                ExcelWorksheet hojaDeCosteosTelefonicos = package.Workbook.Worksheets[2];
+                int colCountCosteosTelefonicos = hojaDeCosteosTelefonicos.Dimension.End.Column;  //get Column Count
+                int rowCountCosteosTelefonicos = hojaDeCosteosTelefonicos.Dimension.End.Row;     //get row count
+
+                for (int row = 1; row <= rowCountCosteos; row++)
+                {
+
+                    CosteoDeFacturaTelefonica costeoDeFacturaTelefonica = new CosteoDeFacturaTelefonica();
+                    costeoDeFacturaTelefonica.NumeroDeCelular = hojaDeCosteosTelefonicos.Cells[row, 1].Value?.ToString().Trim();
+                    costeoDeFacturaTelefonica.Descripcion = hojaDeCosteosTelefonicos.Cells[row, 2].Value?.ToString().Trim();
+                    costeoDeFacturaTelefonica.NumeroDeSerie = hojaDeCosteosTelefonicos.Cells[row, 3].Value?.ToString().Trim();
+                    costeoDeFacturaTelefonica.Pin = hojaDeCosteosTelefonicos.Cells[row, 4].Value?.ToString().Trim();
+                    costeoDeFacturaTelefonica.Puk = hojaDeCosteosTelefonicos.Cells[row, 5].Value?.ToString().Trim();
+                    costeoDeFacturaTelefonica.AsignadoA = hojaDeCosteosTelefonicos.Cells[row, 6].Value?.ToString().Trim();
+                    costeoDeFacturaTelefonica.Centro = hojaDeCosteosTelefonicos.Cells[row, 7].Value?.ToString().Trim();
+                    costeoDeFacturaTelefonica.Activo = hojaDeCosteosTelefonicos.Cells[row, 8].Value?.ToString().Trim();
+                    costeoDeFacturaTelefonica.Comentario = hojaDeCosteosTelefonicos.Cells[row, 9].Value?.ToString().Trim();
+
+                    listadoDeCosteosTelefonicos.Add(costeoDeFacturaTelefonica);
+
+                }
+
+
             }
 
 
@@ -2743,6 +2773,214 @@ namespace FacturasXMLAExcelManager
 
             foreach (var item in facturasLeidasEnPrimeraHoja)
             {
+                if (item.RutCliente=="76124890-1")
+                {
+                    MessageBox.Show("se detecta factura de Movistar");
+
+                    //        //es una factura de movistar
+                    //        int cantidadDeLineas = 0;
+                    //        //contar cantidad de lineas
+
+                    //        //
+                    //        int lineasAdministracion = 0;
+                    //        int lineasInterplanta = 0;
+                    //        int lineasEmprendedores = 0;
+                    //        int lineasIllapel = 0;
+                    //        int lineasSanAntonio = 0;
+                    //        int lineasMelipilla = 0;
+                    //        int lineasSantiago = 0;
+                    //        int lineasRancagua = 0;
+                    //        int lineasCurico = 0;
+                    //        int lineasMovilizadores = 0;
+
+
+                            foreach (var linea in listadoDeCosteosTelefonicos)
+                            {
+                    //            cantidadDeLineas++;
+
+                    //            //switch para determinar a que centro de costo va
+                    //            switch (linea.Centro)
+                    //            {
+                    //                case "ADMINISTRACION":
+                    //                    lineasAdministracion++;
+                    //                    break;
+                    //                case "INTERPLANTA":
+                    //                    lineasInterplanta++;                               
+                    //                    break;
+                    //                case "EMPRENDEDORES":
+                    //                    lineasEmprendedores++;                                
+                    //                    break;
+                    //                case "ILLAPEL":
+                    //                    lineasIllapel++;
+                    //                    break;
+                    //                case "SAN ANTONIO":
+                    //                    lineasSanAntonio++;
+                    //                    break;
+                    //                case "MELIPILLA":
+                    //                    lineasMelipilla++;
+                    //                    break;
+                    //                case "SANTIAGO":
+                    //                    lineasSantiago++;
+                    //                    break;
+                    //                case "RANCAGUA":
+                    //                    lineasRancagua++;
+                    //                    break;
+                    //                case "CURICO":
+                    //                    lineasCurico++;
+                    //                    break;
+                    //                case "MOVILIZADORES":
+                    //                    lineasMovilizadores++;
+                    //                      break;
+                    //                case "#N/D":                               
+                    //                    break;
+                    //                default:                               
+                    //                    break;
+
+                    //            }
+                    //        }
+
+
+                    //        int valorDeFactura = int.Parse(item.TotalDelDocumento);
+                    //        float valorPromedioDeLinea = valorDeFactura / cantidadDeLineas;
+                    //        int valorPromedioDeLineaComoInt = int.Parse(valorPromedioDeLinea.ToString());
+
+                    //        int valorLineasAdministracion = valorPromedioDeLineaComoInt * lineasAdministracion;
+                    //        int valorLineasInterplantas = valorPromedioDeLineaComoInt * lineasInterplanta;
+                    //        int valorLineasEmprendedores = valorPromedioDeLineaComoInt * lineasEmprendedores;
+                    //        int valorLineasIllapel = valorPromedioDeLineaComoInt * lineasIllapel;
+                    //        int valorLineasSanAntonio = valorPromedioDeLineaComoInt * lineasSanAntonio;
+                    //        int valorLineasMelipilla = valorPromedioDeLineaComoInt * lineasMelipilla;
+                    //        int valorLineasSantiago = valorPromedioDeLineaComoInt * lineasSantiago;
+                    //        int valorLineasRancagua = valorPromedioDeLineaComoInt * lineasRancagua;
+                    //        int valorLineasCurico = valorPromedioDeLineaComoInt * lineasCurico;
+                    //        int valorLineasMovilizadores = valorPromedioDeLineaComoInt * lineasMovilizadores;
+
+                    //        List<SubCosteoTelefonico> listadoDeSubCosteosTelefonicos = new List<SubCosteoTelefonico>();
+
+                    //        SubCosteoTelefonico sctf = new SubCosteoTelefonico("203", valorLineasAdministracion.ToString());
+                    //        listadoDeSubCosteosTelefonicos.Add(sctf);
+                    //        sctf = new SubCosteoTelefonico("204", valorLineasInterplantas.ToString());
+                    //        listadoDeSubCosteosTelefonicos.Add(sctf);
+                    //        sctf = new SubCosteoTelefonico("208", valorLineasEmprendedores.ToString());
+                    //        listadoDeSubCosteosTelefonicos.Add(sctf);
+                    //        sctf = new SubCosteoTelefonico("205", valorLineasIllapel.ToString());
+                    //        listadoDeSubCosteosTelefonicos.Add(sctf);
+                    //        sctf = new SubCosteoTelefonico("207", valorLineasSanAntonio.ToString());
+                    //        listadoDeSubCosteosTelefonicos.Add(sctf);
+                    //        sctf = new SubCosteoTelefonico("200", valorLineasMelipilla.ToString());
+                    //        listadoDeSubCosteosTelefonicos.Add(sctf);
+                    //        sctf = new SubCosteoTelefonico("206", valorLineasSantiago.ToString());
+                    //        listadoDeSubCosteosTelefonicos.Add(sctf);
+                    //        sctf = new SubCosteoTelefonico("201", valorLineasRancagua.ToString());
+                    //        listadoDeSubCosteosTelefonicos.Add(sctf);
+                    //        sctf = new SubCosteoTelefonico("202", valorLineasCurico.ToString());
+                    //        listadoDeSubCosteosTelefonicos.Add(sctf);
+                    //        sctf = new SubCosteoTelefonico("310", valorLineasMovilizadores.ToString());
+                    //        listadoDeSubCosteosTelefonicos.Add(sctf);
+
+
+
+                    //        List<Factura> facturasDeTelefoniaSubCosteadas = new List<Factura>();
+
+                    //        foreach (var subcosteo in listadoDeSubCosteosTelefonicos)
+                    //        {
+                    //            Factura fc = new Factura();
+
+                    //            fc.TipoDeDocumento = "FACE";
+                    //            fc.NumeroDelDocumento = item.NumeroDelDocumento;
+                    //            fc.FechaDeDocumento = item.FechaDeDocumento;
+                    //            fc.FechaContableDeDocumento = item.FechaDeDocumento;
+                    //            fc.FechaDeVencimientoDeDocumento = item.FechaDeDocumento;
+                    //            fc.CodigoDeUnidadDeNegocio = "1";
+                    //            fc.RutCliente = item.RutCliente;
+                    //            fc.DireccionDelCliente = "Casa Matriz";
+                    //            fc.RutFacturador = "";
+                    //            fc.CodigoVendedor = "";
+                    //            fc.CodigoComisionista = "";
+                    //            fc.Probabilidad = "";
+                    //            fc.ListaPrecio = "";
+                    //            fc.PlazoPago = "P01";
+                    //            fc.MonedaDelDocumento = "CLP";
+                    //            fc.TasaDeCambio = "";
+                    //            fc.MontoAfecto = item.MontoAfecto;
+                    //            fc.MontoExento = "0";
+                    //            fc.MontoIva = item.MontoIva;
+                    //            fc.MontoImpuestosEspecificos = "";
+                    //            fc.MontoIvaRetenido = "";
+                    //            fc.MontoImpuestosRetenidos = "";
+                    //            fc.TipoDeDescuentoGlobal = "";
+                    //            fc.DescuentoGlobal = "";
+                    //            try
+                    //            {
+                    //                if (!String.IsNullOrEmpty(item.MontoAfecto) && item.MontoAfecto != "monto afecto")
+                    //                {
+                    //                    fc.TotalDelDocumento = (int.Parse(fc.MontoAfecto) + int.Parse(fc.MontoExento) + int.Parse(fc.MontoIva)).ToString();
+                    //                }
+
+                    //            }
+                    //            catch (Exception)
+                    //            {
+                    //                Console.WriteLine("hubo un error");
+                    //                fc.TotalDelDocumento = "0";
+                    //            }
+
+                    //            fc.DeudaPendiente = fc.TotalDelDocumento;
+                    //            fc.TipoDocReferencia = "";
+                    //            fc.NumDocReferencia = "";
+                    //            fc.FechaDocReferencia = "";
+                    //            fc.CodigoDelProducto = item.CodigoDelProducto;
+                    //            fc.Cantidad = "1";
+                    //            fc.Unidad = "S.U.M";
+                    //            //el precio unitario debe cambiar
+                    //            fc.PrecioUnitario = subcosteo.Valor;
+
+                    //            fc.MonedaDelDetalle = "CLP";
+                    //            fc.TasaDeCambio2 = "1";
+                    //            fc.NumeroDeSerie = "";
+                    //            fc.NumeroDeLote = "";
+                    //            fc.FechaDeVencimiento = "";
+                    //            //el centro de costos debe cambiar
+                    //            fc.CentroDeCostos = subcosteo.Centro;
+
+                    //            fc.TipoDeDescuento = "";
+                    //            fc.Descuento = "";
+                    //            fc.Ubicacion = "";
+                    //            fc.Bodega = "";
+                    //            fc.Concepto1 = "";
+                    //            fc.Concepto2 = "";
+                    //            fc.Concepto3 = "";
+                    //            fc.Concepto4 = "";
+                    //            fc.Descripcion = "";
+                    //            fc.DescripcionAdicional = "";
+                    //            fc.Stock = "0";
+                    //            fc.Comentario11 = "";
+                    //            fc.Comentario21 = "";
+                    //            fc.Comentario31 = "";
+                    //            fc.Comentario41 = "";
+                    //            fc.Comentario51 = "";
+                    //            fc.CodigoImpuestoEspecifico1 = "";
+                    //            fc.MontoImpuestoEspecifico1 = "";
+                    //            fc.CodigoImpuestoEspecifico2 = "";
+                    //            fc.MontoImpuestoEspecifico2 = "";
+                    //            fc.Modalidad = "";
+                    //            fc.Glosa = "Sub costeo de telefonía";
+                    //            fc.Referencia = "";
+                    //            fc.FechaDeComprometida = "";
+                    //            fc.PorcentajeCEEC = "";
+                    //            fc.ImpuestoLey18211 = "";
+                    //            fc.IvaLey18211 = "";
+                    //            fc.CodigoKitFlexible = "";
+                    //            fc.AjusteIva = "";
+
+                    //            listadoDeFacturasCosteadas.Add(fc);
+
+                    //        }
+
+                        }
+
+
+                }
+
                 foreach (var identi in identificadores)
                 {
                     if (item.NumeroDelDocumento == identi.Folio && item.RutCliente == identi.Rut)
@@ -3431,17 +3669,23 @@ namespace FacturasXMLAExcelManager
             foreach (var item in listadoDeCosteos)
             {
                 Boolean coincidencia = false;
+
+
                 foreach (var item2 in facturasLeidasEnPrimeraHoja)
                 {
                     if (item.Folio==item2.NumeroDelDocumento && item.Rut==item2.RutCliente)
                     {
                         coincidencia = true;
                     }
+
+                   
                     
                 }
 
                 if (!coincidencia)
                 {
+
+
                     //agregado el 22 de agosto del  2022, facturas ausentes en el listado de XML ahora pueden
                     //aparecer como costeadas si es que están en el listado de costeos.
                     //factura presente en costeo, pero no en listado de facturas xml
@@ -3600,7 +3844,9 @@ namespace FacturasXMLAExcelManager
 
                     if (!String.IsNullOrEmpty(fc.RutCliente) && fc.RutCliente != "rut")
                     {
-                        listadoDeFacturasCosteadas.Add(fc);
+                        
+                            listadoDeFacturasCosteadas.Add(fc);
+                    
 
                         if(fc.CodigoDelProducto == "410104")
                         {
@@ -3682,10 +3928,15 @@ namespace FacturasXMLAExcelManager
                             listadoDeFacturasCosteadas.Add(facturaPetroleo);
                         }
                     }
-                    
+
                 }
+               
+
+
             }
 
+
+           
 
             return listadoDeFacturasCosteadas;
 
