@@ -23,7 +23,6 @@ C:\Users\Chelo\Desktop\xmlAExcelRexTCP\bin\Debug\Microsoft.IO.RecyclableMemorySt
 C:\Users\Chelo\Desktop\xmlAExcelRexTCP\bin\Debug\System.ComponentModel.Annotations.dll
 C:\Users\Chelo\Desktop\xmlAExcelRexTCP\bin\Debug\EPPlus.xml
 C:\Users\Chelo\Desktop\xmlAExcelRexTCP\bin\Debug\Microsoft.IO.RecyclableMemoryStream.xml
-C:\Users\Chelo\Desktop\xmlAExcelRexTCP\obj\Debug\FacturasXMLAExcelManager.csproj.AssemblyReference.cache
 C:\Users\Chelo\Desktop\xmlAExcelRexTCP\obj\Debug\FacturasXMLAExcelManager.Form1.resources
 C:\Users\Chelo\Desktop\xmlAExcelRexTCP\obj\Debug\FacturasXMLAExcelManager.Properties.Resources.resources
 C:\Users\Chelo\Desktop\xmlAExcelRexTCP\obj\Debug\FacturasXMLAExcelManager.csproj.GenerateResource.cache
@@ -59,3 +58,4 @@ C:\Users\Chelo\Desktop\xmlAExcelRexTCP\bin\Debug\Uno.UI.FluentTheme.v1.pdb
 C:\Users\Chelo\Desktop\xmlAExcelRexTCP\bin\Debug\Uno.UI.FluentTheme.v2.pdb
 C:\Users\Chelo\Desktop\xmlAExcelRexTCP\bin\Debug\Uno.UI.Toolkit.pdb
 C:\Users\Chelo\Desktop\xmlAExcelRexTCP\obj\Debug\FacturasXMLAExcelManager.csproj.SuggestedBindingRedirects.cache
+C:\Users\Chelo\Desktop\xmlAExcelRexTCP\obj\Debug\FacturasXMLAExcelManager.csproj.AssemblyReference.cache
